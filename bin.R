@@ -69,5 +69,9 @@ Sim <- as.data.frame(ode(X_0, 1:l_sim, df, parms))
 
 #plot
 colnames(Sim) = c("t", "J", "As", "Ai", "S", "I")
-
 Sim_m = reshape2::melt(Sim, id = 't')
+
+ggplot(Sim_m, aes(x = t, y = value, color = variable))+
+         geom_point()
+
+       
