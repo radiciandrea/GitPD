@@ -7,9 +7,9 @@ library(reshape2)
 #parameters
 
 gamma = 2 #fertility rate mosquitoes: 4 mosquitoes/day, sex ratio 1:1
-mu_j = 1/30 #mortality rate eggs/juveniles
+mu_j = 1/10 #mortality rate eggs/juveniles
 K = 1000  # carrying capacity juveniles
-delta = 0.5 # passage J to A
+delta = 1/150 # passage J to A
 mu_a = 1/50 # mortality rate mosquitoes
 beta_AsI = 0.1 # mosquito infectious rate
 beta_SAi = 0.1  # human infectious rate
@@ -54,10 +54,10 @@ df <- function(t, x, parms) {
 }
 
 # System initialization
-J_0 = 500
-As_0 = 20
-Ai_0 = 50
-S_0 = 200
+J_0 = 10
+As_0 = 0
+Ai_0 = 0
+S_0 = 0
 I_0 = 0
 
 l_sim = 60*4
