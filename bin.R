@@ -10,3 +10,8 @@ mu_a = 1/50 # mortality rate mosquitoes
 beta_AsI = 0.1 # mosquito infectious rate
 beta_SAi = 0.1  # human infectious rate
 alfa = 1/14 #human recovery rate
+
+# functions
+
+theta_delta = c(rep(0,60), rep(1,60), rep(0,60), rep(1,60))
+theta_beta = theta_delta*rep(c(0,1,0,0.5), 60)
