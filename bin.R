@@ -2,6 +2,7 @@
 
 library(deSolve)
 library(ggplot2)
+library(reshape2) 
 
 #parameters
 
@@ -65,3 +66,8 @@ X_0 = c(J_0, As_0, Ai_0, S_0, I_0)
 
 #integration
 Sim <- ode(X_0, 1:l_sim, df, parms)
+
+#plot
+colnames(Sim) = c("t", "J", "As", "Ai", "S", "I")
+
+Sim_m = reshape2::melt(Sim, id = 't')
