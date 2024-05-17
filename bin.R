@@ -65,7 +65,7 @@ l_sim = 60*4
 X_0 = c(J_0, As_0, Ai_0, S_0, I_0)
 
 #integration
-Sim <- ode(X_0, 1:l_sim, df, parms)
+Sim <- as.data.frame(ode(X_0, 1:l_sim, df, parms))
 
 #plot
 colnames(Sim) = c("t", "J", "As", "Ai", "S", "I")
