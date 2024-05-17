@@ -15,3 +15,14 @@ alfa = 1/14 #human recovery rate
 
 theta_delta = c(rep(0,60), rep(1,60), rep(0,60), rep(1,60))
 theta_beta = theta_delta*rep(c(0,1,0,0.5), 60)
+
+# list with parameters to be passed to the ODE system
+parms <- list(gamma = gamma,
+              mu_j = mu_j,
+              K = K,
+              delta = delta,
+              mu_a = mu_a,
+              beta_AsI = beta_AsI,
+              beta_SAi = beta_SAi,
+              alfa = alfa) 
+
