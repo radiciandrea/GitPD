@@ -1,3 +1,1 @@
-#test
-
-#2nd line
+# Little 2 pop epidemic model
