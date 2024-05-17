@@ -15,12 +15,13 @@ beta_AsI = 0.1 # mosquito infectious rate
 beta_SAi = 0.1  # human infectious rate
 alpha = 1/14 #human recovery rate
 
-n_c = 4 #number of seasons
+n_s = 4 #number of seasons
+l_s = 60 #lengh of season
 
 # functions
 
-theta_delta = c(rep(0,60), rep(1,60), rep(0,60), rep(1,60)) # "hatching" is time dependent
-theta_beta = theta_delta*rep(c(0,1,0,0.5), 60) # infection mosquitoes is time dependent
+theta_delta = c(rep(rep(0,l_s), rep(1,l_s)), n_s/2) # "hatching" is time dependent
+theta_beta = theta_delta*rep(c(0,1,0,0.5), l_s*n_s) # infection mosquitoes is time dependent
 # no vertical infection
 
 # list with parameters to be passed to the ODE system
@@ -62,7 +63,7 @@ Ai_0 = 0
 S_0 = 0
 I_0 = 1
 
-l_sim = 60*4
+l_sim = n_s*l_s
 
 X_0 = c(J_0, As_0, Ai_0, S_0, I_0)
 
