@@ -1,6 +1,7 @@
 # Little 2 pop epidemic model
 
 library(deSolve)
+library(ggplot2)
 
 #parameters
 
