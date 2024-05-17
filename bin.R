@@ -9,12 +9,13 @@ delta = 0.5 # passage J to A
 mu_a = 1/50 # mortality rate mosquitoes
 beta_AsI = 0.1 # mosquito infectious rate
 beta_SAi = 0.1  # human infectious rate
-alfa = 1/14 #human recovery rate
+alpha = 1/14 #human recovery rate
 
 # functions
 
-theta_delta = c(rep(0,60), rep(1,60), rep(0,60), rep(1,60))
-theta_beta = theta_delta*rep(c(0,1,0,0.5), 60)
+theta_delta = c(rep(0,60), rep(1,60), rep(0,60), rep(1,60)) # "hatching" is time dependent
+theta_beta = theta_delta*rep(c(0,1,0,0.5), 60) # infection mosquitoes is time dependent
+# no vertical infection
 
 # list with parameters to be passed to the ODE system
 parms <- list(gamma = gamma,
@@ -24,7 +25,7 @@ parms <- list(gamma = gamma,
               mu_a = mu_a,
               beta_AsI = beta_AsI,
               beta_SAi = beta_SAi,
-              alfa = alfa) 
+              alpha = alpha) 
 
 df <- function(t, x, parms) {
   
@@ -40,8 +41,8 @@ df <- function(t, x, parms) {
     dJ = gamma*A - mu_*J*(1+J/K) - delta*theta_delta[t[1]] *J
     dAs = delta*theta_delta[t[1]] *J - beta_AsI*theta_beta[t[1]]*As*I - mu_a*As
     dAi = beta_AsI*theta_beta[t[1]]*As*I - mu_a*As
-    dS = - beta_AsI*S*Ai + alfa*I
-    dI = beta_AsI*S*Ai - alfa*I
+    dS = - beta_AsI*S*Ai + alpha*I
+    dI = beta_AsI*S*Ai - alpha*I
     
     dx <- c(dJ, dAs, dAi, dS, dI)
     
