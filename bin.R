@@ -26,3 +26,24 @@ parms <- list(gamma = gamma,
               beta_SAi = beta_SAi,
               alfa = alfa) 
 
+df <- function(t, x, parms) {
+  
+  # initial conditions and paramters
+  with(parms, { 
+    J <- x[1:(length(x)/5)]
+    As <- x[(length(x)/5 +1):(2*length(x)/5)]
+    Ai <- x[(2*length(x)/5+1):(3*length(x)/5)]
+    S <- x[(3*length(x)/5+1):(4*length(x)/5)]
+    I <- x[(4*length(x)/5+1):length(x)]
+
+    # ODE definition 
+    dJ = gamma*A - mu_*J*(1+J/K) - delta*theta_delta[t[1]] *J
+    dAs = delta*theta_delta[t[1]] *J - beta_AsI*theta_beta[t[1]]*As*I - mu_a*As
+    dAi = beta_AsI*theta_beta[t[1]]*As*I - mu_a*As
+    dS = - beta_AsI*S*Ai + alfa*I
+    dI = beta_AsI*S*Ai - alfa*I
+    
+    dx <- c(dJ, dAs, dAi, dS, dI)
+    
+    return(list(dx))})
+}
