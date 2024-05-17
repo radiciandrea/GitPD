@@ -40,7 +40,7 @@ df <- function(t, x, parms) {
     I <- x[(4*length(x)/5+1):length(x)]
 
     # ODE definition 
-    dJ = gamma*A - mu_*J*(1+J/K) - delta*theta_delta[t[1]] *J
+    dJ = gamma*(As+Ai) - mu_*J*(1+J/K) - delta*theta_delta[t[1]] *J
     dAs = delta*theta_delta[t[1]] *J - beta_AsI*theta_beta[t[1]]*As*I - mu_a*As
     dAi = beta_AsI*theta_beta[t[1]]*As*I - mu_a*As
     dS = - beta_AsI*S*Ai + alpha*I
