@@ -15,6 +15,8 @@ beta_AsI = 0.1 # mosquito infectious rate
 beta_SAi = 0.1  # human infectious rate
 alpha = 1/14 #human recovery rate
 
+n_c = 4 #number of seasons
+
 # functions
 
 theta_delta = c(rep(0,60), rep(1,60), rep(0,60), rep(1,60)) # "hatching" is time dependent
@@ -58,7 +60,7 @@ J_0 = 10
 As_0 = 0
 Ai_0 = 0
 S_0 = 0
-I_0 = 0
+I_0 = 1
 
 l_sim = 60*4
 
