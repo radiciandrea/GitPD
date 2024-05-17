@@ -51,10 +51,16 @@ df <- function(t, x, parms) {
     return(list(dx))})
 }
 
-
 # System initialization
 J_0 = 500
 As_0 = 20
 Ai_0 = 50
 S_0 = 200
 I_0 = 0
+
+l_sim = 60*4
+
+X_0 = c(J_0, As_0, Ai_0, S_0, I_0)
+
+#integration
+Sim <- ode(X_0, 1:l_sim, df, parms)
