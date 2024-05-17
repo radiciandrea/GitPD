@@ -1,5 +1,7 @@
 # Little 2 pop epidemic model
 
+library(deSolve)
+
 #parameters
 
 gamma = 2 #fertility rate mosquitoes: 4 mosquitoes/day, sex ratio 1:1
@@ -48,3 +50,11 @@ df <- function(t, x, parms) {
     
     return(list(dx))})
 }
+
+
+# System initialization
+J_0 = 500
+As_0 = 20
+Ai_0 = 50
+S_0 = 200
+I_0 = 0
