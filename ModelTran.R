@@ -85,7 +85,7 @@ parms = list(beta_1 = beta_1,
 df <- function(t, x) {
   
   # initial conditions and paramters
-  ith(parms, { 
+  with(parms, { 
   
   E0 = x[,1]
   L0 = x[,2]
