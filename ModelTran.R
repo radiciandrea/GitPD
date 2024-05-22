@@ -33,11 +33,22 @@ d = 1:365
 t = 15 - 13*cos(d/365*2*pi); # temperatura sinusoidale, min 1 gen = 2 gradi, max 1 lug = 28
 p = t*c(0, rep(c(0,0,0,1), 91)) # piove ogni 4 giorni con questa forma strana
 
+# p cumulated over 2 weeks and normalized between 0 and 1 (over a year?)
+p_cumm = sapply(1:365, function(x){return(sum(p[max(1,x-13):x]))})
+p_cumm_norm = p_cumm/max(p_cumm)
+
 # functions
 
-theta_delta = rep(c(rep(0,l_s), rep(1,l_s)), n_s/2) # "hatching" is time dependent
-theta_beta = theta_delta*rep(c(0,1,0,0.5), l_s*n_s/4) # infection mosquitoes is time dependent
-# no vertical infection
+f_E = (t-T_E)/TDD_E *(t-T_E>0) # Transition function from egg to larva
+f_L = - 0.0007*t^2 + 0.0392 * t - 0.3911 # Transition function from larva to pupa
+f_P = 0.0008*t^2 - 0.0051 * t + 0.0319 # Transition function from pupa to emerging adult
+f_Ag = (t-T_Ag)/TDD_Ag *(t-T_Ag>0) # Transition function from engorged adult to oviposition site—seeking adult
+m_L = exp(-t/0.5) + mu_L # Larva mortality (day−1)
+m_P = exp(-t/0.5) + mu_P # Pupa mortality rate (day−1)
+m_A = max(mu_A, 0.04417 + 0.00217*t) # Adult mortality rate (day−1)
+k_L = K_L*(p_cumm_norm+1) # Environment carrying capacity of larvae (ha−1)
+k_P = K_P*(p_cumm_norm+1) # Environment carrying capacity of pupae (ha−1)
+
 
 # list with parameters to be passed to the ODE system
 parms <- list(gamma = gamma,
