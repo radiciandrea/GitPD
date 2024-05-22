@@ -27,7 +27,6 @@ TDD_Ag = 77 # Total number of degree-days necessary for egg maturation (°C)
 t_s = 31+28+10 # Start of the favorable season - 10 Mar
 t_end = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept
 
-
 # T and P
 d = 1:365
 t = 15 - 13*cos(d/365*2*pi); # temperatura sinusoidale, min 1 gen = 2 gradi, max 1 lug = 28
@@ -51,50 +50,55 @@ k_P = K_P*(p_cumm_norm+1) # Environment carrying capacity of pupae (ha−1)
 
 
 # list with parameters to be passed to the ODE system
-parms <- list(gamma = gamma,
-              mu_j = mu_j,
-              K = K,
-              delta = delta,
-              mu_a = mu_a,
-              beta_AsI = beta_AsI,
-              beta_SAi = beta_SAi,
-              alpha = alpha) 
-
-df <- function(t, x, parms) {
+df <- function(t, x) {
   
   # initial conditions and paramters
-  with(parms, { 
-    J <- x[1:(length(x)/5)]
-    As <- x[(length(x)/5 +1):(2*length(x)/5)]
-    Ai <- x[(2*length(x)/5+1):(3*length(x)/5)]
-    S <- x[(3*length(x)/5+1):(4*length(x)/5)]
-    I <- x[(4*length(x)/5+1):length(x)]
+  E0 = x[,1]
+  L0 = x[,2]
+  P0 = x[,3]
+  A_em0 = x[,4]
+  A_1h0 = x[,5]
+  A_1g0 = x[,6]
+  A_1o0 = x[,7]
+  A_2h0 = x[,8]
+  A_2g0 = x[,9]
+  A_2o0 = x[,10]
     
     # ODE definition 
-    dJ = gamma*(As+Ai) - mu_j*J*(1+J/K) - delta*theta_delta[t[1]] *J
-    dAs = delta*theta_delta[t[1]] *J - beta_AsI*theta_beta[t[1]]*As*I - mu_a*As
-    dAi = beta_AsI*theta_beta[t[1]]*As*I - mu_a*Ai
-    dS = - beta_AsI*S*Ai + alpha*I
-    dI = beta_AsI*S*Ai - alpha*I
+    dE = gamma_Ao*(beta_1*A_1o + beta_2*A_2o) - (mu_E + f_E[t[1]])*E
+    dL = f_E[t[1]]*E - (m_L(1+L/k_L[t[1]]) + f_L[t[1]])*L
+    dP = f_L[t[1]]*L - (m_P[t[1]] + f_P[t[1]])*P
+    dA_em = f_P[t[1]]*P*sigma*exp(-mu_em*(1+P/k_[t[1]])) - (m_A[t[1]]+gamma_Aem)*A_em
+    dA_1h = gamma_Aem*A_em - (m_A[t[1]] + mu_r + gamma_Ah)*A_1h
+    dA_1g = gamma_Ah*A_1h - (m_A[t[1]] + f_Ag)*A_1g
+    dA_1o = f_Ag[t[1]]*A_1g - (m_A[t[1]] + mu_r + gamma_Ao)*A_1o
+    dA_2h = gamma_Ao*(A_1o + A_2o) - (m_A[t[1]] + mu_r + gamma_Ah)*A_2h
+    dA_2g = gamma_Ah*A_2h - (m_A[t[1]] + f_Ag)*A_2g
+    dA_2o = f_Ag[t[1]]*A_2g - (m_A[t[1]] + mu_r + gamma_Ao)*A_2o
     
-    dx <- c(dJ, dAs, dAi, dS, dI)
+    dx <- c(dE, dL, dP, dA_em, dA_1h, dA_1g, dA_1o, dA_2h, dA_2g, dA_2o)
     
-    return(list(dx))})
+    return(list(dx))
 }
 
 # System initialization
-J_0 = 1500
-As_0 = 500
-Ai_0 = 0
-S_0 = 0
-I_0 = 0
+E0 = max(k_P)
+L0 = 0
+P0 = 0
+A_em0 = 0
+A_1h0 = 0
+A_1g0 = 0
+A_1o0 = 0
+A_2h0 = 0
+A_2g0 = 0
+A_2o0 = 0
 
-l_sim = n_s*l_s
+l_sim = 365
 
-X_0 = c(J_0, As_0, Ai_0, S_0, I_0)
+X_0 = cbind(E0, L0, P0, A_em0, A_1h0, A_1g0, A_1o0, A_2h0, A_2g0, A_2o0)
 
 #integration
-Sim <- as.data.frame(ode(X_0, 1:l_sim, df, parms))
+Sim <- as.data.frame(ode(X_0, 1:l_sim, df))
 
 #plot
 colnames(Sim) = c("t", "J", "As", "Ai", "S", "I")
