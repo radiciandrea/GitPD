@@ -82,7 +82,7 @@ parms = list(beta_1 = beta_1,
              k_L = k_L,
              k_P = k_P)
 
-df <- function(t, x) {
+df <- function(t, x, parms) {
   
   # initial conditions and paramters
   with(parms, { 
