@@ -32,7 +32,7 @@ t_end = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept
 # T and P
 d = t_s:t_end
 t = 15 - 13*cos(d/365*2*pi); # temperatura sinusoidale, min 1 gen = 2 gradi, max 1 lug = 28
-p = t*c(0, rep(c(0,0,0,1), 91)) # piove ogni 4 giorni con questa forma strana
+p = t*rep(c(0,0,0,1), 91)[1:(t_end-t_s+1)] # piove ogni 4 giorni con questa forma strana
 
 # p cumulated over 2 weeks and normalized between 0 and 1 (over a year?)
 p_cumm = sapply(1:365, function(x){return(sum(p[max(1,x-13):x]))})
