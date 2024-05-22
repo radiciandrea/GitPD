@@ -42,6 +42,10 @@ p_cumm_norm = p_cumm/max(p_cumm)
 
 f_E = (t-T_E)/TDD_E *(t-T_E>0) # Transition function from egg to larva
 f_L = - 0.0007*t^2 + 0.0392 * t - 0.3911 # Transition function from larva to pupa
+
+# WARNING 1: this function souhld be > 0
+f_L = pmax(0, f_L)
+
 f_P = 0.0008*t^2 - 0.0051 * t + 0.0319 # Transition function from pupa to emerging adult
 f_Ag = (t-T_Ag)/TDD_Ag *(t-T_Ag>0) # Transition function from engorged adult to oviposition site—seeking adult
 m_L = exp(-t/0.5) + mu_L # Larva mortality (day−1)
@@ -119,7 +123,7 @@ df <- function(t, x, parms) {
 }
 
 # System initialization
-E0 = 100 #max(k_P)
+E0 = max(k_P)
 L0 = 0
 P0 = 0
 A_em0 = 0
