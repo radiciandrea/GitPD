@@ -138,7 +138,7 @@ X_0 = c(E0, L0, P0, A_em0, A_1h0, A_1g0, A_1o0, A_2h0, A_2g0, A_2o0)
 Sim <- as.data.frame(ode(X_0, 1:l_sim, df, parms))
 
 #plot
-colnames(Sim) = c("t", "J", "As", "Ai", "S", "I")
+colnames(Sim) = c("t", " E", " L", " P", " A_em", " A_1h", " A_1g", " A_1o", " A_2h", " A_2g", " A_2o")
 Sim_m = reshape2::melt(Sim, id = 't')
 
 ggplot(Sim_m, aes(x = t, y = value, color = variable))+
