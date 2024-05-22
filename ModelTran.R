@@ -31,26 +31,26 @@ t_end = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept
 
 # T and P
 d = t_s:t_end
-t = 15 - 13*cos(d/365*2*pi); # temperatura sinusoidale, min 1 gen = 2 gradi, max 1 lug = 28
-p = t*rep(c(0,0,0,1), 91)[1:(t_end-t_s+1)] # piove ogni 4 giorni con questa forma strana
+temp = 15 - 13*cos(d/365*2*pi); # temperatura sinusoidale, min 1 gen = 2 gradi, max 1 lug = 28
+prec = temp*rep(c(0,0,0,1), 91)[1:(t_end-t_s+1)] # piove ogni 4 giorni con questa forma strana
 
 # p cumulated over 2 weeks and normalized between 0 and 1 (over a year?)
-p_cumm = sapply(1:365, function(x){return(sum(p[max(1,x-13):x]))})
+p_cumm = sapply(1:length(prec), function(x){return(sum(prec[max(1,x-13):x]))})
 p_cumm_norm = p_cumm/max(p_cumm)
 
 # functions
 
-f_E = (t-T_E)/TDD_E *(t-T_E>0) # Transition function from egg to larva
-f_L = - 0.0007*t^2 + 0.0392 * t - 0.3911 # Transition function from larva to pupa
+f_E = (temp-T_E)/TDD_E *(temp-T_E>0) # Transition function from egg to larva
+f_L = - 0.0007*temp^2 + 0.0392 * temp - 0.3911 # Transition function from larva to pupa
 
 # WARNING 1: this function souhld be > 0
 f_L = pmax(0, f_L)
 
-f_P = 0.0008*t^2 - 0.0051 * t + 0.0319 # Transition function from pupa to emerging adult
-f_Ag = (t-T_Ag)/TDD_Ag *(t-T_Ag>0) # Transition function from engorged adult to oviposition site—seeking adult
-m_L = exp(-t/0.5) + mu_L # Larva mortality (day−1)
-m_P = exp(-t/0.5) + mu_P # Pupa mortality rate (day−1)
-m_A = pmax(mu_A, 0.04417 + 0.00217*t) # Adult mortality rate (day−1)
+f_P = 0.0008*temp^2 - 0.0051 * temp + 0.0319 # Transition function from pupa to emerging adult
+f_Ag = (temp-T_Ag)/TDD_Ag *(temp-T_Ag>0) # Transition function from engorged adult to oviposition site—seeking adult
+m_L = exp(-temp/0.5) + mu_L # Larva mortality (day−1)
+m_P = exp(-temp/0.5) + mu_P # Pupa mortality rate (day−1)
+m_A = pmax(mu_A, 0.04417 + 0.00217*temp) # Adult mortality rate (day−1)
 k_L = K_L*(p_cumm_norm+1) # Environment carrying capacity of larvae (ha−1)
 k_P = K_P*(p_cumm_norm+1) # Environment carrying capacity of pupae (ha−1)
 
@@ -77,7 +77,8 @@ parms = list(beta_1 = beta_1,
              m_A = m_A,
              k_L = k_L,
              k_P = k_P,
-             n_s = n_s) 
+             n_s = n_s,
+             t_s = t_s) 
 
 df <- function(t, x, parms) {
   
@@ -95,18 +96,19 @@ df <- function(t, x, parms) {
     A_2g = x[(1+n_s*8):(9*n_s)]
     A_2o = x[(1+n_s*9):(10*n_s)]
     
+    t_n = t[1]-t_s+1 # time of numerical integration
     
     # ODE definition 
-    dE = gamma_Ao*(beta_1*A_1o + beta_2*A_2o) - (mu_E + f_E[t[1]])*E
-    dL = f_E[t[1]]*E - (m_L[t[1]]*(1+L/k_L[t[1]]) + f_L[t[1]])*L
-    dP = f_L[t[1]]*L - (m_P[t[1]] + f_P[t[1]])*P
-    dA_em = f_P[t[1]]*P*sigma*exp(-mu_em*(1+P/k_P[t[1]])) - (m_A[t[1]]+gamma_Aem)*A_em
-    dA_1h = gamma_Aem*A_em - (m_A[t[1]] + mu_r + gamma_Ah)*A_1h
-    dA_1g = gamma_Ah*A_1h - (m_A[t[1]] + f_Ag[t[1]])*A_1g
-    dA_1o = f_Ag[t[1]]*A_1g - (m_A[t[1]] + mu_r + gamma_Ao)*A_1o
-    dA_2h = gamma_Ao*(A_1o + A_2o) - (m_A[t[1]] + mu_r + gamma_Ah)*A_2h
-    dA_2g = gamma_Ah*A_2h - (m_A[t[1]] + f_Ag[t[1]])*A_2g
-    dA_2o = f_Ag[t[1]]*A_2g - (m_A[t[1]] + mu_r + gamma_Ao)*A_2o
+    dE = gamma_Ao*(beta_1*A_1o + beta_2*A_2o) - (mu_E + f_E[t_n])*E
+    dL = f_E[t_n]*E - (m_L[t_n]*(1+L/k_L[t_n]) + f_L[t_n])*L
+    dP = f_L[t_n]*L - (m_P[t_n] + f_P[t_n])*P
+    dA_em = f_P[t_n]*P*sigma*exp(-mu_em*(1+P/k_P[t_n])) - (m_A[t_n]+gamma_Aem)*A_em
+    dA_1h = gamma_Aem*A_em - (m_A[t_n] + mu_r + gamma_Ah)*A_1h
+    dA_1g = gamma_Ah*A_1h - (m_A[t_n] + f_Ag[t_n])*A_1g
+    dA_1o = f_Ag[t_n]*A_1g - (m_A[t_n] + mu_r + gamma_Ao)*A_1o
+    dA_2h = gamma_Ao*(A_1o + A_2o) - (m_A[t_n] + mu_r + gamma_Ah)*A_2h
+    dA_2g = gamma_Ah*A_2h - (m_A[t_n] + f_Ag[t_n])*A_2g
+    dA_2o = f_Ag[t_n]*A_2g - (m_A[t_n] + mu_r + gamma_Ao)*A_2o
     
     dx <- c(dE, dL, dP, dA_em, dA_1h, dA_1g, dA_1o, dA_2h, dA_2g, dA_2o)
     
