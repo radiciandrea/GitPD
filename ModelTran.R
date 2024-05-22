@@ -30,7 +30,7 @@ t_s = 31+28+10 # Start of the favorable season - 10 Mar
 t_end = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept
 
 # T and P
-d = 1:365
+d = t_s:t_end
 t = 15 - 13*cos(d/365*2*pi); # temperatura sinusoidale, min 1 gen = 2 gradi, max 1 lug = 28
 p = t*c(0, rep(c(0,0,0,1), 91)) # piove ogni 4 giorni con questa forma strana
 
@@ -130,7 +130,7 @@ l_sim = 365
 X_0 = c(E0, L0, P0, A_em0, A_1h0, A_1g0, A_1o0, A_2h0, A_2g0, A_2o0)
 
 #integration
-Sim <- as.data.frame(ode(X_0, 1:l_sim, df, parms))
+Sim <- as.data.frame(ode(X_0, d, df, parms))
 
 #plot
 colnames(Sim) = c("t", " E", " L", " P", " A_em", " A_1h", " A_1g", " A_1o", " A_2h", " A_2g", " A_2o")
