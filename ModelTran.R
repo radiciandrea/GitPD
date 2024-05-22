@@ -4,16 +4,28 @@ library(deSolve)
 library(ggplot2)
 library(reshape2) 
 
-#parameters
+#parameters (Tran 2013)
 
-gamma = 2 #fertility rate mosquitoes: 4 mosquitoes/day, sex ratio 1:1
-mu_j = 1/5 #mortality rate eggs/juveniles
-K = 1000  # carrying capacity juveniles
-delta = 1/100 # passage J to A
-mu_a = 1/50 # mortality rate mosquitoes
-beta_AsI = 0.1 # mosquito infectious rate
-beta_SAi = 0.1  # human infectious rate
-alpha = 1/14 #human recovery rate
+beta_1 = 95 # Number of eggs laid by ovipositing nulliparous females (per female)
+beta_2 = 75 # Number of eggs laid by ovipositing parous females (per female)
+K_L = 250000 # Standard environment carrying capacity for larvae (larvae ha−1)
+K_P = 250000 # Standard environment carrying capacity for pupae (pupae ha−1)
+sigma = 0.5 # Sex-ratio at the emergence
+mu_E = 0.05 # Egg mortality rate (day−1)
+mu_L = 0.08 # Minimum larva mortality rate (day−1)
+mu_P = 0.03 # Minimum pupa mortality rate (day−1)
+mu_em = 0.1 # Mortality rate during adult emergence (day−1)
+mu_A = 0.02 # Minimum adult mortality rate (day−1)
+mu_r = 0.08 # Adult mortality rate related to seeking behavior (day−1)
+T_E = 10.4 # Minimal temperature needed for egg development (°C)
+TDD_E = 110 # Total number of degree-day necessary for egg development (°C)
+gamma_Aem = 0.4 # Development rate of emerging adults (day−1)
+gamma_Ah = 0.2 # Transition rate from host-seeking to engorged adults (day−1)
+gamma_Ao = 0.2 # Transition rate from oviposition site-seeking to host-seeking adults (day−1)
+T_Ag = 10 # Minimal temperature needed for egg maturation (°C)
+TDD_Ag = 77 # Total number of degree-days necessary for egg maturation (°C)
+t_s = 31+28+10 # Start of the favorable season - 10 Mar
+t_end = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept
 
 n_s = 10 #number of seasons
 l_s = 60 #length of season
