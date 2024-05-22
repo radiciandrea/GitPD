@@ -27,6 +27,12 @@ TDD_Ag = 77 # Total number of degree-days necessary for egg maturation (°C)
 t_s = 31+28+10 # Start of the favorable season - 10 Mar
 t_end = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept
 
+
+# T and P
+d = 1:365
+t = 15 - 13*cos(d/365*2*pi); # temperatura sinusoidale, min 1 gen = 2 gradi, max 1 lug = 28
+p = t*c(0, rep(c(0,0,0,1), 91)) # piove ogni 4 giorni con questa forma strana
+
 # functions
 
 theta_delta = rep(c(rep(0,l_s), rep(1,l_s)), n_s/2) # "hatching" is time dependent
