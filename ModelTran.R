@@ -1,4 +1,4 @@
-# Little 2 pop epidemic model
+# Modello Tran 2013
 
 library(deSolve)
 library(ggplot2)
