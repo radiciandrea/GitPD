@@ -27,9 +27,6 @@ TDD_Ag = 77 # Total number of degree-days necessary for egg maturation (°C)
 t_s = 31+28+10 # Start of the favorable season - 10 Mar
 t_end = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept
 
-n_s = 10 #number of seasons
-l_s = 60 #length of season
-
 # functions
 
 theta_delta = rep(c(rep(0,l_s), rep(1,l_s)), n_s/2) # "hatching" is time dependent
