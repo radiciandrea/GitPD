@@ -30,12 +30,12 @@ t_s = 31+28+10 # Start of the favorable season - 10 Mar
 t_end = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept
 
 t_s = 1 # simulate multiple year
-t_end = 365*4.3
+t_end = 365*5
 
 # T and P
 d = t_s:t_end
 temp = 15 - 13*cos(d/365*2*pi); # temperatura sinusoidale, min 1 gen = 2 gradi, max 1 lug = 28
-prec = temp*rep(c(0,0,0,1), floor(t_end/4))[1:(t_end-t_s+1)] # piove ogni 4 giorni con questa forma strana
+prec = temp*rep(c(0,0,0,1), length.out = (t_end-t_s+1)) # piove ogni 4 giorni con questa forma strana
 
 # p cumulated over 2 weeks and normalized between 0 and 1 (over a year?)
 p_cumm = sapply(1:length(prec), function(x){return(sum(prec[max(1,x-13):x]))})
