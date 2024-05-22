@@ -1,5 +1,7 @@
 # Modello Tran 2013
 
+rm(list = ls())
+
 library(deSolve)
 library(ggplot2)
 library(reshape2) 
@@ -50,9 +52,41 @@ k_P = K_P*(p_cumm_norm+1) # Environment carrying capacity of pupae (ha−1)
 
 
 # list with parameters to be passed to the ODE system
+parms = list(beta_1 = beta_1,
+             beta_2 = beta_2,
+             K_L = K_L,
+             K_P = K_P,
+             sigma = sigma,
+             mu_E = mu_E,
+             mu_L = mu_L,
+             mu_P = mu_P,
+             mu_em = mu_em,
+             mu_A = mu_A,
+             mu_r = mu_r,
+             T_E = T_E,
+             TDD_E = TDD_E,
+             gamma_Aem = gamma_Aem,
+             gamma_Ah = gamma_Ah,
+             gamma_Ao = gamma_Ao,
+             T_Ag = T_Ag,
+             TDD_Ag = TDD_Ag,
+             t_s = t_s,
+             t_end = t_end,
+             f_E = f_E,
+             f_L = f_L,
+             f_P = f_P,
+             f_Ag = f_Ag,
+             m_L = m_L,
+             m_P = m_P,
+             m_A = m_A,
+             k_L = k_L,
+             k_P = k_P)
+
 df <- function(t, x) {
   
   # initial conditions and paramters
+  ith(parms, { 
+  
   E0 = x[,1]
   L0 = x[,2]
   P0 = x[,3]
@@ -78,7 +112,7 @@ df <- function(t, x) {
     
     dx <- c(dE, dL, dP, dA_em, dA_1h, dA_1g, dA_1o, dA_2h, dA_2g, dA_2o)
     
-    return(list(dx))
+    return(list(dx))})
 }
 
 # System initialization
@@ -98,7 +132,7 @@ l_sim = 365
 X_0 = cbind(E0, L0, P0, A_em0, A_1h0, A_1g0, A_1o0, A_2h0, A_2g0, A_2o0)
 
 #integration
-Sim <- as.data.frame(ode(X_0, 1:l_sim, df))
+Sim <- as.data.frame(ode(X_0, 1:l_sim, df, parms))
 
 #plot
 colnames(Sim) = c("t", "J", "As", "Ai", "S", "I")
