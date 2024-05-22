@@ -46,7 +46,7 @@ f_P = 0.0008*t^2 - 0.0051 * t + 0.0319 # Transition function from pupa to emergi
 f_Ag = (t-T_Ag)/TDD_Ag *(t-T_Ag>0) # Transition function from engorged adult to oviposition site—seeking adult
 m_L = exp(-t/0.5) + mu_L # Larva mortality (day−1)
 m_P = exp(-t/0.5) + mu_P # Pupa mortality rate (day−1)
-m_A = max(mu_A, 0.04417 + 0.00217*t) # Adult mortality rate (day−1)
+m_A = pmax(mu_A, 0.04417 + 0.00217*t) # Adult mortality rate (day−1)
 k_L = K_L*(p_cumm_norm+1) # Environment carrying capacity of larvae (ha−1)
 k_P = K_P*(p_cumm_norm+1) # Environment carrying capacity of pupae (ha−1)
 
@@ -119,7 +119,7 @@ df <- function(t, x, parms) {
 }
 
 # System initialization
-E0 = max(k_P)
+E0 = 100 #max(k_P)
 L0 = 0
 P0 = 0
 A_em0 = 0
