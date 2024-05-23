@@ -13,7 +13,7 @@ print(data_ER_nc)
 
 attributes(data_ER_nc$var)
 number_ovitrap <- ncvar_get(data_ER_nc, attributes(data_ER_nc$var)$names[1])
-number_eggs <- ncvar_get(data_ER_nc, attributes(data_ER_nc$var)$names[2])
+number_eggs <- ncvar_get(data_ER_nc, attributes(data_ER_nc$var)$names[2]) # it is already Average number of eggs
 
 # città dovrebbero essere nell'ordine alfabetico: Bologna, Ferrara, Forli Cesena, Modena, Parma, Piacenza, Ravenna, Reggio Emilia, Rimini
 region_names <- ncvar_get(data_ER_nc, attributes(data_ER_nc$var)$names[6])
@@ -21,12 +21,14 @@ week <- ncvar_get(data_ER_nc, attributes(data_ER_nc$var)$names[7])
 time_start <- ncvar_get(data_ER_nc, attributes(data_ER_nc$var)$names[8])
 time_end <- ncvar_get(data_ER_nc, attributes(data_ER_nc$var)$names[9])
 
+# day 0: 1/1/2000. 4018 days to 1/1/2011; 4383 to 1/1/2012...
+
 # consider Bologna 2012
 
 # Eggs_Bologna_2011_df = data.frame(DOY = time_start[1:(which(week==1)[1]-1)] -  (time_start[1]-week[1]*7),
 #                               Eggs = number_eggs[1:(which(week==1)[1]-1),1]) 
 
-Eggs_Bologna_2012_df = data.frame(DOY = time_start[which(week==1)[1]:(which(week==1)[2]-1)] -  (time_start[which(week==1)[1]]-week[which(week==1)[1]]*7),
+Eggs_Bologna_2012_df = data.frame(DOY = time_start[which(week==1)[1]:(which(week==1)[2]-1)] - 4383.5,
                                   Eggs = number_eggs[which(week==1)[1]:(which(week==1)[2]-1), 1]) 
 
 Eggs_Bologna_2012_df$type = "observed"
