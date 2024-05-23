@@ -39,3 +39,6 @@ obs_Bologna_2011_df <- data.frame(city = "Bologna",
                                   P = W$DAILY_PREC,
                                   T_av = (W$DAILY_TMIN+W$DAILY_TMAX)/2) # is this the best?)
 obs_Bologna_2011_df <- right_join(Eggs_Bologna_2011_df, obs_Bologna_2011_df)
+
+
+save(Eggs_Bologna_2011_df, obs_Bologna_2011_df, file =  "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Bologna_2011.RData")
