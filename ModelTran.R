@@ -30,7 +30,7 @@ t_s_diap = 31+28+10 # Start of the favorable season - 10 Mar (for diapause)
 t_end_diap = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept (for diapause)
 
 t_s = 1 # simulate multiple year
-t_end = 365*3
+t_end = 365*1
 
 # T and P
 d = t_s:t_end
@@ -38,12 +38,18 @@ temp = 15 - 13*cos(d/365*2*pi); # temperatura sinusoidale, min 1 gen = 2 gradi, 
 prec = temp*rep(c(0,0,0,1), length.out = (t_end-t_s+1)) # piove ogni 4 giorni con questa forma strana
 
 
-#Getting T and P from Agroclim Montpellier
+#Getting T and P from Agroclim Climatik (Montpellier)
 library(readxl)
 W <- read_excel("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Agroclim/T_P_Montpellier_2000_2023_INRAE_STATION_34172005.xls", range = "A10:F8776")
 
 temp = W$TM[7306 - 1 + d] # lets start from 1/1/2020
 prec = W$RR[7306 - 1 + d] 
+
+#Getting T and P and Eggs from Arpae https://dati.arpae.it/dataset/erg5-eraclito-91 + nc by Cyril
+
+load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Bologna_2011.RData")
+temp <- obs_Bologna_2011_df$T_av
+prec <- obs_Bologna_2011_df$P
 
 # p cumulated over 2 weeks and normalized between 0 and 1 (over a year?)
 p_cumm = sapply(1:length(prec), function(x){return(sum(prec[max(1,x-13):x]))})
@@ -152,9 +158,11 @@ X_0 = c(E0, L0, P0, A_em0, A_1h0, A_1g0, A_1o0, A_2h0, A_2g0, A_2o0)
 Sim <- as.data.frame(ode(X_0, d, df, parms))
 
 #plot
-colnames(Sim) = c("t", " E", " L", " P", " A_em", " A_1h", " A_1g", " A_1o", " A_2h", " A_2g", " A_2o")
+colnames(Sim) = c("t", "E", "L", "P", "A_em", "A_1h",
+                  "A_1g", "A_1o", "A_2h", "A_2g", "A_2o")
 Sim_m = reshape2::melt(Sim, id = 't')
 
 ggplot(Sim_m, aes(x = t, y = value, color = variable))+
   geom_point()
+
 
