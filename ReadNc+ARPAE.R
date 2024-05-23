@@ -24,8 +24,9 @@ time_end <- ncvar_get(data_ER_nc, attributes(data_ER_nc$var)$names[9])
 # consider Bologna 2011
 
 Eggs_Bologna_2011_df = data.frame(DOY = time_start[1:(which(week==1)[1]-1)] -  (time_start[1]-week[1]*7),
-                              E_obs = number_eggs[1:(which(week==1)[1]-1)]) 
+                              Eggs = number_eggs[1:(which(week==1)[1]-1)]) 
 
+Eggs_Bologna_2011_df$type = "observed"
 # Meteo da ARPAE https://dati.arpae.it/dataset/erg5-eraclito-91
 # es Bologna Cella 01421
 
