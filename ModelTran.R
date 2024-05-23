@@ -57,7 +57,7 @@ m_A = pmax(mu_A, 0.04417 + 0.00217*temp) # Adult mortality rate (day−1)
 k_L = K_L*(p_cumm_norm+1) # Environment carrying capacity of larvae (ha−1)
 k_P = K_P*(p_cumm_norm+1) # Environment carrying capacity of pupae (ha−1)
 
-z = 1*(t %% 365 > t_s_diap)*(t %% 365 < t_end_diap)
+z = 1*(d %% 365 > t_s_diap)*(d %% 365 < t_end_diap)
 
 n_s = 1 # number of locations (added; 1 for no dimension)
 
@@ -83,7 +83,8 @@ parms = list(beta_1 = beta_1,
              k_L = k_L,
              k_P = k_P,
              n_s = n_s,
-             t_s = t_s) 
+             t_s = t_s,
+             z = z) 
 
 df <- function(t, x, parms) {
   
@@ -104,8 +105,8 @@ df <- function(t, x, parms) {
     t_n = t[1]-t_s+1 # time of numerical integration
     
     # ODE definition 
-    dE = gamma_Ao*(beta_1*A_1o + beta_2*A_2o) - (mu_E + z*f_E[t_n])*E
-    dL = z*f_E[t_n]*E - (m_L[t_n]*(1+L/k_L[t_n]) + f_L[t_n])*L
+    dE = gamma_Ao*(beta_1*A_1o + beta_2*A_2o) - (mu_E + z[t_n]*f_E[t_n])*E
+    dL = z[t_n]*f_E[t_n]*E - (m_L[t_n]*(1+L/k_L[t_n]) + f_L[t_n])*L
     dP = f_L[t_n]*L - (m_P[t_n] + f_P[t_n])*P
     dA_em = f_P[t_n]*P*sigma*exp(-mu_em*(1+P/k_P[t_n])) - (m_A[t_n]+gamma_Aem)*A_em
     dA_1h = gamma_Aem*A_em - (m_A[t_n] + mu_r + gamma_Ah)*A_1h
