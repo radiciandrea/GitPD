@@ -44,6 +44,9 @@ p_cumm_norm = p_cumm/max(p_cumm)
 # functions
 
 f_E = (temp-T_E)/TDD_E *(temp-T_E>0) # Transition function from egg to larva
+
+# WARNING: this should probably depend on praceipitation as well
+
 f_L = - 0.0007*temp^2 + 0.0392 * temp - 0.3911 # Transition function from larva to pupa
 
 # WARNING 1: this function souhld be > 0
