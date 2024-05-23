@@ -30,13 +30,12 @@ t_s_diap = 31+28+10 # Start of the favorable season - 10 Mar (for diapause)
 t_end_diap = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept (for diapause)
 
 t_s = 1 # simulate multiple year
-t_end = 365*1
+t_end = 366*1
 
 # T and P
 d = t_s:t_end
 temp = 15 - 13*cos(d/365*2*pi); # temperatura sinusoidale, min 1 gen = 2 gradi, max 1 lug = 28
 prec = temp*rep(c(0,0,0,1), length.out = (t_end-t_s+1)) # piove ogni 4 giorni con questa forma strana
-
 
 #Getting T and P from Agroclim Climatik (Montpellier)
 library(readxl)
@@ -47,9 +46,9 @@ prec = W$RR[7306 - 1 + d]
 
 #Getting T and P and Eggs from Arpae https://dati.arpae.it/dataset/erg5-eraclito-91 + nc by Cyril
 
-load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Bologna_2011.RData")
-temp <- obs_Bologna_2011_df$T_av
-prec <- obs_Bologna_2011_df$P
+load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Bologna_2012.RData")
+temp <- obs_Bologna_2012_df$T_av
+prec <- obs_Bologna_2012_df$P
 
 # p cumulated over 2 weeks and normalized between 0 and 1 (over a year?)
 p_cumm = sapply(1:length(prec), function(x){return(sum(prec[max(1,x-13):x]))})
@@ -150,8 +149,6 @@ A_2h0 = 0
 A_2g0 = 0
 A_2o0 = 0
 
-l_sim = 365
-
 X_0 = c(E0, L0, P0, A_em0, A_1h0, A_1g0, A_1o0, A_2h0, A_2g0, A_2o0)
 
 #integration
@@ -165,4 +162,23 @@ Sim_m = reshape2::melt(Sim, id = 't')
 ggplot(Sim_m, aes(x = t, y = value, color = variable))+
   geom_point()
 
+#Simulated eggs (eq 4)
 
+Eggs_laid_sim_df <- data.frame(DOY = Sim$t[1:t_end],
+                               Eggs = gamma_Ao*(beta_1*Sim$A_1o + beta_2*Sim$A_2o),
+                               type = "laid, simulated")
+
+#plot
+
+Egg_comp_df <- rbind(Eggs_laid_sim_df, Eggs_Bologna_2012_df)
+
+Egg_comp_df <- Egg_comp_df %>%
+  group_by(type)%>%
+  mutate(Relative_eggs = Eggs/max(Eggs, na.rm = T))%>%
+  ungroup()
+
+ggplot(data = Egg_comp_df, aes(x = DOY, y = Relative_eggs, color = type))+
+  geom_line()+
+  geom_point()
+             
+             
