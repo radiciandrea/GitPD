@@ -35,15 +35,24 @@ Eggs_Bologna_2012_df$type = "observed"
 # Meteo da ARPAE https://dati.arpae.it/dataset/erg5-eraclito-91
 # es Bologna Cella 01421
 
-# W <- read.csv("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/01421_2011/01421_2011_d.csv")
-W <- read.csv("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/01421_2012/01421_2012_d.csv")
+# W <- read.csv("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/01421_2012/01421_2012_d.csv")
+# 
+# #Create df Bologna 2012
+# 
+# obs_Bologna_2012_df <- data.frame(city = "Bologna",
+#                                   year = "2012",
+#                                   DOY = 1:366,
+#                                   P = W$DAILY_PREC,
+#                                   T_av = (W$DAILY_TMIN+W$DAILY_TMAX)/2) # is this the best?)
 
-#Create df Bologna 2012
+# new weather: https://dati.arpae.it/dataset/erg5-interpolazione-su-griglia-di-dati-meteo
+W <- read.csv("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/01421_2012 ERG5/01421_2012_d.csv")
 
 obs_Bologna_2012_df <- data.frame(city = "Bologna",
                                   year = "2012",
                                   DOY = 1:366,
                                   P = W$DAILY_PREC,
-                                  T_av = (W$DAILY_TMIN+W$DAILY_TMAX)/2) # is this the best?)
+                                  T_av = W$DAILY_TAVG) # is this the best?)
 
 save(Eggs_Bologna_2012_df, obs_Bologna_2012_df, file =  "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Bologna_2012.RData")
+
