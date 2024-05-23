@@ -21,25 +21,27 @@ week <- ncvar_get(data_ER_nc, attributes(data_ER_nc$var)$names[7])
 time_start <- ncvar_get(data_ER_nc, attributes(data_ER_nc$var)$names[8])
 time_end <- ncvar_get(data_ER_nc, attributes(data_ER_nc$var)$names[9])
 
-# consider Bologna 2011
+# consider Bologna 2012
 
-Eggs_Bologna_2011_df = data.frame(DOY = time_start[1:(which(week==1)[1]-1)] -  (time_start[1]-week[1]*7),
-                              Eggs = number_eggs[1:(which(week==1)[1]-1)]) 
+# Eggs_Bologna_2011_df = data.frame(DOY = time_start[1:(which(week==1)[1]-1)] -  (time_start[1]-week[1]*7),
+#                               Eggs = number_eggs[1:(which(week==1)[1]-1),1]) 
 
-Eggs_Bologna_2011_df$type = "observed"
+Eggs_Bologna_2012_df = data.frame(DOY = time_start[which(week==1)[1]:(which(week==1)[2]-1)] -  (time_start[which(week==1)[1]]-week[which(week==1)[1]]*7),
+                                  Eggs = number_eggs[which(week==1)[1]:(which(week==1)[2]-1), 1]) 
+
+Eggs_Bologna_2012_df$type = "observed"
 # Meteo da ARPAE https://dati.arpae.it/dataset/erg5-eraclito-91
 # es Bologna Cella 01421
 
-W <- read.csv("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/01421_2011/01421_2011_d.csv")
+# W <- read.csv("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/01421_2011/01421_2011_d.csv")
+W <- read.csv("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/01421_2012/01421_2012_d.csv")
 
-#Create df Bologna 2011
+#Create df Bologna 2012
 
-obs_Bologna_2011_df <- data.frame(city = "Bologna",
-                                  year = "2011",
-                                  DOY = 1:365,
+obs_Bologna_2012_df <- data.frame(city = "Bologna",
+                                  year = "2012",
+                                  DOY = 1:366,
                                   P = W$DAILY_PREC,
                                   T_av = (W$DAILY_TMIN+W$DAILY_TMAX)/2) # is this the best?)
-obs_Bologna_2011_df <- right_join(Eggs_Bologna_2011_df, obs_Bologna_2011_df)
 
-
-save(Eggs_Bologna_2011_df, obs_Bologna_2011_df, file =  "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Bologna_2011.RData")
+save(Eggs_Bologna_2012_df, obs_Bologna_2012_df, file =  "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Bologna_2012.RData")
