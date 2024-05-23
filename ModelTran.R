@@ -44,7 +44,7 @@ W <- read_excel("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Ag
 temp = W$TM[7306 - 1 + d] # lets start from 1/1/2020
 prec = W$RR[7306 - 1 + d] 
 
-#Getting T and P and Eggs from Arpae https://dati.arpae.it/dataset/erg5-eraclito-91 + nc by Cyril
+#Getting T and P and Eggs from Arpae (see ReadNc+ARPAE) + nc by Cyril
 
 load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Bologna_2012.RData")
 temp <- obs_Bologna_2012_df$T_av
