@@ -73,6 +73,10 @@ m_A = pmax(mu_A, 0.04417 + 0.00217*temp) # Adult mortality rate (day−1)
 k_L = K_L*(p_cumm_norm+1) # Environment carrying capacity of larvae (ha−1)
 k_P = K_P*(p_cumm_norm+1) # Environment carrying capacity of pupae (ha−1)
 
+# Warning: this should be corrected by the Area. Here we make the Hp A = 100 ha
+k_L = k_L*100
+k_P = k_P*100
+
 z = 1*(d %% 365 > t_s_diap)*(d %% 365 < t_end_diap)
 
 n_s = 1 # number of locations (added; 1 for no dimension)
