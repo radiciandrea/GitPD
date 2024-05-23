@@ -26,8 +26,8 @@ gamma_Ah = 0.2 # Transition rate from host-seeking to engorged adults (day−1)
 gamma_Ao = 0.2 # Transition rate from oviposition site-seeking to host-seeking adults (day−1)
 T_Ag = 10 # Minimal temperature needed for egg maturation (°C)
 TDD_Ag = 77 # Total number of degree-days necessary for egg maturation (°C)
-t_s = 31+28+10 # Start of the favorable season - 10 Mar
-t_end = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept
+t_s_diap = 31+28+10 # Start of the favorable season - 10 Mar (for diapause)
+t_end_diap = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept (for diapause)
 
 t_s = 1 # simulate multiple year
 t_end = 365*5
@@ -119,7 +119,7 @@ df <- function(t, x, parms) {
 }
 
 # System initialization
-E0 = max(k_P)
+E0 = 10^6 # at 1st of January
 L0 = 0
 P0 = 0
 A_em0 = 0
