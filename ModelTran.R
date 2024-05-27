@@ -5,6 +5,7 @@ rm(list = ls())
 library(deSolve)
 library(ggplot2)
 library(reshape2) 
+library(dplyr)
 
 #parameters (Tran 2013)
 
