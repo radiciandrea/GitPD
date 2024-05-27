@@ -32,7 +32,7 @@ Eggs_Bologna_2012_df = data.frame(DOY = time_start[which(week==1)[1]:(which(week
                                   Eggs = number_eggs[which(week==1)[1]:(which(week==1)[2]-1), 1]) 
 
 Eggs_Bologna_2012_df$type = "observed"
-# Meteo da ARPAE https://dati.arpae.it/dataset/erg5-eraclito-91
+# Meteo da ARPAE https://dati.arpae.it/dataset/erg5-interpolazione-su-griglia-di-dati-meteo (non più https://dati.arpae.it/dataset/erg5-eraclito-91)
 # es Bologna Cella 01421
 # Ferrara 01573
 # Forli Cesena 01948
@@ -43,19 +43,7 @@ Eggs_Bologna_2012_df$type = "observed"
 # Reggio Emilia 00977
 # Rimini 02191
 
-
-# W <- read.csv("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/01421_2012/01421_2012_d.csv")
-# 
-# #Create df Bologna 2012
-# 
-# obs_Bologna_2012_df <- data.frame(city = "Bologna",
-#                                   year = "2012",
-#                                   DOY = 1:366,
-#                                   P = W$DAILY_PREC,
-#                                   T_av = (W$DAILY_TMIN+W$DAILY_TMAX)/2) # is this the best?)
-
-# new weather: https://dati.arpae.it/dataset/erg5-interpolazione-su-griglia-di-dati-meteo
-W <- read.csv("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/01421_2012 ERG5/01421_2012_d.csv")
+W <- read.csv(unz("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/01421_2012 ERG5.zip", "01421_2012_d.csv"))              
 
 obs_Bologna_2012_df <- data.frame(city = "Bologna",
                                   year = "2012",
