@@ -34,6 +34,15 @@ Eggs_Bologna_2012_df = data.frame(DOY = time_start[which(week==1)[1]:(which(week
 Eggs_Bologna_2012_df$type = "observed"
 # Meteo da ARPAE https://dati.arpae.it/dataset/erg5-eraclito-91
 # es Bologna Cella 01421
+# Ferrara 01573
+# Forli Cesena 01948
+# Modena 01138
+# Parma 00774
+# Piacenza 00369
+# Ravenna 01983
+# Reggio Emilia 00977
+# Rimini 02191
+
 
 # W <- read.csv("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/01421_2012/01421_2012_d.csv")
 # 
