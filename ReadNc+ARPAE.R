@@ -79,8 +79,16 @@ for(region in region_codes) {
   }
 }
 
+# add date and doy to both
 
+W_tot_df = W_tot_df %>%
+  mutate(DOY = as.numeric(strftime(date, format = "%j")))
 
+time_df <- W_tot_df%>%
+  filter(region == region_names[1]) %>%
+  select(c("DOS", "DOY", "date"))
 
-save(Eggs_tot_df, W_tot_df, file =  "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData")
+Eggs_tot_df <- left_join(Eggs_tot_df, time_df, by = "DOS")
+
+save(Eggs_tot_df, W_tot_df, time_df, file =  "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData")
 
