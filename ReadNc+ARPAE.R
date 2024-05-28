@@ -33,7 +33,7 @@ time_end <- ncvar_get(data_ER_nc, attributes(data_ER_nc$var)$names[9])
 n_t = length(time_start)
 n_r = length(region_names)
 
-Eggs_df = data.frame(region = rep(region_names, each = n_t),
+Eggs_tot_df = data.frame(region = rep(region_names, each = n_t),
                      DOS = rep(time_start - 4018.5, times = n_r), #Day of simulation
                      eggs = as.vector(number_eggs),
                      ovitrps = as.vector(number_ovitrap),
@@ -82,5 +82,5 @@ for(region in region_codes) {
 
 
 
-save(Eggs_df, W_tot_df, file =  "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData")
+save(Eggs_tot_df, W_tot_df, file =  "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData")
 
