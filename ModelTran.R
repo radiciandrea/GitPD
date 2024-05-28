@@ -42,11 +42,12 @@ t_end_diap = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept 
 
 #Getting T and P and Eggs from Arpae (see ReadNc+ARPAE) + nc by Cyril
 
-load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData")
+load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Weather_Nice_200811.RData") #Nizza
+# load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData") #Emilia Romagna
 
 # chose a region and years
-region_x = "PIACENZA" # "BOLOGNA"
-year_x = 2011:2021
+region_x = "NICE" # "BOLOGNA" "PIACENZA
+year_x = 2008:2011 #2011:2021
 
 W_df <- W_tot_df %>%
   filter(region == region_x) %>%
@@ -58,6 +59,7 @@ prec <- W_df$P
 # T and P
 t_s = W_df$DOS[1] # simulate multiple year
 t_end = tail(W_df$DOS, n = 1)
+t_end = 365
 d = t_s:t_end
 doy = W_df$DOY
 
