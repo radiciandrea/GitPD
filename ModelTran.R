@@ -180,18 +180,17 @@ ggplot(Sim_m, aes(x = t, y = value, color = variable))+
 
 #Simulated eggs (eq 4)
 
-Eggs_laid_sim_df <- data.frame(DOY = Sim$t[1:t_end],
+Eggs_laid_sim_df <- data.frame(DOS = Sim$t[1:t_end],
                                Eggs = gamma_Ao*(beta_1*Sim$A_1o + beta_2*Sim$A_2o),
                                type = "laid, simulated")
 
 #plot
 
 Eggs_df <- Eggs_tot_df %>%
-  filter(region == "BOLOGNA") %>%
-  filter(year == 2018) %>%
-  select("eggs", "type")
+  filter(region == region_x) %>%
+  filter(year %in% year_x ) %>%
+  select("DOS", "Egg", "type")
 
-Eggs_df$
 
 Egg_comp_df <- rbind(Eggs_laid_sim_df, Eggs_df)
 
