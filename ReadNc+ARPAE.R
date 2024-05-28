@@ -44,14 +44,32 @@ Eggs_Bologna_2012_df$type = "observed"
 # Rimini 02191
 
 region_codes = c("01421", "01573", "01948", "01138", "00774", "00369", "01983", "00977", "02191")
+years = 2011:2021
 
-W <- read.csv(unz("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/01421_2012 ERG5.zip", "01421_2012_d.csv"))              
+W_tot <- as.data.frame(matrix(ncol = 6, nrow = 4018*9)) # weather from all the cities
 
-obs_Bologna_2012_df <- data.frame(city = "Bologna",
-                                  year = "2012",
-                                  DOY = 1:366,
-                                  P = W$DAILY_PREC,
-                                  T_av = W$DAILY_TAVG) # is this the best?)
+k1 = 1 # counter
+
+for(region in region_codes) {
+  for(year in years){
+    W <- read.csv(unz(paste0("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/",region,"_",year,".zip"),
+                              paste0(region, "_", year, "_d.csv")))              
+    
+    W_df <- data.frame(city = "Bologna",
+                       year = "2012",
+                       DOY = nrows(W),
+                       date = W$PragaDate,
+                       P = W$DAILY_PREC,
+                       T_av = W$DAILY_TAVG)
+    
+    k2 = k1 + nrows(W)
+    W_tot[(k1-1):k2, ] = W_df
+    k1 = k2
+  }
+}
+
+
+
 
 save(Eggs_Bologna_2012_df, obs_Bologna_2012_df, file =  "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Bologna_2012.RData")
 
