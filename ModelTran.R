@@ -45,7 +45,7 @@ t_end_diap = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept 
 load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData")
 
 # chose a region and years
-region_x = "BOLOGNA"
+region_x = "PIACENZA" # "BOLOGNA"
 year_x = 2011:2021
 
 W_df <- W_tot_df %>%
@@ -181,25 +181,23 @@ ggplot(Sim_m, aes(x = t, y = value, color = variable))+
 #Simulated eggs (eq 4)
 
 Eggs_laid_sim_df <- data.frame(DOS = Sim$t[1:t_end],
-                               Eggs = gamma_Ao*(beta_1*Sim$A_1o + beta_2*Sim$A_2o),
+                               eggs = gamma_Ao*(beta_1*Sim$A_1o + beta_2*Sim$A_2o),
                                type = "laid, simulated")
 
 #plot
 
 Eggs_df <- Eggs_tot_df %>%
   filter(region == region_x) %>%
-  filter(year %in% year_x ) %>%
-  select("DOS", "Egg", "type")
-
+  select("DOS", "eggs", "type")
 
 Egg_comp_df <- rbind(Eggs_laid_sim_df, Eggs_df)
 
 Egg_comp_df <- Egg_comp_df %>%
   group_by(type)%>%
-  mutate(Relative_eggs = Eggs/max(Eggs, na.rm = T))%>%
+  mutate(relative_eggs = eggs/max(eggs, na.rm = T))%>%
   ungroup()
 
-ggplot(data = Egg_comp_df, aes(x = DOY, y = Relative_eggs, color = type))+
+ggplot(data = Egg_comp_df, aes(x = DOS, y = relative_eggs, color = type))+
   geom_line()+
   geom_point()
              
