@@ -48,8 +48,15 @@ d = t_s:t_end
 #Getting T and P and Eggs from Arpae (see ReadNc+ARPAE) + nc by Cyril
 
 load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData")
-temp <- W_tot_df$T_av
-prec <- W_tot_df$P
+
+# chose a region and a year
+
+W_df <- W_tot_df %>%
+  filter(region == "BOLOGNA") %>%
+  filter(year == 2018)
+
+temp <- W_df$T_av
+prec <- W_df$P
 
 # p cumulated over 2 weeks and normalized between 0 and 1 (over a year?)
 p_cumm = sapply(1:length(prec), function(x){return(sum(prec[max(1,x-13):x]))})
@@ -175,7 +182,11 @@ Eggs_laid_sim_df <- data.frame(DOY = Sim$t[1:t_end],
 
 #plot
 
-Egg_comp_df <- rbind(Eggs_laid_sim_df, Eggs_Bologna_2012_df)
+Eggs_df <- Eggs_tot_df %>%
+  filter(region == "BOLOGNA") %>%
+  filter(year == 2018)
+
+Egg_comp_df <- rbind(Eggs_laid_sim_df, Eggs_df)
 
 Egg_comp_df <- Egg_comp_df %>%
   group_by(type)%>%
