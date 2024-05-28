@@ -35,21 +35,21 @@ t_end = 366*1
 
 # T and P
 d = t_s:t_end
-temp = 15 - 13*cos(d/365*2*pi); # temperatura sinusoidale, min 1 gen = 2 gradi, max 1 lug = 28
-prec = temp*rep(c(0,0,0,1), length.out = (t_end-t_s+1)) # piove ogni 4 giorni con questa forma strana
-
-#Getting T and P from Agroclim Climatik (Montpellier)
-library(readxl)
-W <- read_excel("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Agroclim/T_P_Montpellier_2000_2023_INRAE_STATION_34172005.xls", range = "A10:F8776")
-
-temp = W$TM[7306 - 1 + d] # lets start from 1/1/2020
-prec = W$RR[7306 - 1 + d] 
+# temp = 15 - 13*cos(d/365*2*pi); # temperatura sinusoidale, min 1 gen = 2 gradi, max 1 lug = 28
+# prec = temp*rep(c(0,0,0,1), length.out = (t_end-t_s+1)) # piove ogni 4 giorni con questa forma strana
+# 
+# #Getting T and P from Agroclim Climatik (Montpellier)
+# library(readxl)
+# W <- read_excel("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Agroclim/T_P_Montpellier_2000_2023_INRAE_STATION_34172005.xls", range = "A10:F8776")
+# 
+# temp = W$TM[7306 - 1 + d] # lets start from 1/1/2020
+# prec = W$RR[7306 - 1 + d] 
 
 #Getting T and P and Eggs from Arpae (see ReadNc+ARPAE) + nc by Cyril
 
-load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Bologna_2012.RData")
-temp <- obs_Bologna_2012_df$T_av
-prec <- obs_Bologna_2012_df$P
+load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData")
+temp <- W_tot_df$T_av
+prec <- W_tot_df$P
 
 # p cumulated over 2 weeks and normalized between 0 and 1 (over a year?)
 p_cumm = sapply(1:length(prec), function(x){return(sum(prec[max(1,x-13):x]))})
