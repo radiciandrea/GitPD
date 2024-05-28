@@ -44,4 +44,6 @@ time_df <- W_tot_df%>%
 
 plot(W_tot_df$DOS, W_tot_df$T_av)
 
+plot(W_tot_df$DOS, W_tot_df$P)
+
 save(W_tot_df, time_df, file =  "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Weather_Nice_200811.RData")
