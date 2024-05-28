@@ -29,7 +29,7 @@ load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Dottorato/Codice/07_METAPOP
 time <- which(year %in% 2008:2011)
 cell <- 330
 
-W_tot_df <- data.frame(region = "Nice",
+W_tot_df <- data.frame(region = "NICE",
                    year = year[time],
                    DOY = jd[time],
                    date = NA,
