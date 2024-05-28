@@ -30,11 +30,6 @@ TDD_Ag = 77 # Total number of degree-days necessary for egg maturation (°C)
 t_s_diap = 31+28+10 # Start of the favorable season - 10 Mar (for diapause)
 t_end_diap = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept (for diapause)
 
-t_s = 1 # simulate multiple year
-t_end = 366*1
-
-# T and P
-d = t_s:t_end
 # temp = 15 - 13*cos(d/365*2*pi); # temperatura sinusoidale, min 1 gen = 2 gradi, max 1 lug = 28
 # prec = temp*rep(c(0,0,0,1), length.out = (t_end-t_s+1)) # piove ogni 4 giorni con questa forma strana
 # 
@@ -49,14 +44,21 @@ d = t_s:t_end
 
 load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData")
 
-# chose a region and a year
+# chose a region and years
+region_x = "BOLOGNA"
+year_x = 2011:2021
 
 W_df <- W_tot_df %>%
-  filter(region == "BOLOGNA") %>%
-  filter(year == 2018)
+  filter(region == region_x) %>%
+  filter(year %in% year_x )
 
 temp <- W_df$T_av
 prec <- W_df$P
+
+# T and P
+t_s = W_df$DOS[1] # simulate multiple year
+t_end = tail(W_df$DOS, n = 1)
+d = t_s:t_end
 
 # p cumulated over 2 weeks and normalized between 0 and 1 (over a year?)
 p_cumm = sapply(1:length(prec), function(x){return(sum(prec[max(1,x-13):x]))})
@@ -184,7 +186,10 @@ Eggs_laid_sim_df <- data.frame(DOY = Sim$t[1:t_end],
 
 Eggs_df <- Eggs_tot_df %>%
   filter(region == "BOLOGNA") %>%
-  filter(year == 2018)
+  filter(year == 2018) %>%
+  select("eggs", "type")
+
+Eggs_df$
 
 Egg_comp_df <- rbind(Eggs_laid_sim_df, Eggs_df)
 
