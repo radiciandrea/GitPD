@@ -203,4 +203,6 @@ ggplot(data = Egg_comp_df, aes(x = DOS, y = relative_eggs, color = type))+
   geom_line()+
   geom_point()
              
-             
+ggplot(data = Eggs_laid_sim_df, aes(x = DOS, y = eggs, color = type))+
+  geom_line()+
+  geom_point()
