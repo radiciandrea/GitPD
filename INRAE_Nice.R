@@ -21,7 +21,7 @@ read.csv("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/MeteoFran
 # Climate data store, Copernicus
 
 # SICLIMA
-
+library(dplyr)
 load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Dottorato/Codice/07_METAPOP_model/Data SICLIMA/tas_tasmin_pr_1980_2021.RData")
 
 # Nice 2008 2011
@@ -38,3 +38,10 @@ W_tot_df <- data.frame(region = "Nice",
 
 W_tot_df$DOS = 1:nrow(W_tot_df)
 W_tot_df$date = as.Date(W_tot_df$DOS, origin = "2007-12-31")
+
+time_df <- W_tot_df%>%
+  select(c("DOS", "DOY", "date"))
+
+plot(W_tot_df$DOS, W_tot_df$T_av)
+
+save(W_tot_df, time_df, file =  "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Weather_Nice_200811.RData")
