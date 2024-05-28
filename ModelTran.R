@@ -86,9 +86,9 @@ m_A = pmax(mu_A, 0.04417 + 0.00217*temp) # Adult mortality rate (day−1)
 k_L = K_L*(p_cumm_norm+1) # Environment carrying capacity of larvae (ha−1)
 k_P = K_P*(p_cumm_norm+1) # Environment carrying capacity of pupae (ha−1)
 
-# Warning: this should be corrected by the Area. Here we make the Hp A = 100 ha
-k_L = k_L*100
-k_P = k_P*100
+# Warning: this should be corrected by the Area. Here we make the Hp A = 500 ha
+k_L = k_L*500
+k_P = k_P*500
 
 # this has a 1-day error on odd years (not cumulative)
 z = 1*(doy > t_s_diap)*(doy < t_end_diap) #or d %% 365
@@ -175,10 +175,19 @@ Sim <- as.data.frame(ode(X_0, d, df, parms))
 #plot
 colnames(Sim) = c("t", "E", "L", "P", "A_em", "A_1h",
                   "A_1g", "A_1o", "A_2h", "A_2g", "A_2o")
-Sim_m = reshape2::melt(Sim, id = 't')
 
-ggplot(Sim_m, aes(x = t, y = value, color = variable))+
-  geom_point()
+Sim_A = Sim %>%
+  select(c("t", "A_em", "A_1h", "A_1g", "A_1o", "A_2h", "A_2g", "A_2o"))
+
+Sim_m = reshape2::melt(Sim, id = 't')
+Sim_A_m = reshape2::melt(Sim_A, id = 't')
+
+# ggplot(Sim_m, aes(x = t, y = value, color = variable))+
+#   geom_point()
+
+ggplot(Sim_A_m, aes(x = t, y = value, color = variable))+
+  geom_line()
+
 
 #Simulated eggs (eq 4)
 
