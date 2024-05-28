@@ -157,7 +157,7 @@ df <- function(t, x, parms) {
 }
 
 # System initialization
-E0 = 10^6*S # at 1st of January
+E0 = 10^6 # at 1st of January
 L0 = 0
 P0 = 0
 A_em0 = 0
