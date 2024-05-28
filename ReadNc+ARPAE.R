@@ -23,7 +23,7 @@ time_end <- ncvar_get(data_ER_nc, attributes(data_ER_nc$var)$names[9])
 
 # day 0: 1/1/2000. 4018 days to 1/1/2011; 4383 to 1/1/2012...
 
-# consider Bologna 2012
+# consider ALL REGIONS IN THE SAME DATAFRAME
 
 # Eggs_Bologna_2011_df = data.frame(DOY = time_start[1:(which(week==1)[1]-1)] -  (time_start[1]-week[1]*7),
 #                               Eggs = number_eggs[1:(which(week==1)[1]-1),1]) 
@@ -42,6 +42,8 @@ Eggs_Bologna_2012_df$type = "observed"
 # Ravenna 01983
 # Reggio Emilia 00977
 # Rimini 02191
+
+region_codes = c("01421", "01573", "01948", "01138", "00774", "00369", "01983", "00977", "02191")
 
 W <- read.csv(unz("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/01421_2012 ERG5.zip", "01421_2012_d.csv"))              
 
