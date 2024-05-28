@@ -59,6 +59,7 @@ prec <- W_df$P
 t_s = W_df$DOS[1] # simulate multiple year
 t_end = tail(W_df$DOS, n = 1)
 d = t_s:t_end
+doy = W_df$DOY
 
 # p cumulated over 2 weeks and normalized between 0 and 1 (over a year?)
 p_cumm = sapply(1:length(prec), function(x){return(sum(prec[max(1,x-13):x]))})
@@ -87,7 +88,8 @@ k_P = K_P*(p_cumm_norm+1) # Environment carrying capacity of pupae (ha−1)
 k_L = k_L*100
 k_P = k_P*100
 
-z = 1*(d %% 365 > t_s_diap)*(d %% 365 < t_end_diap)
+# this has a 1-day error on odd years (not cumulative)
+z = 1*(doy > t_s_diap)*(doy < t_end_diap) #or d %% 365
 
 n_s = 1 # number of locations (added; 1 for no dimension)
 
