@@ -86,9 +86,10 @@ m_A = pmax(mu_A, 0.04417 + 0.00217*temp) # Adult mortality rate (day−1)
 k_L = K_L*(p_cumm_norm+1) # Environment carrying capacity of larvae (ha−1)
 k_P = K_P*(p_cumm_norm+1) # Environment carrying capacity of pupae (ha−1)
 
-# Warning: this should be corrected by the Area. Here we make the Hp A = 500 ha
-k_L = k_L*500
-k_P = k_P*500
+# Warning: this should be corrected by the Area (S). Here we make the Hp A = 500 ha
+S = 500 #ha
+k_L = k_L*S
+k_P = k_P*S
 
 # this has a 1-day error on odd years (not cumulative)
 z = 1*(doy > t_s_diap)*(doy < t_end_diap) #or d %% 365
@@ -156,7 +157,7 @@ df <- function(t, x, parms) {
 }
 
 # System initialization
-E0 = 10^6 # at 1st of January
+E0 = 10^6*S # at 1st of January
 L0 = 0
 P0 = 0
 A_em0 = 0
