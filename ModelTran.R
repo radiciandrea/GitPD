@@ -157,7 +157,7 @@ df <- function(t, x, parms) {
 }
 
 # System initialization
-E0 = 10^6 # at 1st of January
+E0 = 8*10^7 # at 1st of January (10^6) # 8*10^7 by looking fig 3b
 L0 = 0
 P0 = 0
 A_em0 = 0
@@ -183,8 +183,8 @@ Sim_A = Sim %>%
 Sim_m = reshape2::melt(Sim, id = 't')
 Sim_A_m = reshape2::melt(Sim_A, id = 't')
 
-# ggplot(Sim_m, aes(x = t, y = value, color = variable))+
-#   geom_point()
+ggplot(Sim_m, aes(x = t, y = value, color = variable))+
+  geom_line()
 
 ggplot(Sim_A_m, aes(x = t, y = value, color = variable))+
   geom_line()
