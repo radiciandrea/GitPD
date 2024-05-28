@@ -46,7 +46,8 @@ Eggs_Bologna_2012_df$type = "observed"
 region_codes = c("01421", "01573", "01948", "01138", "00774", "00369", "01983", "00977", "02191")
 years = 2011:2021
 
-W_tot <- as.data.frame(matrix(ncol = 6, nrow = 4018*9)) # weather from all the cities
+W_tot_df <- as.data.frame(matrix(ncol = 6, nrow = 4018*9)) # weather from all the cities
+names(W_tot_df) <- c("region", "year", "DOY", "date", "P",  "T_av")
 
 k1 = 0 # counter
 
@@ -55,7 +56,7 @@ for(region in region_codes) {
     W <- read.csv(unz(paste0("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/",region,"_",year,".zip"),
                               paste0(region, "_", year, "_d.csv")))              
     
-    W_df <- data.frame(city = region_names[which(region_codes == region)],
+    W_df <- data.frame(region = region_names[which(region_codes == region)],
                        year = year,
                        DOY = nrow(W),
                        date = W$PragaDate,
@@ -63,7 +64,7 @@ for(region in region_codes) {
                        T_av = W$DAILY_TAVG)
     
     k2 = k1 + nrow(W)
-    W_tot[(k1+1):k2, ] = W_df
+    W_tot_df[(k1+1):k2, ] = W_df
     k1 = k2
   }
 }
@@ -71,5 +72,5 @@ for(region in region_codes) {
 
 
 
-save(Eggs_Bologna_2012_df, obs_Bologna_2012_df, file =  "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Bologna_2012.RData")
+save(Eggs_Bologna_2012_df, W_tot_df, file =  "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Bologna_2012.RData")
 
