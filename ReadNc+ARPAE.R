@@ -48,22 +48,22 @@ years = 2011:2021
 
 W_tot <- as.data.frame(matrix(ncol = 6, nrow = 4018*9)) # weather from all the cities
 
-k1 = 1 # counter
+k1 = 0 # counter
 
 for(region in region_codes) {
   for(year in years){
     W <- read.csv(unz(paste0("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/ArpAE/",region,"_",year,".zip"),
                               paste0(region, "_", year, "_d.csv")))              
     
-    W_df <- data.frame(city = "Bologna",
-                       year = "2012",
-                       DOY = nrows(W),
+    W_df <- data.frame(city = region_names[which(region_codes == region)],
+                       year = year,
+                       DOY = nrow(W),
                        date = W$PragaDate,
                        P = W$DAILY_PREC,
                        T_av = W$DAILY_TAVG)
     
-    k2 = k1 + nrows(W)
-    W_tot[(k1-1):k2, ] = W_df
+    k2 = k1 + nrow(W)
+    W_tot[(k1+1):k2, ] = W_df
     k1 = k2
   }
 }
