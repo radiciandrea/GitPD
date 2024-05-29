@@ -37,4 +37,11 @@ doy = W_df$DOY
 #elaborate temp and prec
 temp_7 = sapply(1:length(temp), function(x){return(mean(temp[max(1,x-7):x]))}) # temp of precedent 7 days
 
+#photoperiod (which variables should I take? sunrise - sunset)
+SunTimes_df<- getSunlightTimes(as.Date(W_df$date), lat= 44.5, lon = 11.5)# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
+W_df$Ph_P= as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
 
+#parameters (Metelmann 2019)
+
+CTT_s = 11 #critical temperature over one week in spring (°C )
+CPP_s = 11.25 #critical photoperiod
