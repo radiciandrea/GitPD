@@ -14,7 +14,7 @@ beta_2 = 75 # Number of eggs laid by ovipositing parous females (per female)
 K_L = 250000 # Standard environment carrying capacity for larvae (larvae ha−1)
 K_P = 250000 # Standard environment carrying capacity for pupae (pupae ha−1)
 sigma = 0.5 # Sex-ratio at the emergence
-mu_E = 0.05 # 0.05 # Egg mortality rate (day−1) [0.01 in AedesRisk]
+mu_E = 0.01 # 0.05 # Egg mortality rate (day−1) [0.01 in AedesRisk]
 mu_L = 0.08 # Minimum larva mortality rate (day−1)
 mu_P = 0.03 # Minimum pupa mortality rate (day−1)
 mu_em = 0.1 # Mortality rate during adult emergence (day−1)
@@ -42,12 +42,12 @@ t_end_diap = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept 
 
 #Getting T and P and Eggs from Arpae (see ReadNc+ARPAE) + nc by Cyril
 
-load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Weather_Nice_200811.RData") #Nizza
-# load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData") #Emilia Romagna
+# load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Weather_Nice_200811.RData") #Nizza
+load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData") #Emilia Romagna
 
 # chose a region and years
-region_x = "NICE" # "BOLOGNA" "PIACENZA
-year_x = 2008:2011 #2011:2021
+region_x = "BOLOGNA" # "BOLOGNA" "PIACENZA
+year_x = 2011:2021 #2011:2021  2008:2011 for Nice
 
 W_df <- W_tot_df %>%
   filter(region == region_x) %>%
@@ -59,7 +59,7 @@ prec <- W_df$P
 # T and P
 t_s = W_df$DOS[1] # simulate multiple year
 t_end = tail(W_df$DOS, n = 1)
-t_end = 365
+# t_end = 365
 d = t_s:t_end
 doy = W_df$DOY
 
@@ -84,10 +84,10 @@ m_L = exp(-temp/0.5) + mu_L # Larva mortality (day−1)
 m_P = exp(-temp/0.5) + mu_P # Pupa mortality rate (day−1)
 m_A = pmax(mu_A, 0.04417 + 0.00217*temp) # Adult mortality rate (day−1)
 
-#mortalities expressed as in arbocarto
-m_L1 = 0.007*exp(0.1838*(temp-10))+0.02
-m_P1 = 0.003*exp(0.2228*(temp-10))+0.02
-m_A1 = 0.003*exp(0.1745*(temp-10))+0.025
+# #mortalities expressed as in arbocarto
+# m_L = 0.007*exp(0.1838*(temp-10))+0.02
+# m_P = 0.003*exp(0.2228*(temp-10))+0.02
+# m_A = 0.003*exp(0.1745*(temp-10))+0.025
 
 k_L = K_L*(p_cumm_norm+1) # Environment carrying capacity of larvae (ha−1)
 k_P = K_P*(p_cumm_norm+1) # Environment carrying capacity of pupae (ha−1)
@@ -163,7 +163,7 @@ df <- function(t, x, parms) {
 }
 
 # System initialization
-E0 = 8*10^7 # at 1st of January (10^6) # 8*10^7 by looking fig 3b
+E0 = 10^6 # at 1st of January (10^6) # 8*10^7 by looking fig 3b
 L0 = 0
 P0 = 0
 A_em0 = 0
