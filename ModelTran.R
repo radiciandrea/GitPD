@@ -14,17 +14,17 @@ beta_2 = 75 # Number of eggs laid by ovipositing parous females (per female)
 K_L = 250000 # Standard environment carrying capacity for larvae (larvae ha−1)
 K_P = 250000 # Standard environment carrying capacity for pupae (pupae ha−1)
 sigma = 0.5 # Sex-ratio at the emergence
-mu_E = 0.05 # Egg mortality rate (day−1)
+mu_E = 0.05 # 0.05 # Egg mortality rate (day−1) [0.01 in AedesRisk]
 mu_L = 0.08 # Minimum larva mortality rate (day−1)
 mu_P = 0.03 # Minimum pupa mortality rate (day−1)
 mu_em = 0.1 # Mortality rate during adult emergence (day−1)
 mu_A = 0.02 # Minimum adult mortality rate (day−1)
 mu_r = 0.08 # Adult mortality rate related to seeking behavior (day−1)
-T_E = 10.4 # Minimal temperature needed for egg development (°C)
+T_E = 10.4 # Minimal temperature needed for egg development (°C) [10 in arbocartoR]
 TDD_E = 110 # Total number of degree-day necessary for egg development (°C)
 gamma_Aem = 0.4 # Development rate of emerging adults (day−1)
-gamma_Ah = 0.2 # Transition rate from host-seeking to engorged adults (day−1)
-gamma_Ao = 0.2 # Transition rate from oviposition site-seeking to host-seeking adults (day−1)
+gamma_Ah = 0.2 #0.2 # Transition rate from host-seeking to engorged adults (day−1) [0.3 su arbocartoR]
+gamma_Ao = 0.2 #0.2 # Transition rate from oviposition site-seeking to host-seeking adults (day−1) [0.28 su arbocartoR]
 T_Ag = 10 # Minimal temperature needed for egg maturation (°C)
 TDD_Ag = 77 # Total number of degree-days necessary for egg maturation (°C)
 t_s_diap = 31+28+10 # Start of the favorable season - 10 Mar (for diapause)
@@ -83,6 +83,12 @@ f_Ag = (temp-T_Ag)/TDD_Ag *(temp-T_Ag>0) # Transition function from engorged adu
 m_L = exp(-temp/0.5) + mu_L # Larva mortality (day−1)
 m_P = exp(-temp/0.5) + mu_P # Pupa mortality rate (day−1)
 m_A = pmax(mu_A, 0.04417 + 0.00217*temp) # Adult mortality rate (day−1)
+
+#mortalities expressed as in arbocarto
+m_L1 = 0.007*exp(0.1838*(temp-10))+0.02
+m_P1 = 0.003*exp(0.2228*(temp-10))+0.02
+m_A1 = 0.003*exp(0.1745*(temp-10))+0.025
+
 k_L = K_L*(p_cumm_norm+1) # Environment carrying capacity of larvae (ha−1)
 k_P = K_P*(p_cumm_norm+1) # Environment carrying capacity of pupae (ha−1)
 
