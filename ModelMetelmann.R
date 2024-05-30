@@ -70,7 +70,7 @@ H = 3000 #human population density per km²  #NICE = 4,840/km² #BOLOGNA = 2,772
 alpha_evap = 0.9
 alpha_dens = 0.001
 alpha_rain = 0.00001
-K = lambda * (1-alpha_evap)/(1 - al^ha_evap[d])*sum( alpha_evap[1:d])*(alpha_rain*prec + alpha_dens*H)
+K = lambda * (1-alpha_evap)/(1 - alpha_evap[d])*sum( alpha_evap[1:d])*(alpha_rain*prec + alpha_dens*H)
 
 # advanced parameter for hatching
 eps_rat = 0.2
@@ -83,3 +83,47 @@ eps_fac = 0.01
 h = (1-eps_rat)*(1+eps_0)*exp(-epsvar*(prec-eps_opt)^2)/
   (exp(-epsvar*(prec-eps_opt)^2)+ eps_0) +
   eps_rat*eps_dens/(eps_dens + exp(-eps_fac*H))
+
+n_s = 1 # number of locations (added; 1 for no dimension)
+
+# list with parameters to be passed to the ODE system
+parms = list() 
+
+df <- function(t, x, parms) {
+  
+  # initial conditions and paramters
+  with(parms, { 
+    
+    E = x[(1+n_s*0):(1*n_s)]
+    J = x[(1+n_s*1):(2*n_s)]
+    I = x[(1+n_s*2):(3*n_s)]
+    A = x[(1+n_s*3):(4*n_s)]
+    E_d = x[(1+n_s*4):(5*n_s)]
+    
+    t_n = t[1]-t_s+1 # time of numerical integration
+    
+    # ODE definition 
+    dE = beta[t_n]*(1-omega[t_n])*A - (h[t_n]*delta_E - mu_E)*E
+    dJ = h[t_n]*(delta_E*E + sigma*gamma*E_d) - (delta_J + mu_J + J/K)*J  
+    dI = 0.5*delta_J*J - (delta_I + mu_A)*I
+    dA = delta_I*I - mu_A*A
+    dE_d = beta[t_n]*omega[t_n]*A -  h[t_n]*sigma*gamma*E_d #I believe there should be an additional mortality due to winter
+
+    
+    dx <- c(dE, dJ, dI, dA, dE_d)
+    
+    return(list(dx))})
+}
+
+# System initialization
+E0 = 0
+J0 = 0
+I0 = 0
+A0 = 0
+E_d_0 = 10^6 # at 1st of January (10^6)
+
+
+X_0 = c(E0, J0, I0, A0, E_d_0)
+
+#integration
+Sim <- as.data.frame(ode(X_0, d, df, parms))
