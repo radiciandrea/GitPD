@@ -33,6 +33,8 @@ t_s = W_df$DOS[1] # simulate multiple year
 t_end = tail(W_df$DOS, n = 1)
 t_end = 365*2
 d = t_s:t_end
+W_df <- W_df %>%
+  filter(DOS %in% d)
 doy = W_df$DOY
 
 #elaborate temp and prec
