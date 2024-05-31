@@ -100,7 +100,8 @@ parms = list(beta = beta,
              delta_J = delta_J,
              delta_I = delta_I,
              sigma = sigma,
-             gamma = gamma) 
+             gamma = gamma,
+             t_s = t_s) 
 
 df <- function(t, x, parms) {
   
@@ -139,4 +140,3 @@ X_0 = c(E0, J0, I0, A0, E_d_0)
 
 #integration
 Sim <- as.data.frame(ode(X_0, d, df, parms))
-
