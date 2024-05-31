@@ -140,3 +140,41 @@ X_0 = c(E0, J0, I0, A0, E_d_0)
 
 #integration
 Sim <- as.data.frame(ode(X_0, d, df, parms))
+
+#plot
+colnames(Sim) = c("t", "E", "J", "I", "A", "E_d")
+
+Sim_m = reshape2::melt(Sim, id = 't')
+
+
+ggplot(Sim_m, aes(x = t, y = value, color = variable))+
+  geom_line()
+
+
+#Simulated eggs (eq 4 Tran et al 2013)
+
+Eggs_laid_sim_df <- data.frame(DOS = Sim$t[d-t_s+1],
+                               eggs = beta[d]*Sim$A[d-t_s+1], #"all eggs, diapaused or not"
+                               type = "laid, simulated")
+
+#plot
+
+Eggs_df <- Eggs_tot_df %>%
+  filter(region == region_x) %>%
+  filter(DOS %in% Sim$t[d-t_s+1]) %>%
+  select("DOS", "eggs", "type")
+
+Egg_comp_df <- rbind(Eggs_laid_sim_df, Eggs_df)
+
+Egg_comp_df <- Egg_comp_df %>%
+  group_by(type)%>%
+  mutate(relative_eggs = eggs/max(eggs, na.rm = T))%>%
+  ungroup()
+
+ggplot(data = Egg_comp_df, aes(x = DOS, y = relative_eggs, color = type))+
+  geom_line()+
+  geom_point()
+
+ggplot(data = Eggs_laid_sim_df, aes(x = DOS, y = eggs, color = type))+
+  geom_line()+
+  geom_point()
