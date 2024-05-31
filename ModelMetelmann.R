@@ -116,8 +116,8 @@ df <- function(t, x, parms) {
     t_n = t[1]-t_s+1 # time of numerical integration
     
     # ODE definition 
-    dE = beta[t_n]*(1-omega[t_n])*A - (h[t_n]*delta_E[t_n] - mu_E[t_n])*E
-    dJ = h[t_n]*(delta_E[t_n]*E + sigma[t_n]*gamma[t_n]*E_d) - (delta_J[t_n] + mu_J[t_n] + J/K[t_n])*J  
+    dE = beta[t_n]*(1-omega[t_n])*A - (h[t_n]*delta_E - mu_E[t_n])*E
+    dJ = h[t_n]*(delta_E*E + sigma[t_n]*gamma[t_n]*E_d) - (delta_J[t_n] + mu_J[t_n] + J/K[t_n])*J  
     dI = 0.5*delta_J[t_n]*J - (delta_I[t_n] + mu_A[t_n])*I
     dA = delta_I[t_n]*I - mu_A[t_n]*A
     dE_d = beta[t_n]*omega[t_n]*A -  h[t_n]*sigma[t_n]*gamma[t_n]*E_d #I believe there should be an additional mortality due to winter
