@@ -129,14 +129,14 @@ df <- function(t, x, parms) {
 }
 
 # System initialization
-E0 = 100
+E0 = 0
 J0 = 0
 I0 = 0
 A0 = 0
-E_d_0 = 0 # at 1st of January (10^6)
-
+E_d_0 = 10^6 # at 1st of January (10^6)
 
 X_0 = c(E0, J0, I0, A0, E_d_0)
 
 #integration
 Sim <- as.data.frame(ode(X_0, d, df, parms))
+
