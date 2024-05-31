@@ -208,7 +208,16 @@ Eggs_df <- Eggs_tot_df %>%
   filter(region == region_x) %>%
   select("DOS", "eggs", "type")
 
-Egg_comp_df <- rbind(Eggs_laid_sim_df, Eggs_df)
+# cumulate eggs over 2 weeks
+
+Eggs_laid_sim_cum_df <-Eggs_laid_sim_df %>%
+  mutate(type = "laid, simulated, cumulated") %>%
+  filter(DOS %in% Eggs_df$DOS)
+
+#if observatios every two weeks
+Eggs_laid_sim_cum_df$eggs <- sapply(Eggs_df$DOS, function(x){return(sum(Eggs_laid_sim_df$eggs[(x-13):x]))}) 
+
+Egg_comp_df <- rbind(Eggs_laid_sim_df, Eggs_df, Eggs_laid_sim_cum_df)
 
 Egg_comp_df <- Egg_comp_df %>%
   group_by(type)%>%
