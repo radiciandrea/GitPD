@@ -72,9 +72,6 @@ alpha_evap = 0.9
 alpha_dens = 0.001
 alpha_rain = 0.00001
 
-arg1 = alpha_rain*prec[1:x] + alpha_dens*H
-summ = sum(alpha_evap^(x:1) * arg1[1:x])
-
 K = lambda * (1-alpha_evap)/(1 - alpha_evap^d)*
   sapply(d, function(x){return(sum(alpha_evap^(x:1) * (alpha_rain*prec[1:x] + alpha_dens*H)))})
 
