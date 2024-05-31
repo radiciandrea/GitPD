@@ -31,7 +31,7 @@ prec <- W_df$P
 
 t_s = W_df$DOS[1] # simulate multiple year
 t_end = tail(W_df$DOS, n = 1)
-t_end = 10
+t_end = 365*3
 d = t_s:t_end
 doy = W_df$DOY
 
@@ -57,12 +57,14 @@ CPP_a = 10.058 + 0.08965 * L # critical photperiod in autumn
 sigma = 0.1 *(temp_7 > CTT_s)*(Ph_P > CPP_s) # spring hatching rate (1/day)
 omega = 0.5 *(Ph_P < CPP_a)*(doy > 183) # fraction of eggs going into diapause
 delta_E = 1/7.1 #normal egg development rate (1/day)
-delta_J = 1/(83.85 - 4.89*temp_h + 0.08*temp_h^2) #juvenile development rate 
+delta_J = 1/(83.85 - 4.89*temp_h + 0.08*temp_h^2) #juvenile development rate (in SI: 82.42 - 4.87*temp_h + 0.08*temp_h^ 2)
 delta_I = 1/(50.1 - 3.574*temp_h + 0.069*temp_h^2) #first pre blood mean rate
 mu_E = -log(0.955 * exp(-0.5*((temp_h-18.8)/21.53)^6)) # egg mortality rate
 mu_J = -log(0.977 * exp(-0.5*((temp_h-21.8)/16.6)^6)) # juvenile mortality rate
 mu_A = -log(0.677 * exp(-0.5*((temp-20.9)/13.2)^6)*temp^0.1) # adult mortality rate
-gamma = 0.93*exp(-0.5*((temp_min_DJF -20.9)/15.67)^6) #survival probability of diapausing eggs (1:/inter) #at DOY = 10?
+mu_A[which(is.na(mu_A))] = -log(0.677 * exp(-0.5*((temp-20.9)/13.2)^6)) #correct the problems due to negative values from SI
+
+gamma = 0.93*exp(-0.5*((temp_min_DJF -11.68)/15.67)^6) #survival probability of diapausing eggs (1:/inter) #at DOY = 10?
 beta = (33.2*exp(-0.5*((temp_h-70.3)/14.1)^2)*(38.8 - temp_h)^1.5)*(temp_h<= 38.8) #fertility rate 
 lambda = 10^6 # capacity parameter (larvae/day/ha)
 
@@ -72,8 +74,11 @@ alpha_evap = 0.9
 alpha_dens = 0.001
 alpha_rain = 0.00001
 
+# K = lambda * (1-alpha_evap)/(1 - alpha_evap^d)*
+#   sapply(d, function(x){return(sum(alpha_evap^(x:1) * (alpha_rain*prec[1:x] + alpha_dens*H)))})
+
 K = lambda * (1-alpha_evap)/(1 - alpha_evap^d)*
-  sapply(d, function(x){return(sum(alpha_evap^(x:1) * (alpha_rain*prec[1:x] + alpha_dens*H)))})
+  sapply(d, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec[1:x] + alpha_rain*H)))}) # how it looks like from code
 
 # advanced parameter for hatching
 eps_rat = 0.2
@@ -121,8 +126,7 @@ df <- function(t, x, parms) {
     dJ = h[t_n]*(delta_E*E + sigma[t_n]*gamma[t_n]*E_d) - (delta_J[t_n] + mu_J[t_n] + J/K[t_n])*J  
     dI = 0.5*delta_J[t_n]*J - (delta_I[t_n] + mu_A[t_n])*I
     dA = delta_I[t_n]*I - mu_A[t_n]*A
-    dE_d = beta[t_n]*omega[t_n]*A -  h[t_n]*sigma[t_n]*gamma[t_n]*E_d #I believe there should be an additional mortality due to winter
-
+    dE_d = beta[t_n]*omega[t_n]*A -  h[t_n]*sigma[t_n]*E_d #I believe there should be an additional mortality due to winter
     
     dx <- c(dE, dJ, dI, dA, dE_d)
     
@@ -146,10 +150,8 @@ colnames(Sim) = c("t", "E", "J", "I", "A", "E_d")
 
 Sim_m = reshape2::melt(Sim, id = 't')
 
-
 ggplot(Sim_m, aes(x = t, y = value, color = variable))+
   geom_line()
-
 
 #Simulated eggs (eq 4 Tran et al 2013)
 
