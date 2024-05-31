@@ -30,8 +30,8 @@ temp <- W_df$T_av
 prec <- W_df$P
 
 t_s = W_df$DOS[1] # simulate multiple year
-t_end = tail(W_df$DOS, n = 1)
-t_end = 365*2
+# t_end = tail(W_df$DOS, n = 1)
+t_end = 365*3.5
 d = t_s:t_end
 W_df <- W_df %>%
   filter(DOS %in% d)
@@ -157,10 +157,10 @@ n_y = length(unique(W_df$year)) # number of years
 
 for(y in 1:(n_y-1)){
   t_x = max(d_i)
-  E_d_i = Sim_i$E_d[t_x]# last eggs
+  E_d_i = Sim_i$E_d[nrow(Sim_i)]# last eggs
   gamma_i = gamma[t_x] #
   X_0 = c(0, 0, 0, 0, E_d_i*gamma_i)
-  d_i = d[which(d == max(d_i))+1]:min(max(d), d[which(W_df$DOY==32)[2+y]], na.rm = T) #from current 1st of February to the next, if possible
+  d_i = d[which(d == max(d_i))]:min(max(d), d[which(W_df$DOY==3)[2+y]], na.rm = T)+1 #from current 1st of February to the next, if possible
   Sim_i <- as.data.frame(ode(X_0, d_i, df, parms))
   colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d")
   Sim = rbind(Sim, Sim_i)
