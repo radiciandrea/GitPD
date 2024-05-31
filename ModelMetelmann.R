@@ -144,11 +144,30 @@ E_d_0 = 10^6 # at 1st of January (10^6)
 
 X_0 = c(E0, J0, I0, A0, E_d_0)
 
-#integration
-Sim <- as.data.frame(ode(X_0, d, df, parms))
+# #integration
+# Sim <- as.data.frame(ode(X_0, d, df, parms))
+
+#integration on multiple years #updated at each february
+d_i = d[W_df$year == W_df$year[1]]
+d_i = c(d_i, max(d_i)+ 1:31) #first simulation is computed until until 1st of February of second year, DOY =32
+Sim_i <- as.data.frame(ode(X_0, d_i, df, parms))
+colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d")
+Sim = Sim_i
+n_y = length(unique(W_df$year)) # number of years
+
+for(y in 1:(n_y-1)){
+  t_x = max(d_i)
+  E_d_i = Sim_i$E_d[t_x]# last eggs
+  gamma_i = gamma[t_x] #
+  X_0 = c(0, 0, 0, 0, E_d_i*gamma_i)
+  d_i = d[which(d == max(d_i))+1]:min(max(d), d[which(W_df$DOY==32)[2+y]], na.rm = T) #from current 1st of February to the next, if possible
+  Sim_i <- as.data.frame(ode(X_0, d_i, df, parms))
+  colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d")
+  Sim = rbind(Sim, Sim_i)
+}
+
 
 #plot
-colnames(Sim) = c("t", "E", "J", "I", "A", "E_d")
 
 Sim_m = reshape2::melt(Sim, id = 't')
 
