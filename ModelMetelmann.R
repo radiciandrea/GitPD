@@ -31,7 +31,7 @@ prec <- W_df$P
 
 t_s = W_df$DOS[1] # simulate multiple year
 t_end = tail(W_df$DOS, n = 1)
-t_end = 365*3
+t_end = 365*2
 d = t_s:t_end
 doy = W_df$DOY
 
@@ -166,7 +166,16 @@ Eggs_df <- Eggs_tot_df %>%
   filter(DOS %in% Sim$t[d-t_s+1]) %>%
   select("DOS", "eggs", "type")
 
-Egg_comp_df <- rbind(Eggs_laid_sim_df, Eggs_df)
+# cumulate eggs over 2 weeks
+
+Eggs_laid_sim_cum_df <-Eggs_laid_sim_df %>%
+  mutate(type = "laid, simulated, cumulated") %>%
+  filter(DOS %in% Eggs_df$DOS)
+
+#if observatios every two weeks
+Eggs_laid_sim_cum_df$eggs <- sapply(Eggs_df$DOS, function(x){return(sum(Eggs_laid_sim_df$eggs[(x-13):x]))}) 
+
+Egg_comp_df <- rbind(Eggs_laid_sim_df, Eggs_df, Eggs_laid_sim_cum_df)
 
 Egg_comp_df <- Egg_comp_df %>%
   group_by(type)%>%
