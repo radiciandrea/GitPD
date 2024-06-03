@@ -166,7 +166,10 @@ X_0 = c(E0, J0, I0, A0, E_d_0)
 
 #integration on multiple years #updated at each february
 d_i = d[W_df$year == W_df$year[1]]
-d_i = c(d_i, max(d_i)+ 1:31) #first simulation is computed until until 1st of February of second year, DOY =32
+
+if (max(d)> max(d_i)){
+  d_i = c(d_i, max(d_i)+ 1:min(31, max(d)-max(d_i))) #first simulation is computed until until 1st of February of second year, DOY =32
+}
 Sim_i <- as.data.frame(ode(X_0, d_i, df, parms))
 colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d")
 Sim = Sim_i
