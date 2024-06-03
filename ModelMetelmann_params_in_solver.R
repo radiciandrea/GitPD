@@ -50,8 +50,8 @@ temp_min_DJF = sapply(1:length(temp), function(x){return(min(temp[max(1,x-300):x
 
 #photoperiod Ph_P (which variables should I take? sunrise - sunset)
 SunTimes_df<- getSunlightTimes(as.Date(W_df$date), lat= 44.5, lon = 11.5)# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
-Ph_P= as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
-t_sr = SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2 # time of sunrise: correction needed since time is in UTC
+Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
+t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
 
 #parameters (Metelmann 2019)
 
@@ -123,14 +123,14 @@ df <- function(t, x, parms) {
     E_d = x[(1+n_s*4):(5*n_s)]
     
     t_n = t[1]-t_s+1 # time of numerical integration to index matrix
-    # t_h = t[1] - t_n #shoud put t and not t[1]
-    # ts = t_sr[t_n]
-    # TM = temp_M[max(1,t_n-1)]*(t_h<ts) + temp_M[t_n]*(t_h>ts)
-    # Tm = temp_m[t_n]*(t_h<14) + temp_M[min(t_n+1, length(temp_m))]*(t_h>14)
-    # 
-    # temp_h = ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h+10)/(10+ts)))*(t_h<ts)+
-    #   ((TM+Tm)/2 - (TM-Tm)/2*cos(pi*(t_h-ts)/(14-ts)))*(t_h>ts)*(t<14)+
-    #   ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h-14)/(10+ts)))*(t_h>14)
+    t_h = t - t_n #shoud put t and not t[1]
+    ts = t_sr[t_n]
+    TM = temp_M[max(1,t_n-1)]*(t_h<ts) + temp_M[t_n]*(t_h>ts)
+    Tm = temp_m[t_n]*(t_h<14) + temp_M[min(t_n+1, length(temp_m))]*(t_h>14)
+    
+    temp_h = ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h+10)/(10+ts)))*(t_h<ts)+
+      ((TM+Tm)/2 - (TM-Tm)/2*cos(pi*(t_h-ts)/(14-ts)))*(t_h>ts)*(t<14)+
+      ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h-14)/(10+ts)))*(t_h>14)
     
     temp_h = 20
     
