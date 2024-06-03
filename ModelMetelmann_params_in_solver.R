@@ -123,14 +123,16 @@ df <- function(t, x, parms) {
     E_d = x[(1+n_s*4):(5*n_s)]
     
     t_n = t[1]-t_s+1 # time of numerical integration to index matrix
-    t_h = t - t_n
-    ts = t_sr[t_n]
-    TM = temp_M[max(1,t_n-1)]*(t_h<ts) + temp_M[t_n]*(t_h>ts)
-    Tm = temp_m[t_n]*(t_h<14) + temp_M[min(t_n+1, length(temp_m))]*(t_h>14)
+    # t_h = t[1] - t_n #shoud put t and not t[1]
+    # ts = t_sr[t_n]
+    # TM = temp_M[max(1,t_n-1)]*(t_h<ts) + temp_M[t_n]*(t_h>ts)
+    # Tm = temp_m[t_n]*(t_h<14) + temp_M[min(t_n+1, length(temp_m))]*(t_h>14)
+    # 
+    # temp_h = ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h+10)/(10+ts)))*(t_h<ts)+
+    #   ((TM+Tm)/2 - (TM-Tm)/2*cos(pi*(t_h-ts)/(14-ts)))*(t_h>ts)*(t<14)+
+    #   ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h-14)/(10+ts)))*(t_h>14)
     
-    temp_h = ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h+10)/(10+ts)))*(t_h<ts)+
-      ((TM+Tm)/2 - (TM-Tm)/2*cos(pi*(t_h-ts)/(14-ts)))*(t_h>ts)*(t<14)+
-      ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h-14)/(10+ts)))*(t_h>14)
+    temp_h = 20
     
     delta_J = 1/(83.85 - 4.89*temp_h + 0.08*temp_h^2) #juvenile development rate (in SI: 82.42 - 4.87*temp_h + 0.08*temp_h^ 2)
     delta_I = 1/(50.1 - 3.574*temp_h + 0.069*temp_h^2) #first pre blood mean rate
