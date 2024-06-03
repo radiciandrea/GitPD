@@ -88,7 +88,7 @@ W_tot_df = W_tot_df %>%
 
 time_df <- W_tot_df%>%
   filter(region == region_names[1]) %>%
-  select(c("DOS", "DOY", "date"))
+  dplyr::select(c("DOS", "DOY", "date"))
 
 Eggs_tot_df <- left_join(Eggs_tot_df, time_df, by = "DOS")
 
