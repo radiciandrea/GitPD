@@ -27,6 +27,8 @@ W_df <- W_tot_df %>%
   filter(year %in% year_x )
 
 temp <- W_df$T_av
+temp_M <- W_df$T_M
+tem_min <- W_df$T_m
 prec <- W_df$P
 
 t_s = W_df$DOS[1] # simulate multiple year
@@ -59,10 +61,10 @@ CPP_a = 10.058 + 0.08965 * L # critical photperiod in autumn
 sigma = 0.1 *(temp_7 > CTT_s)*(Ph_P > CPP_s) # spring hatching rate (1/day)
 omega = 0.5 *(Ph_P < CPP_a)*(doy > 183) # fraction of eggs going into diapause
 delta_E = 1/7.1 #normal egg development rate (1/day)
-delta_J = 1/(83.85 - 4.89*temp_h + 0.08*temp_h^2) #juvenile development rate (in SI: 82.42 - 4.87*temp_h + 0.08*temp_h^ 2)
-delta_I = 1/(50.1 - 3.574*temp_h + 0.069*temp_h^2) #first pre blood mean rate
-mu_E = -log(0.955 * exp(-0.5*((temp_h-18.8)/21.53)^6)) # egg mortality rate
-mu_J = -log(0.977 * exp(-0.5*((temp_h-21.8)/16.6)^6)) # juvenile mortality rate
+# delta_J = 1/(83.85 - 4.89*temp_h + 0.08*temp_h^2) #juvenile development rate (in SI: 82.42 - 4.87*temp_h + 0.08*temp_h^ 2)
+# delta_I = 1/(50.1 - 3.574*temp_h + 0.069*temp_h^2) #first pre blood mean rate
+# mu_E = -log(0.955 * exp(-0.5*((temp_h-18.8)/21.53)^6)) # egg mortality rate
+# mu_J = -log(0.977 * exp(-0.5*((temp_h-21.8)/16.6)^6)) # juvenile mortality rate
 mu_A = -log(0.677 * exp(-0.5*((temp-20.9)/13.2)^6)*temp^0.1) # adult mortality rate
 mu_A[which(is.na(mu_A))] = -log(0.677 * exp(-0.5*((temp-20.9)/13.2)^6)) #correct the problems due to negative values from SI
 
@@ -97,18 +99,14 @@ h = (1-eps_rat)*(1+eps_0)*exp(-eps_var*(prec-eps_opt)^2)/
 n_s = 1 # number of locations (added; 1 for no dimension)
 
 # list with parameters to be passed to the ODE system
-parms = list(beta = beta,
-             omega = omega,
+parms = list(omega = omega,
              h = h,
-             mu_E = mu_E,
-             mu_J = mu_J,
              mu_A = mu_A,
              delta_E = delta_E,
-             delta_J = delta_J,
-             delta_I = delta_I,
              sigma = sigma,
              gamma = gamma,
-             t_s = t_s) 
+             t_s = t_s,
+             temp = temp) 
 
 df <- function(t, x, parms) {
   
@@ -122,7 +120,7 @@ df <- function(t, x, parms) {
     E_d = x[(1+n_s*4):(5*n_s)]
     
     t_n = t[1]-t_s+1 # time of numerical integration
-    
+        
     # ODE definition 
     dE = beta[t_n]*(1-omega[t_n])*A - (h[t_n]*delta_E - mu_E[t_n])*E
     dJ = h[t_n]*(delta_E*E + sigma[t_n]*gamma[t_n]*E_d) - (delta_J[t_n] + mu_J[t_n] + J/K[t_n])*J  
