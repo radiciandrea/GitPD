@@ -52,8 +52,8 @@ Eggs_tot_df = data.frame(region = rep(region_names, each = n_t),
 
 region_codes = c("01421", "01573", "01948", "01138", "00774", "00369", "01983", "00977", "02191")
 
-W_tot_df <- as.data.frame(matrix(ncol = 6, nrow = 4018*9)) # weather from all the cities
-names(W_tot_df) <- c("region", "year", "DOS", "date", "P",  "T_av")
+W_tot_df <- as.data.frame(matrix(ncol = 8, nrow = 4018*9)) # weather from all the cities
+names(W_tot_df) <- c("region", "year", "DOS", "date", "P",  "T_av",  "T_M",  "T_m")
 
 # DOS: day of simulation
 k1 = 0 # counter
@@ -69,7 +69,9 @@ for(region in region_codes) {
                        DOS = kd:(kd+nrow(W)-1),
                        date = W$PragaDate,
                        P = W$DAILY_PREC,
-                       T_av = W$DAILY_TAVG)
+                       T_av = W$DAILY_TAVG,
+                       T_M = W$DAILY_TMAX,
+                       T_m = W$DAILY_TMIN)
     
     k2 = k1 + nrow(W)
     W_tot_df[(k1+1):k2, ] = W_df
