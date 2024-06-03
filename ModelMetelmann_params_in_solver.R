@@ -109,7 +109,9 @@ parms = list(omega = omega,
              t_s = t_s,
              temp_M = temp_M,
              temp_m = temp_m,
-             t_sr = t_sr) 
+             t_sr = t_sr,
+             m_d_i = max(d_i) #max sim
+             ) 
 
 df <- function(t, x, parms) {
   
@@ -122,13 +124,27 @@ df <- function(t, x, parms) {
     A = x[(1+n_s*3):(4*n_s)]
     E_d = x[(1+n_s*4):(5*n_s)]
     
-    t_n = t[1]-t_s+1 # time of numerical integration
+    t_n = t[1]-t_s+1 # time of numerical integration to index matrix
+    t_h = t - t_n
+    ts = t_sr[t_n]
+    TM = temp_M[max(1,t_n-1)]*(t_h<ts) + temp_M[t_n]*(t_h>ts)
+    Tm = temp_m[t_n]*(t_h<14) + temp_M[min(t_n+1, m_d_i)]*(t_h>14)
+    
+    temp_h = ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h+10)/(10+ts)))*(t_h<ts)+
+      ((TM+Tm)/2 - (TM-Tm)/2*cos(pi*(t_h-ts)/(14-ts)))*(t_h>ts)*(t<14)+
+      ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h-14)/(10+ts)))*(t_h>14)
+    
+    delta_J = 1/(83.85 - 4.89*temp_h + 0.08*temp_h^2) #juvenile development rate (in SI: 82.42 - 4.87*temp_h + 0.08*temp_h^ 2)
+    delta_I = 1/(50.1 - 3.574*temp_h + 0.069*temp_h^2) #first pre blood mean rate
+    mu_E = -log(0.955 * exp(-0.5*((temp_h-18.8)/21.53)^6)) # egg mortality rate
+    mu_J = -log(0.977 * exp(-0.5*((temp_h-21.8)/16.6)^6)) # juvenile mortality rate
+    
         
     # ODE definition 
-    dE = beta[t_n]*(1-omega[t_n])*A - (h[t_n]*delta_E - mu_E[t_n])*E
-    dJ = h[t_n]*(delta_E*E + sigma[t_n]*gamma[t_n]*E_d) - (delta_J[t_n] + mu_J[t_n] + J/K[t_n])*J  
-    dI = 0.5*delta_J[t_n]*J - (delta_I[t_n] + mu_A[t_n])*I
-    dA = delta_I[t_n]*I - mu_A[t_n]*A
+    dE = beta[t_n]*(1-omega[t_n])*A - (h[t_n]*delta_E - mu_E)*E
+    dJ = h[t_n]*(delta_E*E + sigma[t_n]*gamma[t_n]*E_d) - (delta_J + mu_J + J/K[t_n])*J  
+    dI = 0.5*delta_J*J - (delta_I + mu_A[t_n])*I
+    dA = delta_I*I - mu_A[t_n]*A
     dE_d = beta[t_n]*omega[t_n]*A -  h[t_n]*sigma[t_n]*E_d #I believe there should be an additional mortality due to winter
     
     dx <- c(dE, dJ, dI, dA, dE_d)
