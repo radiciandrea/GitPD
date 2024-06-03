@@ -28,7 +28,7 @@ W_df <- W_tot_df %>%
 
 temp <- W_df$T_av
 temp_M <- W_df$T_M
-tem_min <- W_df$T_m
+temp_m <- W_df$T_m
 prec <- W_df$P
 
 t_s = W_df$DOS[1] # simulate multiple year
@@ -106,7 +106,8 @@ parms = list(omega = omega,
              sigma = sigma,
              gamma = gamma,
              t_s = t_s,
-             temp = temp) 
+             temp_M = temp_M,
+             temp_m = temp_m) 
 
 df <- function(t, x, parms) {
   
