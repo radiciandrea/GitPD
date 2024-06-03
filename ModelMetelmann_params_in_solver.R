@@ -18,7 +18,7 @@ load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_
 
 # chose a region and years
 region_x = "BOLOGNA" # "BOLOGNA" "PIACENZA
-year_x = 2011:2021 #2011:2021  2008:2011 for Nice
+year_x = 2011:2011 #2011:2021  2008:2011 for Nice
 
 # temp and prec (by now, only at a daily step: it should change at least hour by hour)
 
@@ -109,9 +109,7 @@ parms = list(omega = omega,
              t_s = t_s,
              temp_M = temp_M,
              temp_m = temp_m,
-             t_sr = t_sr,
-             m_d_i = max(d_i) #max sim
-             ) 
+             t_sr = t_sr)
 
 df <- function(t, x, parms) {
   
@@ -128,7 +126,7 @@ df <- function(t, x, parms) {
     t_h = t - t_n
     ts = t_sr[t_n]
     TM = temp_M[max(1,t_n-1)]*(t_h<ts) + temp_M[t_n]*(t_h>ts)
-    Tm = temp_m[t_n]*(t_h<14) + temp_M[min(t_n+1, m_d_i)]*(t_h>14)
+    Tm = temp_m[t_n]*(t_h<14) + temp_M[min(t_n+1, length(temp_m))]*(t_h>14)
     
     temp_h = ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h+10)/(10+ts)))*(t_h<ts)+
       ((TM+Tm)/2 - (TM-Tm)/2*cos(pi*(t_h-ts)/(14-ts)))*(t_h>ts)*(t<14)+
