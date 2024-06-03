@@ -51,6 +51,7 @@ temp_min_DJF = sapply(1:length(temp), function(x){return(min(temp[max(1,x-300):x
 #photoperiod Ph_P (which variables should I take? sunrise - sunset)
 SunTimes_df<- getSunlightTimes(as.Date(W_df$date), lat= 44.5, lon = 11.5)# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
 Ph_P= as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
+t_sr = SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2 # time of sunrise: correction needed since time is in UTC
 
 #parameters (Metelmann 2019)
 
@@ -107,7 +108,8 @@ parms = list(omega = omega,
              gamma = gamma,
              t_s = t_s,
              temp_M = temp_M,
-             temp_m = temp_m) 
+             temp_m = temp_m,
+             t_sr = t_sr) 
 
 df <- function(t, x, parms) {
   
