@@ -13,12 +13,12 @@ library(suncalc)
 
 #Getting T and P and Eggs from Arpae (see ReadNc+ARPAE) + nc by Cyril
 
-# load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Weather_Nice_200811.RData") #Nizza
-load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData") #Emilia Romagna
+load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Weather_Nice_200811.RData") #Nizza
+#load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData") #Emilia Romagna
 
 # chose a region and years
-region_x = "BOLOGNA" # "BOLOGNA" "PIACENZA
-year_x = 2011:2011 #2011:2021  2008:2011 for Nice
+region_x = "NICE" # "BOLOGNA" "PIACENZA #NICE
+year_x = 2008:2011 #2011:2021 in EMILA ROMAGNA  # 2008:2011 for Nice
 
 # temp and prec (by now, only at a daily step: it should change at least hour by hour)
 
@@ -27,9 +27,16 @@ W_df <- W_tot_df %>%
   filter(year %in% year_x )
 
 temp <- W_df$T_av
-temp_M <- W_df$T_M
-temp_m <- W_df$T_m
 prec <- W_df$P
+
+if (any(names(W_df)=="T_M")){
+  temp_M <- W_df$T_M
+  temp_m <- W_df$T_m
+} else {
+  cat("T_M and T_m are not available, repaced by T_av")
+  temp_M <- temp
+  temp_m <- temp
+}
 
 t_s = W_df$DOS[1] # simulate multiple year
 t_end = tail(W_df$DOS, n = 1)
