@@ -30,8 +30,8 @@ temp <- W_df$T_av
 prec <- W_df$P
 
 t_s = W_df$DOS[1] # simulate multiple year
-# t_end = tail(W_df$DOS, n = 1)
-t_end = 365*3.5
+t_end = tail(W_df$DOS, n = 1)
+# t_end = 365*2
 d = t_s:t_end
 W_df <- W_df %>%
   filter(DOS %in% d)
@@ -39,12 +39,7 @@ doy = W_df$DOY
 
 #elaborate temp and prec
 temp_7 = sapply(1:length(temp), function(x){return(mean(temp[max(1,x-7):x]))}) # temp of precedent 7 days
-temp_h = temp #this will be modified with equation
 temp_min_DJF = sapply(1:length(temp), function(x){return(min(temp[max(1,x-300):x]))}) #min temp of last winter (daily or hours?)
-
-# T_h = ((TM+Tm)/2 + (TM-Tm)/2*cos((h+10)/(10+ts)))*(h<ts)+
-#   ((TM+Tm)/2 - (TM-Tm)/2*cos((h-ts)/(14-ts)))*(h>ts)*(h<14)+
-#   ((TM+Tm)/2 + (TM-Tm)/2*cos((h-14)/(10+ts)))*(h>14)
 
 #photoperiod Ph_P (which variables should I take? sunrise - sunset)
 SunTimes_df<- getSunlightTimes(as.Date(W_df$date), lat= 44.5, lon = 11.5)# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
