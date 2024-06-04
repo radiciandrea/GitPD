@@ -70,7 +70,7 @@ delta_E = 1/7.1 #normal egg development rate (1/day)
 # mu_E = -log(0.955 * exp(-0.5*((temp_h-18.8)/21.53)^6)) # egg mortality rate
 # mu_J = -log(0.977 * exp(-0.5*((temp_h-21.8)/16.6)^6)) # juvenile mortality rate
 mu_A = -log(0.677 * exp(-0.5*((temp-20.9)/13.2)^6)*temp^0.1) # adult mortality rate
-mu_A[which(is.na(mu_A))] = -log(0.677 * exp(-0.5*((temp-20.9)/13.2)^6)) #correct the problems due to negative values from SI
+mu_A[which(temp<0)] = -log(0.677 * exp(-0.5*((temp[which(temp<0)]-20.9)/13.2)^6)) #correct the problems due to negative values from SI
 
 gamma = 0.93*exp(-0.5*((temp_min_DJF -11.68)/15.67)^6) #survival probability of diapausing eggs (1:/inter) #at DOY = 10?
 beta = (33.2*exp(-0.5*((temp_h-70.3)/14.1)^2)*(38.8 - temp_h)^1.5)*(temp_h<= 38.8) #fertility rate 
