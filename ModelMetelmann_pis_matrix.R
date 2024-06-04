@@ -49,13 +49,13 @@ temp_min_DJF = temp[1,]
 temp_min_DJF = rbind(temp_min_DJF, t(sapply(2:nrow(temp),
                                             function(x){return(apply(temp[max(1,x-300):x, ], 2, min))}))) #min temp of last winter (daily or hours?)
 
-
-# following: to be modified
-
-#photoperiod Ph_P (which variables should I take? sunrise - sunset)
-SunTimes_df<- getSunlightTimes(as.Date(W_df$date), lat= 44.5, lon = 11.5)# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
+#photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
+SunTimes_df<- getSunlightTimes(as.Date(W_tot_df$date), lat= 44.5, lon = 11.5)# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
 Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
 t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
+
+Ph_P = matrix(Ph_P, nrow = max(DOS))
+t_sr = matrix(t_sr, nrow = max(DOS))
 
 #parameters (Metelmann 2019)
 
@@ -64,21 +64,21 @@ CPP_s = 11.25 #critical photoperiod in spring
 L = 44 # latitute more or less in ER - Nice
 CPP_a = 10.058 + 0.08965 * L # critical photperiod in autumn
 sigma = 0.1 *(temp_7 > CTT_s)*(Ph_P > CPP_s) # spring hatching rate (1/day)
-omega = 0.5 *(Ph_P < CPP_a)*(doy > 183) # fraction of eggs going into diapause
+omega = 0.5 *(Ph_P < CPP_a)*(DOY > 183) # fraction of eggs going into diapause
 delta_E = 1/7.1 #normal egg development rate (1/day)
 # delta_J = 1/(83.85 - 4.89*temp_h + 0.08*temp_h^2) #juvenile development rate (in SI: 82.42 - 4.87*temp_h + 0.08*temp_h^ 2)
 # delta_I = 1/(50.1 - 3.574*temp_h + 0.069*temp_h^2) #first pre blood mean rate
 # mu_E = -log(0.955 * exp(-0.5*((temp_h-18.8)/21.53)^6)) # egg mortality rate
 # mu_J = -log(0.977 * exp(-0.5*((temp_h-21.8)/16.6)^6)) # juvenile mortality rate
 mu_A = -log(0.677 * exp(-0.5*((temp-20.9)/13.2)^6)*temp^0.1) # adult mortality rate
-mu_A[which(is.na(mu_A))] = -log(0.677 * exp(-0.5*((temp-20.9)/13.2)^6)) #correct the problems due to negative values from SI
+mu_A[which(is.na(mu_A))] = -log(0.677 * exp(-0.5*((temp[which(is.na(mu_A))]-20.9)/13.2)^6)) #correct the problems due to negative values from SI
 
 gamma = 0.93*exp(-0.5*((temp_min_DJF -11.68)/15.67)^6) #survival probability of diapausing eggs (1:/inter) #at DOY = 10?
-beta = (33.2*exp(-0.5*((temp_h-70.3)/14.1)^2)*(38.8 - temp_h)^1.5)*(temp_h<= 38.8) #fertility rate 
+# beta = (33.2*exp(-0.5*((temp_h-70.3)/14.1)^2)*(38.8 - temp_h)^1.5)*(temp_h<= 38.8) #fertility rate 
 lambda = 10^6 # capacity parameter (larvae/day/ha)
 
 # advanced parameter for carrying capacity
-H = 3000 #human population density per km²  #NICE = 4,840/km² #BOLOGNA = 2,772/km² #RAVENNA = 239.1/km² # https://www.citypopulation.de/en/france/alpesmaritimes/nice/06088__nice/
+H = 1000*c(2.78, 0.3, 0.4, 1, 0.8, 0.9, 0.2, 0.7, 1.1) #human population density per km²  #NICE = 4,840/km² #BOLOGNA = 2,772/km² #RAVENNA = 239.1/km² # https://www.citypopulation.de/en/france/alpesmaritimes/nice/06088__nice/
 alpha_evap = 0.9
 alpha_dens = 0.001
 alpha_rain = 0.00001
@@ -86,8 +86,10 @@ alpha_rain = 0.00001
 # K = lambda * (1-alpha_evap)/(1 - alpha_evap^d)*
 #   sapply(d, function(x){return(sum(alpha_evap^(x:1) * (alpha_rain*prec[1:x] + alpha_dens*H)))})
 
-K = lambda * (1-alpha_evap)/(1 - alpha_evap^d)*
-  sapply(d, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec[1:x] + alpha_rain*H)))}) # how it looks like from code
+K = sapply(1:length(H), function(y){return(lambda * (1-alpha_evap)/(1 - alpha_evap^d)*
+                                   sapply(d, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec[1:x,y] + alpha_rain*H[y])))}))})
+  
+# following: to be modified
 
 # advanced parameter for hatching
 eps_rat = 0.2
@@ -140,6 +142,7 @@ df <- function(t, x, parms) {
     delta_I = 1/(50.1 - 3.574*temp_h + 0.069*temp_h^2) #first pre blood mean rate
     mu_E = -log(0.955 * exp(-0.5*((temp_h-18.8)/21.53)^6)) # egg mortality rate
     mu_J = -log(0.977 * exp(-0.5*((temp_h-21.8)/16.6)^6)) # juvenile mortality rate
+    beta = (33.2*exp(-0.5*((temp_h-70.3)/14.1)^2)*(38.8 - temp_h)^1.5)*(temp_h<= 38.8) #fertility rate
     
     
     # ODE definition 
