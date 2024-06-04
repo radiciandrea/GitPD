@@ -14,12 +14,12 @@ library(suncalc)
 
 #Getting T and P and Eggs from Arpae (see ReadNc+ARPAE) + nc by Cyril
 
-load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Weather_Nice_200811.RData") #Nizza
-#load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData") #Emilia Romagna
+#load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Weather_Nice_200811.RData") #Nizza
+load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData") #Emilia Romagna
 
 # chose a region and years
-region_x = "NICE" # "BOLOGNA" "PIACENZA #NICE
-year_x = 2008:2011 #2011:2021 in EMILA ROMAGNA  # 2008:2011 for Nice
+region_x = "BOLOGNA" # "BOLOGNA" "PIACENZA #NICE
+year_x = 2011:2021 #2011:2021 in EMILA ROMAGNA  # 2008:2011 for Nice
 
 # temp and prec (by now, only at a daily step: it should change at least hour by hour)
 
@@ -49,12 +49,7 @@ doy = W_df$DOY
 
 #elaborate temp and prec
 temp_7 = sapply(1:length(temp), function(x){return(mean(temp[max(1,x-7):x]))}) # temp of precedent 7 days
-temp_h = temp #this will be modified with equation
 temp_min_DJF = sapply(1:length(temp), function(x){return(min(temp[max(1,x-300):x]))}) #min temp of last winter (daily or hours?)
-
-# T_h = ((TM+Tm)/2 + (TM-Tm)/2*cos((h+10)/(10+ts)))*(h<ts)+
-#   ((TM+Tm)/2 - (TM-Tm)/2*cos((h-ts)/(14-ts)))*(h>ts)*(h<14)+
-#   ((TM+Tm)/2 + (TM-Tm)/2*cos((h-14)/(10+ts)))*(h>14)
 
 #photoperiod Ph_P (which variables should I take? sunrise - sunset)
 SunTimes_df<- getSunlightTimes(as.Date(W_df$date), lat= 44.5, lon = 11.5)# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
