@@ -17,44 +17,40 @@ library(suncalc)
 #load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Weather_Nice_200811.RData") #Nizza
 load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData") #Emilia Romagna
 
-# chose a region and years
-region_x = "BOLOGNA" # "BOLOGNA" "PIACENZA #NICE
-year_x = 2011:2021 #2011:2021 in EMILA ROMAGNA  # 2008:2011 for Nice
+#Create a matrix over which integrate; each colums is a city, each row is a date
+regions = unique(W_tot_df$region)
+DOS = unique(W_tot_df$DOS)
+DOY = W_tot_df$DOY[DOS]
+date = W_tot_df$date
+temp = matrix(W_tot_df$T_av, nrow = max(DOS))
+prec = matrix(W_tot_df$P, nrow = max(DOS))
 
-# temp and prec (by now, only at a daily step: it should change at least hour by hour)
-
-W_df <- W_tot_df %>%
-  filter(region == region_x) %>%
-  filter(year %in% year_x )
-
-temp <- W_df$T_av
-prec <- W_df$P
-
-if (any(names(W_df)=="T_M")){
-  temp_M <- W_df$T_M
-  temp_m <- W_df$T_m
+#LAT and LON for each place
+#??
+  
+if (any(names(W_tot_df)=="T_M")){
+  temp_M <- matrix(W_tot_df$T_M, nrow = max(DOS))
+  temp_m <- matrix(W_tot_df$T_m, nrow = max(DOS))
 } else {
   cat("T_M and T_m are not available, repaced by T_av")
   temp_M <- temp
   temp_m <- temp
 }
-
-t_s = W_df$DOS[1] # simulate multiple year
-t_end = tail(W_df$DOS, n = 1)
+t_s = DOS[1] # simulate multiple year
+t_end = tail(DOS, n = 1)
 # t_end = 365*2
 d = t_s:t_end
-W_df <- W_df %>%
-  filter(DOS %in% d)
-doy = W_df$DOY
 
-#elaborate temp and prec
-temp_7 = sapply(1:length(temp), function(x){return(mean(temp[max(1,x-7):x]))}) # temp of precedent 7 days
-temp_h = temp #this will be modified with equation
-temp_min_DJF = sapply(1:length(temp), function(x){return(min(temp[max(1,x-300):x]))}) #min temp of last winter (daily or hours?)
+#elaborate temp and prec + sapply transpose matrices: need to t()
+temp_7 = temp[1,]
+temp_7 = rbind(temp_7, t(sapply(2:nrow(temp),
+                                function(x){return(colMeans(temp[max(1,(x-7)):x,]))}))) # temp of precedent 7 days
+temp_min_DJF = temp[1,]
+temp_min_DJF = rbind(temp_min_DJF, t(sapply(2:nrow(temp),
+                                            function(x){return(apply(temp[max(1,x-300):x, ], 2, min))}))) #min temp of last winter (daily or hours?)
 
-# T_h = ((TM+Tm)/2 + (TM-Tm)/2*cos((h+10)/(10+ts)))*(h<ts)+
-#   ((TM+Tm)/2 - (TM-Tm)/2*cos((h-ts)/(14-ts)))*(h>ts)*(h<14)+
-#   ((TM+Tm)/2 + (TM-Tm)/2*cos((h-14)/(10+ts)))*(h>14)
+
+# following: to be modified
 
 #photoperiod Ph_P (which variables should I take? sunrise - sunset)
 SunTimes_df<- getSunlightTimes(as.Date(W_df$date), lat= 44.5, lon = 11.5)# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
