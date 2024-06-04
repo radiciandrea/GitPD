@@ -1,5 +1,6 @@
 # I try to code the model by Metelmann 2019
 # I'll need to compare with octave code
+# Here the model works with day-varying temperature 
 
 rm(list = ls())
 
