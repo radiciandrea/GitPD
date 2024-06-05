@@ -80,7 +80,7 @@ sigma = 0.1 *(temp_7 > CTT_s)*(Ph_P > CPP_s) # spring hatching rate (1/day)
 omega = 0.5 *(Ph_P < CPP_a)*(matrix(rep(DOY, n_r), ncol = n_r) > 183) # fraction of eggs going into diapause
 delta_E = 1/7.1 #normal egg development rate (1/day)
 mu_A = -log(0.677 * exp(-0.5*((temp-20.9)/13.2)^6)*temp^0.1) # adult mortality rate
-mu_A[which(is.na(mu_A))] = -log(0.677 * exp(-0.5*((temp[which(is.na(mu_A))]-20.9)/13.2)^6)) #correct the problems due to negative values from SI
+mu_A[which(temp<=0)] = -log(0.677 * exp(-0.5*((temp[which(temp<=0)]-20.9)/13.2)^6))  #correct the problems due to negative values from SI
 
 gamma = 0.93*exp(-0.5*((temp_min_DJF -11.68)/15.67)^6) #survival probability of diapausing eggs (1:/inter) #at DOY = 10?
 lambda = 10^6 # capacity parameter (larvae/day/ha)
