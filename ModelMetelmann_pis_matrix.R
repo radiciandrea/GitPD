@@ -24,18 +24,19 @@ DOS = unique(W_tot_df$DOS)
 # set simualtion horizon
 t_s = DOS[1] # simulate multiple year
 t_end = tail(DOS, n = 1)
-# t_end = 365*2
-d = t_s:t_end
+t_end = 365*2
+DOS_sim = t_s:t_end
 
+# reduce simulation horizon and redefine DOY and DOS
 W_df <- W_tot_df %>%
-  filter(DOS %in% d)
+  filter(DOS %in% DOS_sim)
 
 DOY = W_df$DOY[DOS]
 date = W_df$date
 
 #dimensions
 n_r = length(regions) # number of regions/locations (added; 1 for no dimension)
-n_d = length(d) # simulation length
+n_d = length(DOS_sim) # simulation length
 
 temp = matrix(W_df$T_av, nrow = n_d)
 prec = matrix(W_df$P, nrow = n_d)
@@ -88,7 +89,7 @@ alpha_dens = 0.001
 alpha_rain = 0.00001
 
 K = sapply(1:n_r, function(y){return(lambda * (1-alpha_evap)/(1 - alpha_evap^d)*
-                                       sapply(d, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec[1:x,y] + alpha_rain*H[y])))}))
+                                       sapply(DOS_sim, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec[1:x,y] + alpha_rain*H[y])))}))
 })
   
 # advanced parameter for hatching
@@ -170,7 +171,7 @@ X_0 = c(E0, J0, I0, A0, E_d_0)
 # following: to be modified
 
 #integration on multiple years #updated at each february
-d_i = d[W_df$year == W_df$year[1]]
+d_i = DOS_sim[W_df$year == W_df$year[1]]
 
 if (max(d)> max(d_i)){
   d_i = c(d_i, max(d_i)+ 1:min(31, max(d)-max(d_i))) #first simulation is computed until until 1st of February of second year, DOY =32
@@ -201,15 +202,15 @@ ggplot(Sim_m, aes(x = t, y = value, color = variable))+
 
 #Simulated eggs (eq 4 Tran et al 2013)
 
-Eggs_laid_sim_df <- data.frame(DOS = Sim$t[d-t_s+1],
-                               eggs = beta[d]*Sim$A[d-t_s+1], #"all eggs, diapaused or not"
+Eggs_laid_sim_df <- data.frame(DOS = Sim$t[DOS_sim],
+                               eggs = beta[DOS_sim]*Sim$A[DOS_sim], #"all eggs, diapaused or not"
                                type = "laid, simulated")
 
 #plot
 
 Eggs_df <- Eggs_tot_df %>%
   filter(region == region_x) %>%
-  filter(DOS %in% Sim$t[d-t_s+1]) %>%
+  filter(DOS %in% Sim$t[DOS_sim]) %>%
   select("DOS", "eggs", "type")
 
 # cumulate eggs over 2 weeks
