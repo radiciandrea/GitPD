@@ -24,9 +24,6 @@ DOY = W_tot_df$DOY[DOS]
 date = W_tot_df$date
 temp = matrix(W_tot_df$T_av, nrow = max(DOS))
 prec = matrix(W_tot_df$P, nrow = max(DOS))
-
-#LAT and LON for each place
-#??
   
 if (any(names(W_tot_df)=="T_M")){
   temp_M <- matrix(W_tot_df$T_M, nrow = max(DOS))
@@ -36,6 +33,10 @@ if (any(names(W_tot_df)=="T_M")){
   temp_M <- temp
   temp_m <- temp
 }
+
+#To be needed next: LAT and LON for each place; Human population in each pixel;
+
+# set simualtion horizon
 t_s = DOS[1] # simulate multiple year
 t_end = tail(DOS, n = 1)
 # t_end = 365*2
@@ -58,7 +59,6 @@ Ph_P = matrix(Ph_P, nrow = max(DOS))
 t_sr = matrix(t_sr, nrow = max(DOS))
 
 #parameters (Metelmann 2019)
-
 CTT_s = 11 #critical temperature over one week in spring (°C )
 CPP_s = 11.25 #critical photoperiod in spring
 L = 44 # latitute more or less in ER - Nice
@@ -73,7 +73,7 @@ gamma = 0.93*exp(-0.5*((temp_min_DJF -11.68)/15.67)^6) #survival probability of 
 lambda = 10^6 # capacity parameter (larvae/day/ha)
 
 # advanced parameter for carrying capacity
-H = 1000*c(2.78, 0.3, 0.4, 1, 0.8, 0.9, 0.2, 0.7, 1.1) #human population density per km²  #NICE = 4,840/km² #BOLOGNA = 2,772/km² #RAVENNA = 239.1/km² # https://www.citypopulation.de/en/france/alpesmaritimes/nice/06088__nice/
+H = 1000*c(2.78, 0.3, 0.4, 1, 0.8, 0.9, 0.2, 0.7, 1.1) #human population density per km² in E R
 alpha_evap = 0.9
 alpha_dens = 0.001
 alpha_rain = 0.00001
