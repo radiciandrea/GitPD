@@ -170,16 +170,16 @@ X_0 = c(E0, J0, I0, A0, E_d_0)
 # #integration
 # Sim <- as.data.frame(ode(X_0, d, df, parms))
 
-# following: to be modified
-
 #integration on multiple years #updated at each february
 d_i = DOS_sim[years == years[1]]
 
 if (n_d> max(d_i)){
   d_i = c(d_i, max(d_i)+ 1:min(31, n_d-max(d_i))) #first simulation is computed until until 1st of February of second year, DOY =32
 }
-Sim_i <- as.data.frame(ode(X_0, d_i, df, parms))
-colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d")
+
+# following: to be modified
+
+Sim_i <- ode(X_0, d_i, df, parms)
 Sim = Sim_i
 n_y = length(unique(years)) # number of years
 
@@ -194,25 +194,35 @@ for(y in 1:(n_y-1)){
   Sim = rbind(Sim, Sim_i)
 }
 
+Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*max(Sim[,1])),
+                      "region" = rep(rep(regions, each = max(Sim[,1])), 5),
+                      "t" = rep(Sim[,1], n_r*5),
+                      "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
 
 #plot
+id_reg = 7
 
-Sim_m = reshape2::melt(Sim, id = 't')
+region_x = regions[id_reg]
 
-ggplot(Sim_m, aes(x = t, y = value, color = variable))+
+Sim_m_x_df <- Sim_m_df %>%
+  filter(region == region_x)
+Sim_x_df<- dcast(Sim_m_x_df, t ~ variable)
+
+ggplot(Sim_m_x_df, aes(x = t, y = value, color = variable))+
   geom_line()
 
-#Simulated eggs (eq 4 Tran et al 2013)
+# compute laid eggs: change into integration function #beta should be calculatedd hour by hour
+beta_approx = (33.2*exp(-0.5*((temp[,id_reg]-70.3)/14.1)^2)*(38.8 - temp[,id_reg])^1.5)*(temp[,id_reg]<= 38.8) 
 
-Eggs_laid_sim_df <- data.frame(DOS = Sim$t[DOS_sim],
-                               eggs = beta[DOS_sim]*Sim$A[DOS_sim], #"all eggs, diapaused or not"
+Eggs_laid_sim_df <- data.frame(DOS = Sim_x_df$t[DOS_sim],
+                               eggs = beta_approx*Sim_x_df$A[DOS_sim], #"all eggs, diapaused or not"
                                type = "laid, simulated")
 
 #plot
 
 Eggs_df <- Eggs_tot_df %>%
   filter(region == region_x) %>%
-  filter(DOS %in% Sim$t[DOS_sim]) %>%
+  filter(DOS %in% Sim_x_df$t[DOS_sim]) %>%
   select("DOS", "eggs", "type")
 
 # cumulate eggs over 2 weeks
