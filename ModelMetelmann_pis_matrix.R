@@ -27,22 +27,22 @@ t_end = tail(DOS, n = 1)
 # t_end = 365*2
 d = t_s:t_end
 
-W_tot_df <- W_tot_df %>%
+W_df <- W_tot_df %>%
   filter(DOS %in% d)
 
-DOY = W_tot_df$DOY[DOS]
-date = W_tot_df$date
+DOY = W_df$DOY[DOS]
+date = W_df$date
 
 #dimensions
 n_r = length(regions) # number of regions/locations (added; 1 for no dimension)
 n_d = length(d) # simulation length
 
-temp = matrix(W_tot_df$T_av, nrow = n_d)
-prec = matrix(W_tot_df$P, nrow = n_d)
+temp = matrix(W_df$T_av, nrow = n_d)
+prec = matrix(W_df$P, nrow = n_d)
   
-if (any(names(W_tot_df)=="T_M")){
-  temp_M <- matrix(W_tot_df$T_M, nrow = n_d)
-  temp_m <- matrix(W_tot_df$T_m, nrow = n_d)
+if (any(names(W_df)=="T_M")){
+  temp_M <- matrix(W_df$T_M, nrow = n_d)
+  temp_m <- matrix(W_df$T_m, nrow = n_d)
 } else {
   cat("T_M and T_m are not available, repaced by T_av")
   temp_M <- temp
@@ -60,7 +60,7 @@ temp_min_DJF = rbind(temp_min_DJF, t(sapply(2:n_d,
                                             function(x){return(apply(temp[max(1,x-300):x, ], 2, min))}))) #min temp of last winter (daily or hours?)
 
 #photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
-SunTimes_df<- getSunlightTimes(as.Date(W_tot_df$date), lat= 44.5, lon = 11.5)# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
+SunTimes_df<- getSunlightTimes(as.Date(W_df$date), lat= 44.5, lon = 11.5)# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
 Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
 t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
 
