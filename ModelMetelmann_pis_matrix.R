@@ -31,7 +31,7 @@ DOS_sim = t_s:t_end
 W_df <- W_tot_df %>%
   filter(DOS %in% DOS_sim)
 
-DOY = W_df$DOY[DOS]
+DOY = W_df$DOY[DOS_sim]
 date = W_df$date
 
 #dimensions
@@ -51,6 +51,9 @@ if (any(names(W_df)=="T_M")){
 }
 
 #To be needed next: LAT and LON for each place; Human population in each pixel;
+LAT = 44.5*rep(1, n_r)
+LON = 11.5*rep(1, n_r)
+H = 1000*c(2.78, 0.3, 0.4, 1, 0.8, 0.9, 0.2, 0.7, 1.1) #human population density per km² in E R
 
 #elaborate temp and prec + sapply transpose matrices: need to t()
 temp_7 = temp[1,]
@@ -61,7 +64,7 @@ temp_min_DJF = rbind(temp_min_DJF, t(sapply(2:n_d,
                                             function(x){return(apply(temp[max(1,x-300):x, ], 2, min))}))) #min temp of last winter (daily or hours?)
 
 #photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
-SunTimes_df<- getSunlightTimes(as.Date(W_df$date), lat= 44.5, lon = 11.5)# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
+SunTimes_df<- getSunlightTimes(as.Date(W_df$date), lat= LAT, lon = LON)# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
 Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
 t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
 
@@ -71,10 +74,10 @@ t_sr = matrix(t_sr, nrow = n_d)
 #parameters (Metelmann 2019)
 CTT_s = 11 #critical temperature over one week in spring (°C )
 CPP_s = 11.25 #critical photoperiod in spring
-L = 44 # latitute more or less in ER - Nice
-CPP_a = 10.058 + 0.08965 * L # critical photperiod in autumn
+LAT = 44 # latitute more or less in ER - Nice
+CPP_a = 10.058 + 0.08965 * LAT # critical photperiod in autumn
 sigma = 0.1 *(temp_7 > CTT_s)*(Ph_P > CPP_s) # spring hatching rate (1/day)
-omega = 0.5 *(Ph_P < CPP_a)*(DOY > 183) # fraction of eggs going into diapause
+omega = 0.5 *(Ph_P < CPP_a)*(matrix(rep(DOY, n_r), ncol = n_r) > 183) # fraction of eggs going into diapause
 delta_E = 1/7.1 #normal egg development rate (1/day)
 mu_A = -log(0.677 * exp(-0.5*((temp-20.9)/13.2)^6)*temp^0.1) # adult mortality rate
 mu_A[which(is.na(mu_A))] = -log(0.677 * exp(-0.5*((temp[which(is.na(mu_A))]-20.9)/13.2)^6)) #correct the problems due to negative values from SI
@@ -83,7 +86,6 @@ gamma = 0.93*exp(-0.5*((temp_min_DJF -11.68)/15.67)^6) #survival probability of 
 lambda = 10^6 # capacity parameter (larvae/day/ha)
 
 # advanced parameter for carrying capacity
-H = 1000*c(2.78, 0.3, 0.4, 1, 0.8, 0.9, 0.2, 0.7, 1.1) #human population density per km² in E R
 alpha_evap = 0.9
 alpha_dens = 0.001
 alpha_rain = 0.00001
