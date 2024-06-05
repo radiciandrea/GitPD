@@ -24,7 +24,7 @@ DOS = unique(W_tot_df$DOS)
 # set simualtion horizon
 t_s = DOS[1] # simulate multiple year
 t_end = tail(DOS, n = 1)
-t_end = 365
+# t_end = 365
 DOS_sim = t_s:t_end
 
 # reduce simulation horizon and redefine DOY and DOS
@@ -209,14 +209,19 @@ Sim_m_x_df <- Sim_m_df %>%
 Sim_x_df<- dcast(Sim_m_x_df, t ~ variable)
 
 ggplot(Sim_m_x_df, aes(x = t, y = value, color = variable))+
-  geom_line()
+  geom_line()+
+  scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
+  # ylim(1, max(Sim_m_x_df$value))+
+  # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
+  labs(color = paste0("Abundances per classes (", region_x, ")")) +
+  theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
 
 # compute laid eggs: change into integration function #beta should be calculatedd hour by hour
 beta_approx = (33.2*exp(-0.5*((temp[,id_reg]-70.3)/14.1)^2)*(38.8 - temp[,id_reg])^1.5)*(temp[,id_reg]<= 38.8) 
 
 Eggs_laid_sim_df <- data.frame(DOS = Sim_x_df$t[DOS_sim],
                                eggs = beta_approx*Sim_x_df$A[DOS_sim], #"all eggs, diapaused or not"
-                               type = "laid, simulated")
+                               type = "simulated")
 
 #plot
 
@@ -228,7 +233,7 @@ Eggs_df <- Eggs_tot_df %>%
 # cumulate eggs over 2 weeks
 
 Eggs_laid_sim_cum_df <-Eggs_laid_sim_df %>%
-  mutate(type = "laid, simulated, cumulated") %>%
+  mutate(type = "simulated+cum") %>%
   filter(DOS %in% Eggs_df$DOS)
 
 #if observatios every two weeks
@@ -243,8 +248,12 @@ Egg_comp_df <- Egg_comp_df %>%
 
 ggplot(data = Egg_comp_df, aes(x = DOS, y = relative_eggs, color = type))+
   geom_line()+
-  geom_point()
+  geom_point()+
+  labs(color = paste0("Laid eggs (", region_x, ")")) +
+  theme( legend.position = "bottom")
 
 ggplot(data = Eggs_laid_sim_df, aes(x = DOS, y = eggs, color = type))+
   geom_line()+
-  geom_point()
+  geom_point()+ 
+  labs(color = paste0("Laid eggs (", region_x, ")")) +
+  theme(legend.position = "bottom")
