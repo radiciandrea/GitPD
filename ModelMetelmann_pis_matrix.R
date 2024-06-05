@@ -20,21 +20,29 @@ load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_
 #Create a matrix over which integrate; each colums is a city, each row is a date
 regions = unique(W_tot_df$region)
 DOS = unique(W_tot_df$DOS)
+
+# set simualtion horizon
+t_s = DOS[1] # simulate multiple year
+t_end = tail(DOS, n = 1)
+# t_end = 365*2
+d = t_s:t_end
+
+W_tot_df <- W_tot_df %>%
+  filter(DOS %in% d)
+
 DOY = W_tot_df$DOY[DOS]
 date = W_tot_df$date
 
-
-
 #dimensions
 n_r = length(regions) # number of regions/locations (added; 1 for no dimension)
-n_w = max(DOS) # weather dataset length
+n_d = length(d) # simulation length
 
-temp = matrix(W_tot_df$T_av, nrow = n_w)
-prec = matrix(W_tot_df$P, nrow = n_w)
+temp = matrix(W_tot_df$T_av, nrow = n_d)
+prec = matrix(W_tot_df$P, nrow = n_d)
   
 if (any(names(W_tot_df)=="T_M")){
-  temp_M <- matrix(W_tot_df$T_M, nrow = n_w)
-  temp_m <- matrix(W_tot_df$T_m, nrow = n_w)
+  temp_M <- matrix(W_tot_df$T_M, nrow = n_d)
+  temp_m <- matrix(W_tot_df$T_m, nrow = n_d)
 } else {
   cat("T_M and T_m are not available, repaced by T_av")
   temp_M <- temp
@@ -43,14 +51,12 @@ if (any(names(W_tot_df)=="T_M")){
 
 #To be needed next: LAT and LON for each place; Human population in each pixel;
 
-
-
 #elaborate temp and prec + sapply transpose matrices: need to t()
 temp_7 = temp[1,]
-temp_7 = rbind(temp_7, t(sapply(2:n_w,
+temp_7 = rbind(temp_7, t(sapply(2:n_d,
                                 function(x){return(colMeans(temp[max(1,(x-7)):x,]))}))) # temp of precedent 7 days
 temp_min_DJF = temp[1,]
-temp_min_DJF = rbind(temp_min_DJF, t(sapply(2:n_w,
+temp_min_DJF = rbind(temp_min_DJF, t(sapply(2:n_d,
                                             function(x){return(apply(temp[max(1,x-300):x, ], 2, min))}))) #min temp of last winter (daily or hours?)
 
 #photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
@@ -58,8 +64,8 @@ SunTimes_df<- getSunlightTimes(as.Date(W_tot_df$date), lat= 44.5, lon = 11.5)# l
 Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
 t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
 
-Ph_P = matrix(Ph_P, nrow = n_w)
-t_sr = matrix(t_sr, nrow = n_w)
+Ph_P = matrix(Ph_P, nrow = n_d)
+t_sr = matrix(t_sr, nrow = n_d)
 
 #parameters (Metelmann 2019)
 CTT_s = 11 #critical temperature over one week in spring (°C )
@@ -95,7 +101,7 @@ eps_fac = 0.01
 
 h = (1-eps_rat)*(1+eps_0)*exp(-eps_var*(prec-eps_opt)^2)/
   (exp(-eps_var*(prec-eps_opt)^2)+ eps_0) +
-  eps_rat*eps_dens/(eps_dens + exp(-eps_fac*matrix(rep(H, n_w), nrow = n_w, byrow = T )))
+  eps_rat*eps_dens/(eps_dens + exp(-eps_fac*matrix(rep(H, n_d), nrow = n_d, byrow = T )))
 
 # list with parameters to be passed to the ODE system
 parms = list(omega = omega,
@@ -120,7 +126,8 @@ df <- function(t, x, parms) {
     A = x[(1+n_r*3):(4*n_r)]
     E_d = x[(1+n_r*4):(5*n_r)]
     
-    t_n = t[1]-t_s+1 # time of numerical integration to index matrix
+    #t_n = t[1]-t_s+1 # time of numerical integration to index matrix
+    t_n = t[1]
     t_h = 24*(t - t_n) #should put t and not t[1]
     TM = temp_M[max(1,t_n-1),]*(t_h<t_sr[t_n, ]) + temp_M[t_n,]*(t_h>t_sr[t_n, ])
     Tm = temp_m[t_n, ]*(t_h<14) + temp_M[min(t_n+1, length(temp_m))]*(t_h>14)
