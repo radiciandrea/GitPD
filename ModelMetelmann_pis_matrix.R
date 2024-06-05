@@ -23,9 +23,10 @@ DOS = unique(W_tot_df$DOS)
 DOY = W_tot_df$DOY[DOS]
 date = W_tot_df$date
 
+
+
 #dimensions
 n_r = length(regions) # number of regions/locations (added; 1 for no dimension)
-n_d = length(d) # simulation length
 n_w = max(DOS) # weather dataset length
 
 temp = matrix(W_tot_df$T_av, nrow = n_w)
@@ -42,11 +43,6 @@ if (any(names(W_tot_df)=="T_M")){
 
 #To be needed next: LAT and LON for each place; Human population in each pixel;
 
-# set simualtion horizon
-t_s = DOS[1] # simulate multiple year
-t_end = tail(DOS, n = 1)
-# t_end = 365*2
-d = t_s:t_end
 
 
 #elaborate temp and prec + sapply transpose matrices: need to t()
@@ -86,7 +82,8 @@ alpha_dens = 0.001
 alpha_rain = 0.00001
 
 K = sapply(1:n_r, function(y){return(lambda * (1-alpha_evap)/(1 - alpha_evap^d)*
-                                   sapply(d, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec[1:x,y] + alpha_rain*H[y])))}))})
+                                       sapply(d, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec[1:x,y] + alpha_rain*H[y])))}))
+})
   
 # advanced parameter for hatching
 eps_rat = 0.2
@@ -99,10 +96,6 @@ eps_fac = 0.01
 h = (1-eps_rat)*(1+eps_0)*exp(-eps_var*(prec-eps_opt)^2)/
   (exp(-eps_var*(prec-eps_opt)^2)+ eps_0) +
   eps_rat*eps_dens/(eps_dens + exp(-eps_fac*matrix(rep(H, n_w), nrow = n_w, byrow = T )))
-
-# following: to be modified
-
-
 
 # list with parameters to be passed to the ODE system
 parms = list(omega = omega,
@@ -128,14 +121,13 @@ df <- function(t, x, parms) {
     E_d = x[(1+n_r*4):(5*n_r)]
     
     t_n = t[1]-t_s+1 # time of numerical integration to index matrix
-    t_h = 24*(t - t_n) #shoud put t and not t[1]
-    ts = t_sr[t_n]
-    TM = temp_M[max(1,t_n-1)]*(t_h<ts) + temp_M[t_n]*(t_h>ts)
-    Tm = temp_m[t_n]*(t_h<14) + temp_M[min(t_n+1, length(temp_m))]*(t_h>14)
+    t_h = 24*(t - t_n) #should put t and not t[1]
+    TM = temp_M[max(1,t_n-1),]*(t_h<t_sr[t_n, ]) + temp_M[t_n,]*(t_h>t_sr[t_n, ])
+    Tm = temp_m[t_n, ]*(t_h<14) + temp_M[min(t_n+1, length(temp_m))]*(t_h>14)
     
-    temp_h = ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h+10)/(10+ts)))*(t_h<ts)+
-      ((TM+Tm)/2 - (TM-Tm)/2*cos(pi*(t_h-ts)/(14-ts)))*(t_h>ts)*(t_h<14)+
-      ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h-14)/(10+ts)))*(t_h>14)
+    temp_h = ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h+10)/(10+t_sr[t_n, ])))*(t_h<t_sr[t_n, ])+
+      ((TM+Tm)/2 - (TM-Tm)/2*cos(pi*(t_h-t_sr[t_n, ])/(14-t_sr[t_n, ])))*(t_h>t_sr[t_n, ])*(t_h<14)+
+      ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h-14)/(10+t_sr[t_n, ])))*(t_h>14)
     
     delta_J = 1/(83.85 - 4.89*temp_h + 0.08*temp_h^2) #juvenile development rate (in SI: 82.42 - 4.87*temp_h + 0.08*temp_h^ 2)
     delta_I = 1/(50.1 - 3.574*temp_h + 0.069*temp_h^2) #first pre blood mean rate
@@ -145,11 +137,11 @@ df <- function(t, x, parms) {
     
     
     # ODE definition 
-    dE = beta[t_n]*(1-omega[t_n])*A - (h[t_n]*delta_E - mu_E)*E
-    dJ = h[t_n]*(delta_E*E + sigma[t_n]*gamma[t_n]*E_d) - (delta_J + mu_J + J/K[t_n])*J  
-    dI = 0.5*delta_J*J - (delta_I + mu_A[t_n])*I
-    dA = delta_I*I - mu_A[t_n]*A
-    dE_d = beta[t_n]*omega[t_n]*A -  h[t_n]*sigma[t_n]*E_d #I believe there should be an additional mortality due to winter
+    dE = beta[t_n, ]*(1-omega[t_n, ])*A - (h[t_n, ]*delta_E - mu_E)*E
+    dJ = h[t_n, ]*(delta_E*E + sigma[t_n, ]*gamma[t_n, ]*E_d) - (delta_J + mu_J + J/K[t_n, ])*J  
+    dI = 0.5*delta_J*J - (delta_I + mu_A[t_n, ])*I
+    dA = delta_I*I - mu_A[t_n, ]*A
+    dE_d = beta[t_n, ]*omega[t_n, ]*A -  h[t_n, ]*sigma[t_n, ]*E_d #I believe there should be an additional mortality due to winter
     
     dx <- c(dE, dJ, dI, dA, dE_d)
     
@@ -157,16 +149,18 @@ df <- function(t, x, parms) {
 }
 
 # System initialization
-E0 = 0
-J0 = 0
-I0 = 0
-A0 = 0
-E_d_0 = 10^6 # at 1st of January (10^6)
+E0 = rep(0, n_r)
+J0 = rep(0, n_r)
+I0 = rep(0, n_r)
+A0 = rep(0, n_r)
+E_d_0 = 10^6*rep(1, n_r) # at 1st of January (10^6)
 
 X_0 = c(E0, J0, I0, A0, E_d_0)
 
 # #integration
 # Sim <- as.data.frame(ode(X_0, d, df, parms))
+
+# following: to be modified
 
 #integration on multiple years #updated at each february
 d_i = d[W_df$year == W_df$year[1]]
