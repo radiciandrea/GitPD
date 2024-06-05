@@ -24,7 +24,7 @@ DOS = unique(W_tot_df$DOS)
 # set simualtion horizon
 t_s = DOS[1] # simulate multiple year
 t_end = tail(DOS, n = 1)
-t_end = 365*2
+t_end = 365
 DOS_sim = t_s:t_end
 
 # reduce simulation horizon and redefine DOY and DOS
@@ -147,11 +147,11 @@ df <- function(t, x, parms) {
     
     
     # ODE definition 
-    dE = beta[t_n, ]*(1-omega[t_n, ])*A - (h[t_n, ]*delta_E - mu_E)*E
+    dE = beta*(1-omega[t_n, ])*A - (h[t_n, ]*delta_E - mu_E)*E
     dJ = h[t_n, ]*(delta_E*E + sigma[t_n, ]*gamma[t_n, ]*E_d) - (delta_J + mu_J + J/K[t_n, ])*J  
     dI = 0.5*delta_J*J - (delta_I + mu_A[t_n, ])*I
     dA = delta_I*I - mu_A[t_n, ]*A
-    dE_d = beta[t_n, ]*omega[t_n, ]*A -  h[t_n, ]*sigma[t_n, ]*E_d #I believe there should be an additional mortality due to winter
+    dE_d = beta*omega[t_n, ]*A -  h[t_n, ]*sigma[t_n, ]*E_d #I believe there should be an additional mortality due to winter
     
     dx <- c(dE, dJ, dI, dA, dE_d)
     
