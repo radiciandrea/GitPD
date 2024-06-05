@@ -32,6 +32,7 @@ W_df <- W_tot_df %>%
   filter(DOS %in% DOS_sim)
 
 DOY = W_df$DOY[DOS_sim]
+years = W_df$year[DOS_sim]
 date = W_df$date
 
 #dimensions
@@ -172,7 +173,7 @@ X_0 = c(E0, J0, I0, A0, E_d_0)
 # following: to be modified
 
 #integration on multiple years #updated at each february
-d_i = DOS_sim[W_df$year == W_df$year[1]]
+d_i = DOS_sim[years == years[1]]
 
 if (n_d> max(d_i)){
   d_i = c(d_i, max(d_i)+ 1:min(31, n_d-max(d_i))) #first simulation is computed until until 1st of February of second year, DOY =32
@@ -180,7 +181,7 @@ if (n_d> max(d_i)){
 Sim_i <- as.data.frame(ode(X_0, d_i, df, parms))
 colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d")
 Sim = Sim_i
-n_y = length(unique(W_df$year)) # number of years
+n_y = length(unique(years)) # number of years
 
 for(y in 1:(n_y-1)){
   t_x = max(d_i)
