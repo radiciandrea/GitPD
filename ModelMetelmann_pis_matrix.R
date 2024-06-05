@@ -42,6 +42,10 @@ t_end = tail(DOS, n = 1)
 # t_end = 365*2
 d = t_s:t_end
 
+#dimensions
+n_s = length(regions) # number of locations (added; 1 for no dimension)
+n_d = length(d) # simulation lenght
+
 #elaborate temp and prec + sapply transpose matrices: need to t()
 temp_7 = temp[1,]
 temp_7 = rbind(temp_7, t(sapply(2:nrow(temp),
@@ -81,8 +85,6 @@ alpha_rain = 0.00001
 K = sapply(1:length(H), function(y){return(lambda * (1-alpha_evap)/(1 - alpha_evap^d)*
                                    sapply(d, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec[1:x,y] + alpha_rain*H[y])))}))})
   
-# following: to be modified
-
 # advanced parameter for hatching
 eps_rat = 0.2
 eps_0 = 1.5
@@ -93,9 +95,11 @@ eps_fac = 0.01
 
 h = (1-eps_rat)*(1+eps_0)*exp(-eps_var*(prec-eps_opt)^2)/
   (exp(-eps_var*(prec-eps_opt)^2)+ eps_0) +
-  eps_rat*eps_dens/(eps_dens + exp(-eps_fac*H))
+  eps_rat*eps_dens/(eps_dens + exp(-eps_fac*matrix(rep(H, length(d)), nrow = length(d), byrow = T )))
 
-n_s = 1 # number of locations (added; 1 for no dimension)
+# following: to be modified
+
+
 
 # list with parameters to be passed to the ODE system
 parms = list(omega = omega,
