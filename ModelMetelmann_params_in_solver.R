@@ -18,7 +18,7 @@ library(suncalc)
 load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData") #Emilia Romagna
 
 # chose a region and years
-region_x = "BOLOGNA" # "BOLOGNA" "PIACENZA #NICE
+region_x = "FERRARA" # "BOLOGNA" "PIACENZA #NICE
 year_x = 2011:2021 #2011:2021 in EMILA ROMAGNA  # 2008:2011 for Nice
 
 # temp and prec (by now, only at a daily step: it should change at least hour by hour)
@@ -77,7 +77,7 @@ gamma = 0.93*exp(-0.5*((temp_min_DJF -11.68)/15.67)^6) #survival probability of 
 lambda = 10^6 # capacity parameter (larvae/day/ha)
 
 # advanced parameter for carrying capacity
-H = 3000 #human population density per km²  #NICE = 4,840/km² #BOLOGNA = 2,772/km² #RAVENNA = 239.1/km² # https://www.citypopulation.de/en/france/alpesmaritimes/nice/06088__nice/
+H = 300 #human population density per km²  #NICE = 4,840/km² #BOLOGNA = 2,772/km² #RAVENNA = 239.1/km² # https://www.citypopulation.de/en/france/alpesmaritimes/nice/06088__nice/
 alpha_evap = 0.9
 alpha_dens = 0.001
 alpha_rain = 0.00001
