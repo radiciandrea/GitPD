@@ -89,9 +89,9 @@ alpha_evap = 0.9
 alpha_dens = 0.001
 alpha_rain = 0.00001
 
-K = sapply(1:n_r, function(y){return(lambda * (1-alpha_evap)/(1 - alpha_evap^d)*
+K = sapply(1:n_r, function(y){return(lambda * (1-alpha_evap)/(1 - alpha_evap^DOS_sim)*
                                        sapply(DOS_sim, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec[1:x,y] + alpha_rain*H[y])))}))
-})
+}) # this maxes the code to abort quite often.
   
 # advanced parameter for hatching
 eps_rat = 0.2
