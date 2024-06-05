@@ -177,20 +177,19 @@ if (n_d> max(d_i)){
   d_i = c(d_i, max(d_i)+ 1:min(31, n_d-max(d_i))) #first simulation is computed until until 1st of February of second year, DOY =32
 }
 
-# following: to be modified
-
 Sim_i <- ode(X_0, d_i, df, parms)
 Sim = Sim_i
 n_y = length(unique(years)) # number of years
 
+# following: to be modified - c'è un errore negli indici
+
 for(y in 1:(n_y-1)){
   t_x = max(d_i)
-  E_d_i = Sim_i$E_d[nrow(Sim_i)]# last eggs
-  gamma_i = gamma[t_x] #
-  X_0 = c(0, 0, 0, 0, E_d_i*gamma_i)
-  d_i = d[which(DOS_sim == max(d_i))]:min(n_d, DOS_sim[which(W_df$DOY==3)[2+y]], na.rm = T)+1 #from current 1st of February to the next, if possible
-  Sim_i <- as.data.frame(ode(X_0, d_i, df, parms))
-  colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d")
+  E_d_i = Sim_i[dim(Sim_i)[1], dim(Sim_i)[2]-(n_r-1):0] # last diapausing eggs
+  gamma_i = gamma[t_x,] #
+  X_0 = c(E0, J0, I0, A0, E_d_i*gamma_i)
+  d_i = DOS_sim[which(DOS_sim == max(d_i))]:min(n_d, DOS_sim[which(W_df$DOY==32)[2+y]], na.rm = T)+1 #from current 1st of February to the next (32), if possible
+  Sim_i <- ode(X_0, d_i, df, parms)
   Sim = rbind(Sim, Sim_i)
 }
 
@@ -200,7 +199,7 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
                       "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
 
 #plot
-id_reg = 7
+id_reg = 9
 
 region_x = regions[id_reg]
 
@@ -208,13 +207,13 @@ Sim_m_x_df <- Sim_m_df %>%
   filter(region == region_x)
 Sim_x_df<- dcast(Sim_m_x_df, t ~ variable)
 
-ggplot(Sim_m_x_df, aes(x = t, y = value, color = variable))+
-  geom_line()+
-  scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
-  # ylim(1, max(Sim_m_x_df$value))+
-  # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
-  labs(color = paste0("Abundances per classes (", region_x, ")")) +
-  theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
+# ggplot(Sim_m_x_df, aes(x = t, y = value, color = variable))+
+#   geom_line()+
+#   scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
+#   # ylim(1, max(Sim_m_x_df$value))+
+#   # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
+#   labs(color = paste0("Abundances per classes (", region_x, ")")) +
+#   theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
 
 # compute laid eggs: change into integration function #beta should be calculatedd hour by hour
 beta_approx = (33.2*exp(-0.5*((temp[,id_reg]-70.3)/14.1)^2)*(38.8 - temp[,id_reg])^1.5)*(temp[,id_reg]<= 38.8) 
@@ -246,14 +245,14 @@ Egg_comp_df <- Egg_comp_df %>%
   mutate(relative_eggs = eggs/max(eggs, na.rm = T))%>%
   ungroup()
 
-ggplot(data = Egg_comp_df, aes(x = DOS, y = relative_eggs, color = type))+
-  geom_line()+
-  geom_point()+
+ggplot(Egg_comp_df, aes(x = DOS, y = relative_eggs, color = type))+
+  geom_line(data = Egg_comp_df %>% filter(type == "simulated"))+
+  geom_point(data = Egg_comp_df %>% filter(type == "observed"))+
   labs(color = paste0("Laid eggs (", region_x, ")")) +
   theme( legend.position = "bottom")
 
-ggplot(data = Eggs_laid_sim_df, aes(x = DOS, y = eggs, color = type))+
-  geom_line()+
-  geom_point()+ 
-  labs(color = paste0("Laid eggs (", region_x, ")")) +
-  theme(legend.position = "bottom")
+# ggplot(data = Eggs_laid_sim_df, aes(x = DOS, y = eggs, color = type))+
+#   geom_line()+
+#   geom_point()+ 
+#   labs(color = paste0("Laid eggs (", region_x, ")")) +
+#   theme(legend.position = "bottom")
