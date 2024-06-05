@@ -175,7 +175,7 @@ X_0 = c(E0, J0, I0, A0, E_d_0)
 d_i = DOS_sim[W_df$year == W_df$year[1]]
 
 if (max(d)> max(d_i)){
-  d_i = c(d_i, max(d_i)+ 1:min(31, max(d)-max(d_i))) #first simulation is computed until until 1st of February of second year, DOY =32
+  d_i = c(d_i, max(d_i)+ 1:min(31, max(DOS_sim)-max(d_i))) #first simulation is computed until until 1st of February of second year, DOY =32
 }
 Sim_i <- as.data.frame(ode(X_0, d_i, df, parms))
 colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d")
@@ -187,7 +187,7 @@ for(y in 1:(n_y-1)){
   E_d_i = Sim_i$E_d[nrow(Sim_i)]# last eggs
   gamma_i = gamma[t_x] #
   X_0 = c(0, 0, 0, 0, E_d_i*gamma_i)
-  d_i = d[which(d == max(d_i))]:min(max(d), d[which(W_df$DOY==3)[2+y]], na.rm = T)+1 #from current 1st of February to the next, if possible
+  d_i = d[which(DOS_sim == max(d_i))]:min(max(DOS_sim), DOS_sim[which(W_df$DOY==3)[2+y]], na.rm = T)+1 #from current 1st of February to the next, if possible
   Sim_i <- as.data.frame(ode(X_0, d_i, df, parms))
   colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d")
   Sim = rbind(Sim, Sim_i)
