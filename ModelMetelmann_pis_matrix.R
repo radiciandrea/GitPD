@@ -66,15 +66,10 @@ CPP_a = 10.058 + 0.08965 * L # critical photperiod in autumn
 sigma = 0.1 *(temp_7 > CTT_s)*(Ph_P > CPP_s) # spring hatching rate (1/day)
 omega = 0.5 *(Ph_P < CPP_a)*(DOY > 183) # fraction of eggs going into diapause
 delta_E = 1/7.1 #normal egg development rate (1/day)
-# delta_J = 1/(83.85 - 4.89*temp_h + 0.08*temp_h^2) #juvenile development rate (in SI: 82.42 - 4.87*temp_h + 0.08*temp_h^ 2)
-# delta_I = 1/(50.1 - 3.574*temp_h + 0.069*temp_h^2) #first pre blood mean rate
-# mu_E = -log(0.955 * exp(-0.5*((temp_h-18.8)/21.53)^6)) # egg mortality rate
-# mu_J = -log(0.977 * exp(-0.5*((temp_h-21.8)/16.6)^6)) # juvenile mortality rate
 mu_A = -log(0.677 * exp(-0.5*((temp-20.9)/13.2)^6)*temp^0.1) # adult mortality rate
 mu_A[which(is.na(mu_A))] = -log(0.677 * exp(-0.5*((temp[which(is.na(mu_A))]-20.9)/13.2)^6)) #correct the problems due to negative values from SI
 
 gamma = 0.93*exp(-0.5*((temp_min_DJF -11.68)/15.67)^6) #survival probability of diapausing eggs (1:/inter) #at DOY = 10?
-# beta = (33.2*exp(-0.5*((temp_h-70.3)/14.1)^2)*(38.8 - temp_h)^1.5)*(temp_h<= 38.8) #fertility rate 
 lambda = 10^6 # capacity parameter (larvae/day/ha)
 
 # advanced parameter for carrying capacity
@@ -82,9 +77,6 @@ H = 1000*c(2.78, 0.3, 0.4, 1, 0.8, 0.9, 0.2, 0.7, 1.1) #human population density
 alpha_evap = 0.9
 alpha_dens = 0.001
 alpha_rain = 0.00001
-
-# K = lambda * (1-alpha_evap)/(1 - alpha_evap^d)*
-#   sapply(d, function(x){return(sum(alpha_evap^(x:1) * (alpha_rain*prec[1:x] + alpha_dens*H)))})
 
 K = sapply(1:length(H), function(y){return(lambda * (1-alpha_evap)/(1 - alpha_evap^d)*
                                    sapply(d, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec[1:x,y] + alpha_rain*H[y])))}))})
