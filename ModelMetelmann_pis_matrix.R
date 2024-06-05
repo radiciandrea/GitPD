@@ -22,12 +22,18 @@ regions = unique(W_tot_df$region)
 DOS = unique(W_tot_df$DOS)
 DOY = W_tot_df$DOY[DOS]
 date = W_tot_df$date
-temp = matrix(W_tot_df$T_av, nrow = max(DOS))
-prec = matrix(W_tot_df$P, nrow = max(DOS))
+
+#dimensions
+n_r = length(regions) # number of regions/locations (added; 1 for no dimension)
+n_d = length(d) # simulation length
+n_w = max(DOS) # weather dataset length
+
+temp = matrix(W_tot_df$T_av, nrow = n_w)
+prec = matrix(W_tot_df$P, nrow = n_w)
   
 if (any(names(W_tot_df)=="T_M")){
-  temp_M <- matrix(W_tot_df$T_M, nrow = max(DOS))
-  temp_m <- matrix(W_tot_df$T_m, nrow = max(DOS))
+  temp_M <- matrix(W_tot_df$T_M, nrow = n_w)
+  temp_m <- matrix(W_tot_df$T_m, nrow = n_w)
 } else {
   cat("T_M and T_m are not available, repaced by T_av")
   temp_M <- temp
@@ -42,16 +48,13 @@ t_end = tail(DOS, n = 1)
 # t_end = 365*2
 d = t_s:t_end
 
-#dimensions
-n_s = length(regions) # number of locations (added; 1 for no dimension)
-n_d = length(d) # simulation lenght
 
 #elaborate temp and prec + sapply transpose matrices: need to t()
 temp_7 = temp[1,]
-temp_7 = rbind(temp_7, t(sapply(2:nrow(temp),
+temp_7 = rbind(temp_7, t(sapply(2:n_w,
                                 function(x){return(colMeans(temp[max(1,(x-7)):x,]))}))) # temp of precedent 7 days
 temp_min_DJF = temp[1,]
-temp_min_DJF = rbind(temp_min_DJF, t(sapply(2:nrow(temp),
+temp_min_DJF = rbind(temp_min_DJF, t(sapply(2:n_w,
                                             function(x){return(apply(temp[max(1,x-300):x, ], 2, min))}))) #min temp of last winter (daily or hours?)
 
 #photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
@@ -59,8 +62,8 @@ SunTimes_df<- getSunlightTimes(as.Date(W_tot_df$date), lat= 44.5, lon = 11.5)# l
 Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
 t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
 
-Ph_P = matrix(Ph_P, nrow = max(DOS))
-t_sr = matrix(t_sr, nrow = max(DOS))
+Ph_P = matrix(Ph_P, nrow = n_w)
+t_sr = matrix(t_sr, nrow = n_w)
 
 #parameters (Metelmann 2019)
 CTT_s = 11 #critical temperature over one week in spring (°C )
@@ -82,7 +85,7 @@ alpha_evap = 0.9
 alpha_dens = 0.001
 alpha_rain = 0.00001
 
-K = sapply(1:length(H), function(y){return(lambda * (1-alpha_evap)/(1 - alpha_evap^d)*
+K = sapply(1:n_r, function(y){return(lambda * (1-alpha_evap)/(1 - alpha_evap^d)*
                                    sapply(d, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec[1:x,y] + alpha_rain*H[y])))}))})
   
 # advanced parameter for hatching
@@ -95,7 +98,7 @@ eps_fac = 0.01
 
 h = (1-eps_rat)*(1+eps_0)*exp(-eps_var*(prec-eps_opt)^2)/
   (exp(-eps_var*(prec-eps_opt)^2)+ eps_0) +
-  eps_rat*eps_dens/(eps_dens + exp(-eps_fac*matrix(rep(H, length(d)), nrow = length(d), byrow = T )))
+  eps_rat*eps_dens/(eps_dens + exp(-eps_fac*matrix(rep(H, n_w), nrow = n_w, byrow = T )))
 
 # following: to be modified
 
@@ -118,11 +121,11 @@ df <- function(t, x, parms) {
   # initial conditions and parameters
   with(parms, { 
     
-    E = x[(1+n_s*0):(1*n_s)]
-    J = x[(1+n_s*1):(2*n_s)]
-    I = x[(1+n_s*2):(3*n_s)]
-    A = x[(1+n_s*3):(4*n_s)]
-    E_d = x[(1+n_s*4):(5*n_s)]
+    E = x[(1+n_r*0):(1*n_r)]
+    J = x[(1+n_r*1):(2*n_r)]
+    I = x[(1+n_r*2):(3*n_r)]
+    A = x[(1+n_r*3):(4*n_r)]
+    E_d = x[(1+n_r*4):(5*n_r)]
     
     t_n = t[1]-t_s+1 # time of numerical integration to index matrix
     t_h = 24*(t - t_n) #shoud put t and not t[1]
