@@ -64,7 +64,7 @@ temp_min_DJF = rbind(temp_min_DJF, t(sapply(2:n_d,
                                             function(x){return(apply(temp[max(1,x-300):x, ], 2, min))}))) #min temp of last winter (daily or hours?)
 
 #photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
-SunTimes_df<- getSunlightTimes(as.Date(W_df$date), lat= LAT, lon = LON)# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
+SunTimes_df<- getSunlightTimes(data = data.frame("date" = as.Date(W_df$date), "lat"= rep(LAT, n_d), "lon" = rep(LON, n_d)))# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
 Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
 t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
 
@@ -74,7 +74,6 @@ t_sr = matrix(t_sr, nrow = n_d)
 #parameters (Metelmann 2019)
 CTT_s = 11 #critical temperature over one week in spring (°C )
 CPP_s = 11.25 #critical photoperiod in spring
-LAT = 44 # latitute more or less in ER - Nice
 CPP_a = 10.058 + 0.08965 * LAT # critical photperiod in autumn
 sigma = 0.1 *(temp_7 > CTT_s)*(Ph_P > CPP_s) # spring hatching rate (1/day)
 omega = 0.5 *(Ph_P < CPP_a)*(matrix(rep(DOY, n_r), ncol = n_r) > 183) # fraction of eggs going into diapause
