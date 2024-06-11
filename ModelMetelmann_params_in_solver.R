@@ -18,8 +18,8 @@ library(suncalc)
 load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData") #Emilia Romagna
 
 # chose a region and years
-region_x = "FERRARA" # "BOLOGNA" "PIACENZA #NICE
-year_x = 2011:2021 #2011:2021 in EMILA ROMAGNA  # 2008:2011 for Nice
+region_x = "BOLOGNA" # "BOLOGNA" "PIACENZA #NICE
+year_x = 2011:2011 #2011:2021 in EMILA ROMAGNA  # 2008:2011 for Nice
 
 # temp and prec (by now, only at a daily step: it should change at least hour by hour)
 
@@ -41,7 +41,7 @@ if (any(names(W_df)=="T_M")){
 
 t_s = W_df$DOS[1] # simulate multiple year
 t_end = tail(W_df$DOS, n = 1)
-# t_end = 365*2
+#t_end = 365*1
 d = t_s:t_end
 W_df <- W_df %>%
   filter(DOS %in% d)
@@ -124,6 +124,7 @@ df <- function(t, x, parms) {
     I = x[(1+n_s*2):(3*n_s)]
     A = x[(1+n_s*3):(4*n_s)]
     E_d = x[(1+n_s*4):(5*n_s)]
+    E_l_cum = x[(1+n_s*5):(6*n_s)]
     
     t_n = t[1]-t_s+1 # time of numerical integration to index matrix
     t_h = 24*(t - t_n) #shoud put t and not t[1]
@@ -147,8 +148,9 @@ df <- function(t, x, parms) {
     dI = 0.5*delta_J*J - (delta_I + mu_A[t_n])*I
     dA = delta_I*I - mu_A[t_n]*A
     dE_d = beta[t_n]*omega[t_n]*A -  h[t_n]*sigma[t_n]*E_d #I believe there should be an additional mortality due to winter
+    dE_l_cum = beta[t_n]*A
     
-    dx <- c(dE, dJ, dI, dA, dE_d)
+    dx <- c(dE, dJ, dI, dA, dE_d, dE_l_cum)
     
     return(list(dx))})
 }
@@ -159,8 +161,9 @@ J0 = 0
 I0 = 0
 A0 = 0
 E_d_0 = 10^6 # at 1st of January (10^6)
+E_l_cum_0 = 0 # laid eggs
 
-X_0 = c(E0, J0, I0, A0, E_d_0)
+X_0 = c(E0, J0, I0, A0, E_d_0, E_l_cum_0)
 
 # #integration
 # Sim <- as.data.frame(ode(X_0, d, df, parms))
@@ -172,7 +175,7 @@ if (max(d)> max(d_i)){
   d_i = c(d_i, max(d_i)+ 1:min(31, max(d)-max(d_i))) #first simulation is computed until until 1st of February of second year, DOY =32
 }
 Sim_i <- as.data.frame(ode(X_0, d_i, df, parms))
-colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d")
+colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d", "E_l_cum")
 Sim = Sim_i
 n_y = length(unique(W_df$year)) # number of years
 
@@ -183,9 +186,11 @@ for(y in 1:(n_y-1)){
   X_0 = c(0, 0, 0, 0, E_d_i*gamma_i)
   d_i = d[which(d == max(d_i))]:min(max(d), d[which(W_df$DOY==3)[2+y]], na.rm = T)+1 #from current 1st of February to the next, if possible
   Sim_i <- as.data.frame(ode(X_0, d_i, df, parms))
-  colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d")
+  colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d", "E_l_cum")
   Sim = rbind(Sim, Sim_i)
 }
+
+
 
 
 #plot
