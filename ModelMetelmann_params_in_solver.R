@@ -143,12 +143,12 @@ df <- function(t, x, parms) {
     beta = (33.2*exp(-0.5*((temp_h-70.3)/14.1)^2)*(38.8 - temp_h)^1.5)*(temp_h<= 38.8) #fertility rate
         
     # ODE definition 
-    dE = beta[t_n]*(1-omega[t_n])*A - (h[t_n]*delta_E - mu_E)*E
+    dE = beta*(1-omega[t_n])*A - (h[t_n]*delta_E - mu_E)*E
     dJ = h[t_n]*(delta_E*E + sigma[t_n]*gamma[t_n]*E_d) - (delta_J + mu_J + J/K[t_n])*J  
     dI = 0.5*delta_J*J - (delta_I + mu_A[t_n])*I
     dA = delta_I*I - mu_A[t_n]*A
-    dE_d = beta[t_n]*omega[t_n]*A -  h[t_n]*sigma[t_n]*E_d #I believe there should be an additional mortality due to winter
-    dE_l_cum = beta[t_n]*A
+    dE_d = beta*omega[t_n]*A -  h[t_n]*sigma[t_n]*E_d #I believe there should be an additional mortality due to winter
+    dE_l_cum = beta*A
     
     dx <- c(dE, dJ, dI, dA, dE_d, dE_l_cum)
     
@@ -189,9 +189,6 @@ for(y in 1:(n_y-1)){
   colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d", "E_l_cum")
   Sim = rbind(Sim, Sim_i)
 }
-
-
-
 
 #plot
 
