@@ -143,7 +143,7 @@ df <- function(t, x, parms) {
     beta = (33.2*exp(-0.5*((temp_h-70.3)/14.1)^2)*(38.8 - temp_h)^1.5)*(temp_h<= 38.8) #fertility rate
         
     # ODE definition 
-    dE = beta*(1-omega[t_n])*A - (h[t_n]*delta_E - mu_E)*E
+    dE = beta*(1-omega[t_n])*A - (h[t_n]*delta_E + mu_E)*E
     dJ = h[t_n]*(delta_E*E + sigma[t_n]*gamma[t_n]*E_d) - (delta_J + mu_J + J/K[t_n])*J  
     dI = 0.5*delta_J*J - (delta_I + mu_A[t_n])*I
     dA = delta_I*I - mu_A[t_n]*A
