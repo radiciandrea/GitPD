@@ -142,11 +142,11 @@ df <- function(t, x, parms) {
     beta = (33.2*exp(-0.5*((temp_h-70.3)/14.1)^2)*(38.8 - temp_h)^1.5)*(temp_h<= 38.8) #fertility rate
         
     # ODE definition 
-    dE = beta[t_n]*(1-omega[t_n])*A - (h[t_n]*delta_E - mu_E)*E
+    dE = beta*(1-omega[t_n])*A - (h[t_n]*delta_E + mu_E)*E
     dJ = h[t_n]*(delta_E*E + sigma[t_n]*gamma[t_n]*E_d) - (delta_J + mu_J + J/K[t_n])*J  
     dI = 0.5*delta_J*J - (delta_I + mu_A[t_n])*I
     dA = delta_I*I - mu_A[t_n]*A
-    dE_d = beta[t_n]*omega[t_n]*A -  h[t_n]*sigma[t_n]*E_d #I believe there should be an additional mortality due to winter
+    dE_d = beta*omega[t_n]*A -  h[t_n]*sigma[t_n]*E_d #I believe there should be an additional mortality due to winter
     
     dx <- c(dE, dJ, dI, dA, dE_d)
     
@@ -197,8 +197,10 @@ ggplot(Sim_m, aes(x = t, y = value, color = variable))+
 
 #Simulated eggs (eq 4 Tran et al 2013)
 
+beta_approx = (33.2*exp(-0.5*((temp-70.3)/14.1)^2)*(38.8 - temp)^1.5)*(temp<= 38.8) #fertility rate
+
 Eggs_laid_sim_df <- data.frame(DOS = Sim$t[d-t_s+1],
-                               eggs = beta[d]*Sim$A[d-t_s+1], #"all eggs, diapaused or not"
+                               eggs = beta_approx[d]*Sim$A[d-t_s+1], #"all eggs, diapaused or not"
                                type = "laid, simulated")
 
 #plot
