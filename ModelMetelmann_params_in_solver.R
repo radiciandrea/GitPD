@@ -179,15 +179,17 @@ colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d", "E_l_cum")
 Sim = Sim_i
 n_y = length(unique(W_df$year)) # number of years
 
-for(y in 1:(n_y-1)){
-  t_x = max(d_i)
-  E_d_i = Sim_i$E_d[nrow(Sim_i)]# last eggs
-  gamma_i = gamma[t_x] #
-  X_0 = c(0, 0, 0, 0, E_d_i*gamma_i)
-  d_i = d[which(d == max(d_i))]:min(max(d), d[which(W_df$DOY==3)[2+y]], na.rm = T)+1 #from current 1st of February to the next, if possible
-  Sim_i <- as.data.frame(ode(X_0, d_i, df, parms))
-  colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d", "E_l_cum")
-  Sim = rbind(Sim, Sim_i)
+if (n_y>1){
+  for(y in 1:(n_y-1)){
+    t_x = max(d_i)
+    E_d_i = Sim_i$E_d[nrow(Sim_i)]# last eggs
+    gamma_i = gamma[t_x] #
+    X_0 = c(0, 0, 0, 0, E_d_i*gamma_i)
+    d_i = d[which(d == max(d_i))]:min(max(d), d[which(W_df$DOY==3)[2+y]], na.rm = T)+1 #from current 1st of February to the next, if possible
+    Sim_i <- as.data.frame(ode(X_0, d_i, df, parms))
+    colnames(Sim_i) = c("t", "E", "J", "I", "A", "E_d", "E_l_cum")
+    Sim = rbind(Sim, Sim_i)
+  }
 }
 
 #plot
