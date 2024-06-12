@@ -182,16 +182,18 @@ Sim = Sim_i
 n_y = length(unique(years)) # number of years
 
 # following: to be modified - c'è un errore negli indici
-
-for(y in 1:(n_y-1)){
-  t_x = max(d_i)
-  E_d_i = Sim_i[dim(Sim_i)[1], dim(Sim_i)[2]-(n_r-1):0] # last diapausing eggs
-  gamma_i = gamma[t_x,] #
-  X_0 = c(E0, J0, I0, A0, E_d_i*gamma_i)
-  d_i = DOS_sim[which(DOS_sim == max(d_i))]:min(n_d, DOS_sim[which(W_df$DOY==32)[2+y]], na.rm = T)+1 #from current 1st of February to the next (32), if possible
-  Sim_i <- ode(X_0, d_i, df, parms)
-  Sim = rbind(Sim, Sim_i)
+if (n_y > 1){
+  for(y in 1:(n_y-1)){
+    t_x = max(d_i)
+    E_d_i = Sim_i[dim(Sim_i)[1], dim(Sim_i)[2]-(n_r-1):0] # last diapausing eggs
+    gamma_i = gamma[t_x,] #
+    X_0 = c(E0, J0, I0, A0, E_d_i*gamma_i)
+    d_i = DOS_sim[which(DOS_sim == max(d_i))]:min(n_d, DOS_sim[which(W_df$DOY==32)[2+y]], na.rm = T)+1 #from current 1st of February to the next (32), if possible
+    Sim_i <- ode(X_0, d_i, df, parms)
+    Sim = rbind(Sim, Sim_i)
+  }
 }
+
 
 Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*max(Sim[,1])),
                       "region" = rep(rep(regions, each = max(Sim[,1])), 5),
@@ -199,7 +201,7 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
                       "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
 
 #plot
-id_reg = 9
+id_reg = 1
 
 region_x = regions[id_reg]
 
