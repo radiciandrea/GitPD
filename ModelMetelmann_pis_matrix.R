@@ -19,12 +19,12 @@ load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_
 
 #Create a matrix over which integrate; each colums is a city, each row is a date
 regions = unique(W_tot_df$region)
-DOS = unique(W_tot_df$DOS)
+DOS = unique(which(W_df$DOY==31))
 
 # set simualtion horizon
 t_s = DOS[1] # simulate multiple year
 t_end = tail(DOS, n = 1)
-# t_end = 365
+# t_end = 365*3+1
 DOS_sim = t_s:t_end
 
 # reduce simulation horizon and redefine DOY and DOS
@@ -90,6 +90,7 @@ alpha_evap = 0.9
 alpha_dens = 0.001
 alpha_rain = 0.00001
 
+#This could be recomputed year after year
 K = sapply(1:n_r, function(y){return(lambda * (1-alpha_evap)/(1 - alpha_evap^DOS_sim)*
                                        sapply(DOS_sim, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec[1:x,y] + alpha_rain*H[y])))}))
 }) # this maxes the code to abort quite often.
@@ -183,12 +184,12 @@ n_y = length(unique(years)) # number of years
 
 # following: to be modified - c'è un errore negli indici
 if (n_y > 1){
-  for(y in 1:(n_y-1)){
+  for(y in 2:n_y){
     t_x = max(d_i)
     E_d_i = Sim_i[dim(Sim_i)[1], dim(Sim_i)[2]-(n_r-1):0] # last diapausing eggs
     gamma_i = gamma[t_x,] #
     X_0 = c(E0, J0, I0, A0, E_d_i*gamma_i)
-    d_i = DOS_sim[which(DOS_sim == max(d_i))]:min(n_d, DOS_sim[which(W_df$DOY==32)[2+y]], na.rm = T)+1 #from current 1st of February to the next (32), if possible
+    d_i = DOS_sim[which(DOS_sim == t_x)+1]:min(n_d, DOS_sim[which(W_df$DOY==31)[1+y]], na.rm = T) #from current 1st of February to the next (32), if possible
     Sim_i <- ode(X_0, d_i, df, parms)
     Sim = rbind(Sim, Sim_i)
   }
