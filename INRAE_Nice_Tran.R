@@ -103,4 +103,7 @@ W_tot_df <- W %>%
   mutate(DOY = yday(date)) %>%
   select(c("region", "year", "DOS", "date", "P", "T_av", "T_M", "T_m", "DOY"))
   
-  
+time_df <- W_tot_df%>%
+  dplyr::select(c("DOS", "DOY", "date"))  
+
+save(Eggs_tot_df, W_tot_df, time_df, file =  "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_Nice_200811.RData")
