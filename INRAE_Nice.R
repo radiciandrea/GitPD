@@ -1,6 +1,8 @@
 #Climatik
 # c'è montpellier ma non c'è Nizza :(
 
+#### BELOW: DATA FROM NICE
+
 
 # https://agroclim.inrae.fr/siclima/extraction/#HomePlace:
 
@@ -47,3 +49,35 @@ plot(W_tot_df$DOS, W_tot_df$T_av)
 plot(W_tot_df$DOS, W_tot_df$P)
 
 save(W_tot_df, time_df, file =  "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Weather_Nice_200811.RData")
+
+# DATA FROM NICE
+
+library(dplyr)
+library(lubridate)
+
+folder = "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Tran 2013/"
+
+data = read.delim(paste0(folder, "Data_Nice_synthese.txt"), header = TRUE)
+
+# cleaning data and elaborations to homogenize with 
+
+data$Noeufs[which(data$Noeufs == -99)] = NA
+
+Eggs_tot_df <- data %>%
+  mutate(date = paste(ANNEE, MOIS, JOUR, sep = "-")) %>%
+  mutate(DOY = yday(date)) %>%
+  mutate(DOS = julian(as.Date(date), origin = as.Date('2007-12-31'))) %>%
+  group_by(DOS) %>%
+  mutate(eggs = mean(Noeufs, na.rm = T)) %>%
+  mutate(ovitrps = sum(DOY>0, na.rm = T)) %>%
+  ungroup()%>%
+  distinct(DOS, .keep_all = TRUE) %>%
+  mutate(region = "NICE")%>%
+  mutate(type = "observed") %>%
+  select(c("region", "DOS", "eggs", "ovitrps", "type", "DOY", "date"))
+
+time_df <- W_tot_df%>%
+  filter(region == region_names[1]) %>%
+  dplyr::select(c("DOS", "DOY", "date"))    
+
+plot(data_m$JJULIEN, data_m$EGGS)  
