@@ -59,7 +59,7 @@ folder = "C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Tran 2013
 
 data = read.delim(paste0(folder, "Data_Nice_synthese.txt"), header = TRUE)
 
-# cleaning data and elaborations to homogenize with 
+# cleaning data and elaborations to homogenize with ER. Here eggs are AVERAGED
 
 data$Noeufs[which(data$Noeufs == -99)] = NA
 
@@ -80,4 +80,27 @@ time_df <- W_tot_df%>%
   filter(region == region_names[1]) %>%
   dplyr::select(c("DOS", "DOY", "date"))    
 
-plot(data_m$JJULIEN, data_m$EGGS)  
+# yes it is it 
+# plot(data_m$JJULIEN, data_m$EGGS)  
+
+#load weather
+
+W <- read.delim(paste0(folder, "Data_Meteo_Nice.txt"), header = TRUE)
+
+# daily rain RR
+# temp min = TN
+# tem max = TX
+
+W_tot_df <- W %>%
+  mutate(region = "NICE") %>%
+  mutate(year = substr(DATE, 1, 4)) %>%
+  mutate(date = paste(year, substr(DATE, 5, 6), substr(DATE, 7, 8), sep = "-")) %>%
+  mutate(DOS = INDEX) %>%
+  mutate(P = RR) %>%
+  mutate(T_M = TX) %>%
+  mutate(T_m = TN) %>%
+  mutate(T_av = (T_M+T_m)/2)%>%
+  mutate(DOY = yday(date)) %>%
+  select(c("region", "year", "DOS", "date", "P", "T_av", "T_M", "T_m", "DOY"))
+  
+  
