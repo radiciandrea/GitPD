@@ -16,7 +16,7 @@ Eggs_laid_sim_cum_Tran_df$eggs = sapply(Eggs_laid_sim_cum_Tran_df$DOS,
 # second run ModelMetelmann_params_in_solver.R
 
 Eggs_laid_sim_Metelmann_df <- data.frame(DOS = Sim$t[d-t_s+1],
-                               eggs = beta[d]*Sim$A[d-t_s+1], #"all eggs, diapaused or not"
+                               eggs = beta_approx[d]*Sim$A[d-t_s+1], #"all eggs, diapaused or not"
                                type = "laid, simulated, Metelmann")
 
 Eggs_laid_sim_cum_Metelmann_df <- Eggs_laid_sim_Metelmann_df
