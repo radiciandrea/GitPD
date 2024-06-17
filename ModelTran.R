@@ -80,8 +80,8 @@ f_L = pmax(0, f_L)
 
 f_P = 0.0008*temp^2 - 0.0051 * temp + 0.0319 # Transition function from pupa to emerging adult
 f_Ag = (temp-T_Ag)/TDD_Ag *(temp-T_Ag>0) # Transition function from engorged adult to oviposition site—seeking adult
-m_L = exp(-temp/0.5) + mu_L # Larva mortality (day−1)
-m_P = exp(-temp/0.5) + mu_P # Pupa mortality rate (day−1)
+m_L = exp(-temp*0.5) + mu_L # Larva mortality (day−1)
+m_P = exp(-temp*0.5) + mu_P # Pupa mortality rate (day−1)
 m_A = pmax(mu_A, 0.04417 + 0.00217*temp) # Adult mortality rate (day−1)
 
 # #mortalities expressed as in arbocarto
@@ -163,7 +163,7 @@ df <- function(t, x, parms) {
 }
 
 # System initialization
-E0 = 10^6 # at 1st of January (10^6) # 8*10^7 by looking fig 3b
+E0 = 8*10^7 # at 1st of January (10^6) # 8*10^7 by looking fig 3b
 L0 = 0
 P0 = 0
 A_em0 = 0
