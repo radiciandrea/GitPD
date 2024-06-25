@@ -32,16 +32,17 @@ Eggs_df <- Eggs_tot_df %>%
 
 # join sims
 Egg_comp_df <- rbind(Eggs_df, Eggs_laid_sim_Tran_df, Eggs_laid_sim_Metelmann_df)
-Egg_comp_df <- rbind(Eggs_df, Eggs_laid_sim_cum_Tran_df, Eggs_laid_sim_cum_Metelmann_df)
+#Egg_comp_df <- rbind(Eggs_df, Eggs_laid_sim_cum_Tran_df, Eggs_laid_sim_cum_Metelmann_df)
 
 #ignore 2011 for adjustment - comoure relative eggs
 Egg_comp_df <- Egg_comp_df %>%
   filter(DOS > 365) %>%
   group_by(type)%>%
-  mutate(relative_eggs_m = eggs/mean(eggs, na.rm = T))%>%
-  mutate(relative_eggs_M = eggs/max(eggs, na.rm = T))%>%
+  mutate(relative_eggs_m = 100*eggs/mean(eggs, na.rm = T))%>%
+  mutate(relative_eggs_M = 100*eggs/max(eggs, na.rm = T))%>%
   ungroup()
 
 ggplot(Egg_comp_df, aes(x = DOS, y = relative_eggs_M, color = type))+
   geom_line(data = Egg_comp_df %>% filter(type != "observed"))+
-  geom_point(data = Egg_comp_df %>% filter(type == "observed"))
+  geom_point(data = Egg_comp_df %>% filter(type == "observed"))+
+  theme_test()
