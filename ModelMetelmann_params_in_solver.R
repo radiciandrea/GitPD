@@ -14,11 +14,11 @@ library(suncalc)
 
 #Getting T and P and Eggs from Arpae (see ReadNc+ARPAE) + nc by Cyril
 
-load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_Nice_200811.RData") #Nizza
-# load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData") #Emilia Romagna
+load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_Nice_200811.RData") #Nizza
+#load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData") #Emilia Romagna
 
 # chose a region and years
-region_x = "NICE" # "BOLOGNA" "PIACENZA
+region_x = "NICE" # "BOLOGNA" "PIACENZA" "NICE"
 year_x = 2008:2011 #2011:2021  2008:2011 for Nice
 
 # temp and prec (by now, only at a daily step: it should change at least hour by hour)

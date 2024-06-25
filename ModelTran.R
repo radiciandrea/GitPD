@@ -35,19 +35,19 @@ t_end_diap = 31+28+31+30+31+30+31+31+30 # End of the favorable season - 30 Sept 
 # 
 # #Getting T and P from Agroclim Climatik (Montpellier)
 # library(readxl)
-# W <- read_excel("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Agroclim/T_P_Montpellier_2000_2023_INRAE_STATION_34172005.xls", range = "A10:F8776")
+# W <- read_excel("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Agroclim/T_P_Montpellier_2000_2023_INRAE_STATION_34172005.xls", range = "A10:F8776")
 # 
 # temp = W$TM[7306 - 1 + d] # lets start from 1/1/2020
 # prec = W$RR[7306 - 1 + d] 
 
 #Getting T and P and Eggs from Arpae (see ReadNc+ARPAE) + nc by Cyril
 
-#load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_Nice_200811.RData") #Nizza
-load("C:/Users/Andrea/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData") #Emilia Romagna
+load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_Nice_200811.RData") #Nizza
+#load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather_ER_20112021.RData") #Emilia Romagna
 
 # chose a region and years
-region_x = "BOLOGNA" # "BOLOGNA" "PIACENZA
-year_x = 2011:2021 #2011:2021  2008:2011 for Nice
+region_x = "NICE" # "BOLOGNA" "PIACENZA" "NICE"
+year_x = 2008:2011 #2011:2021  2008:2011 for Nice
 
 W_df <- W_tot_df %>%
   filter(region == region_x) %>%
@@ -93,7 +93,7 @@ k_L = K_L*(p_cumm_norm+1) # Environment carrying capacity of larvae (ha−1)
 k_P = K_P*(p_cumm_norm+1) # Environment carrying capacity of pupae (ha−1)
 
 # Warning: this should be corrected by the Area (S). Here we make the Hp A = 500 ha
-S = 100 #ha
+S = 1 #ha
 k_L = k_L*S
 k_P = k_P*S
 
