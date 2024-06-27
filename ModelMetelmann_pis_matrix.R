@@ -9,6 +9,7 @@ library(ggplot2)
 library(reshape2) 
 library(dplyr)
 library(suncalc)
+library(pracma)
 
 #load T and P
 
@@ -154,6 +155,7 @@ X_0 = c(E0, J0, I0, A0, E_d_0)
 
 Sim <- matrix(nrow = length(DOS_sim), ncol = 1+n_r*5)
 
+tic()
 for (year in years_u){
   id_d_y = which(years == year)# vector of if days
   DOS_y = DOS_sim[id_d_y]
@@ -172,6 +174,7 @@ for (year in years_u){
   Sim[id_d_y,] = rbind(Sim_y_1, Sim_y_2)
   X_0 = c(rep(0, n_r*4), Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
 }
+toc()
 
 Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*max(DOS_sim)),
                       "region" = rep(rep(regions, each = max(DOS_sim)), 5),
