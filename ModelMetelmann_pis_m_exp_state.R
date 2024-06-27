@@ -2,6 +2,7 @@
 # Running on matrix in which we alter the weather variable
 
 rm(list = ls())
+gc()
 
 library(deSolve)
 library(ggplot2)
@@ -92,7 +93,7 @@ if (any(names(W_df)=="T_M")){
 #To be needed next: LAT and LON for each place; Human population in each pixel;
 LAT = 43.5*rep(1, n_r)
 LON = 7.3*rep(1, n_r)
-H = rep(H_dens*H_mult, each = length(T_add))
+H = W_df$H
 
 #elaborate temp and prec + sapply transpose matrices: need to t()
 temp_7 = temp[1,]
@@ -137,7 +138,7 @@ eps_fac = 0.01
 
 h = (1-eps_rat)*(1+eps_0)*exp(-eps_var*(prec-eps_opt)^2)/
   (exp(-eps_var*(prec-eps_opt)^2)+ eps_0) +
-  eps_rat*eps_dens/(eps_dens + exp(-eps_fac*matrix(rep(H, n_d), nrow = n_d, byrow = T )))
+  eps_rat*eps_dens/(eps_dens + exp(-eps_fac*matrix(H, nrow = n_d, byrow = T )))
 
 df <- function(t, x, parms) {
   
@@ -219,4 +220,5 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
 E0_df$E0 = (Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)]/E_d_0)^(1/length(years_u))
 
 ggplot(E0_df, aes(T_av, H, fill= E0)) + 
+  scale_y_log10()+
   geom_tile()
