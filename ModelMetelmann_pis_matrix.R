@@ -19,7 +19,7 @@ load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weath
 
 #Create a matrix over which integrate; each colums is a city, each row is a date
 regions = unique(W_tot_df$region)
-DOS = unique(which(W_df$DOY==31))
+DOS = unique(W_tot_df$DOS)
 
 # set simualtion horizon
 t_s = DOS[1] # simulate multiple year
@@ -33,6 +33,7 @@ W_df <- W_tot_df %>%
 
 DOY = W_df$DOY[DOS_sim]
 years = W_df$year[DOS_sim]
+years_u = unique(years)
 date = W_df$date
 
 #dimensions
@@ -90,12 +91,6 @@ alpha_evap = 0.9
 alpha_dens = 0.001
 alpha_rain = 0.00001
 
-#This could be recomputed year after year
-K = sapply(1:n_r, function(y){return(lambda * (1-alpha_evap)/(1 - alpha_evap^DOS_sim)*
-                                       sapply(DOS_sim, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec[1:x,y] + alpha_rain*H[y])))}))
-}) # this maxes the code to abort quite often.
-  
-# advanced parameter for hatching
 eps_rat = 0.2
 eps_0 = 1.5
 eps_var = 0.05
@@ -106,18 +101,6 @@ eps_fac = 0.01
 h = (1-eps_rat)*(1+eps_0)*exp(-eps_var*(prec-eps_opt)^2)/
   (exp(-eps_var*(prec-eps_opt)^2)+ eps_0) +
   eps_rat*eps_dens/(eps_dens + exp(-eps_fac*matrix(rep(H, n_d), nrow = n_d, byrow = T )))
-
-# list with parameters to be passed to the ODE system
-parms = list(omega = omega,
-             h = h,
-             mu_A = mu_A,
-             delta_E = delta_E,
-             sigma = sigma,
-             gamma = gamma,
-             t_s = t_s,
-             temp_M = temp_M,
-             temp_m = temp_m,
-             t_sr = t_sr)
 
 df <- function(t, x, parms) {
   
@@ -146,10 +129,9 @@ df <- function(t, x, parms) {
     mu_J = -log(0.977 * exp(-0.5*((temp_h-21.8)/16.6)^6)) # juvenile mortality rate
     beta = (33.2*exp(-0.5*((temp_h-70.3)/14.1)^2)*(38.8 - temp_h)^1.5)*(temp_h<= 38.8) #fertility rate
     
-    
     # ODE definition 
     dE = beta*(1-omega[t_n, ])*A - (h[t_n, ]*delta_E + mu_E)*E
-    dJ = h[t_n, ]*(delta_E*E + sigma[t_n, ]*gamma[t_n, ]*E_d) - (delta_J + mu_J + J/K[t_n, ])*J  
+    dJ = h[t_n, ]*(delta_E*E + sigma[t_n, ]*gamma*E_d) - (delta_J + mu_J + J/K[t_n, ])*J  
     dI = 0.5*delta_J*J - (delta_I + mu_A[t_n, ])*I
     dA = delta_I*I - mu_A[t_n, ]*A
     dE_d = beta*omega[t_n, ]*A -  h[t_n, ]*sigma[t_n, ]*E_d #I believe there should be an additional mortality due to winter
@@ -168,37 +150,54 @@ E_d_0 = 10^6*rep(1, n_r) # at 1st of January (10^6)
 
 X_0 = c(E0, J0, I0, A0, E_d_0)
 
-# #integration
-# Sim <- as.data.frame(ode(X_0, d, df, parms))
+#integration on multiple years 
 
-#integration on multiple years #updated at each february
-d_i = DOS_sim[years == years[1]]
+Sim <- matrix(nrow = length(DOS_sim), ncol = 1+n_r*5)
 
-if (n_d> max(d_i)){
-  d_i = c(d_i, max(d_i)+ 1:min(31, n_d-max(d_i))) #first simulation is computed until until 1st of February of second year, DOY =32
+for (year in years_u){
+  id_d_y = which(years == year)# vector of if days
+  DOS_y = DOS_sim[id_d_y]
+  DOY_y = DOY[id_d_y]
+  source("MM_y_parameters_extraction.R")
+  
+  #break at 1/8 to zero diapausing eggs, even for odd years
+  DOY_y_1 = DOY_y[1:(max(DOY_y)-153)] 
+  Sim_y_1<- ode(X_0, DOY_y_1, df, parms)
+  X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
+  
+  DOY_y_2 = DOY_y[(max(DOY_y)-152): max(DOY_y)]
+  Sim_y_2<- ode(X_0, DOY_y_2, df, parms)
+  
+  Sim[id_d_y,] = rbind(Sim_y_1, Sim_y_2)
+  X_0 = Sim_y_2[nrow(Sim_y_2),1+1:(n_r*5)]
 }
 
-Sim_i <- ode(X_0, d_i, df, parms)
-Sim = Sim_i
-n_y = length(unique(years)) # number of years
+# if (n_d> max(DOS_y)){
+#   DOS_y = c(DOS_y, max(DOS_y)+ 1:min(31, n_d-max(DOS_y))) #first simulation is computed until until 1st of February of second year, DOY =32
+# }
+# 
+# Sim_i <- ode(X_0, DOS_y, df, parms)
+# Sim = Sim_i
+# n_y = length(unique(years)) # number of years
 
-# following: to be modified - c'è un errore negli indici
-if (n_y > 1){
-  for(y in 2:n_y){
-    t_x = max(d_i)
-    E_d_i = Sim_i[dim(Sim_i)[1], dim(Sim_i)[2]-(n_r-1):0] # last diapausing eggs
-    gamma_i = gamma[t_x,] #
-    X_0 = c(E0, J0, I0, A0, E_d_i*gamma_i)
-    d_i = DOS_sim[which(DOS_sim == t_x)+1]:min(n_d, DOS_sim[which(W_df$DOY==31)[1+y]], na.rm = T) #from current 1st of February to the next (32), if possible
-    Sim_i <- ode(X_0, d_i, df, parms)
-    Sim = rbind(Sim, Sim_i)
-  }
-}
+# # following: to be modified - c'è un errore negli indici
+# if (n_y > 1){
+#   for(y in 2:n_y){
+#     t_x = max(DOS_y)
+#     E_d_i = Sim_i[dim(Sim_i)[1], dim(Sim_i)[2]-(n_r-1):0] # last diapausing eggs
+#     gamma_i = gamma[t_x,] #
+#     #X_0 = c(E0, J0, I0, A0, E_d_i*gamma_i) # this is almost certianly not correct
+#     X_0 = c(E0, J0, I0, A0, E_d_i*gamma_i)
+#     d_i = DOS_sim[which(DOS_sim == t_x)+1]:min(n_d, DOS_sim[which(W_df$DOY==31)[1+y]], na.rm = T) #from current 1st of February to the next (32), if possible
+#     Sim_i <- ode(X_0, d_i, df, parms)
+#     Sim = rbind(Sim, Sim_i)
+#   }
+# }
 
 
-Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*max(Sim[,1])),
-                      "region" = rep(rep(regions, each = max(Sim[,1])), 5),
-                      "t" = rep(Sim[,1], n_r*5),
+Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*max(DOS_sim)),
+                      "region" = rep(rep(regions, each = max(DOS_sim)), 5),
+                      "t" = rep(DOS_sim, n_r*5),
                       "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
 
 #plot
