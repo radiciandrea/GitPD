@@ -168,32 +168,10 @@ for (year in years_u){
   DOY_y_2 = DOY_y[(max(DOY_y)-152): max(DOY_y)]
   Sim_y_2<- ode(X_0, DOY_y_2, df, parms)
   
+  #break at 31/12 to zero everything except diapausing eggs
   Sim[id_d_y,] = rbind(Sim_y_1, Sim_y_2)
-  X_0 = Sim_y_2[nrow(Sim_y_2),1+1:(n_r*5)]
+  X_0 = c(rep(0, n_r*4), Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
 }
-
-# if (n_d> max(DOS_y)){
-#   DOS_y = c(DOS_y, max(DOS_y)+ 1:min(31, n_d-max(DOS_y))) #first simulation is computed until until 1st of February of second year, DOY =32
-# }
-# 
-# Sim_i <- ode(X_0, DOS_y, df, parms)
-# Sim = Sim_i
-# n_y = length(unique(years)) # number of years
-
-# # following: to be modified - c'è un errore negli indici
-# if (n_y > 1){
-#   for(y in 2:n_y){
-#     t_x = max(DOS_y)
-#     E_d_i = Sim_i[dim(Sim_i)[1], dim(Sim_i)[2]-(n_r-1):0] # last diapausing eggs
-#     gamma_i = gamma[t_x,] #
-#     #X_0 = c(E0, J0, I0, A0, E_d_i*gamma_i) # this is almost certianly not correct
-#     X_0 = c(E0, J0, I0, A0, E_d_i*gamma_i)
-#     d_i = DOS_sim[which(DOS_sim == t_x)+1]:min(n_d, DOS_sim[which(W_df$DOY==31)[1+y]], na.rm = T) #from current 1st of February to the next (32), if possible
-#     Sim_i <- ode(X_0, d_i, df, parms)
-#     Sim = rbind(Sim, Sim_i)
-#   }
-# }
-
 
 Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*max(DOS_sim)),
                       "region" = rep(rep(regions, each = max(DOS_sim)), 5),
