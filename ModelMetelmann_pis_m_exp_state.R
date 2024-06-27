@@ -20,10 +20,7 @@ H_dens = 4800 # humans/km2
 
 #T_av = 14.66509
 T_add = -9:10
-H_mult = 98*(1:20)^2/4800
-
-T_add = -1:1
-H_mult = c(0.5,1,2)
+H_mult = 1.23618^(-9:10)
 
 W_tot_cycle_l <- vector(mode = "list", length = length(T_add)*length(H_mult))
 
@@ -43,7 +40,7 @@ for (i in 1:length(T_add)){
       mutate(T_av = T_av + T_add[i]) %>%
       mutate(H_mult = H_mult[j]) %>%
       mutate(H = H_dens*H_mult[j]) %>%
-      mutate(region = paste0(region, "_tadd_", T_add[i], "_Hmult_", round(H_mult, 1)))
+      mutate(region = paste0(region, "_tadd_", T_add[i], "_Hmult_", round(H_mult, 2)))
     
     W_tot_cycle_l[[k]] <- W_tot_cycle_df
     
@@ -222,5 +219,4 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
 E0_df$E0 = (Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)]/E_d_0)^(1/length(years_u))
 
 ggplot(E0_df, aes(T_av, H, fill= E0)) + 
-  scale_y_log10()+
   geom_tile()
