@@ -14,7 +14,7 @@ gamma_y = apply(gamma[id_d_y,], 2, function(x){min(x)})
 
 # Compute K
 K_y = sapply(1:n_r, function(y){return(lambda * (1-alpha_evap)/(1 - alpha_evap^DOY_y)*
-                                       sapply(DOY_y, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec_y[1:x,y] + alpha_rain*H[,y])))}))
+                                       sapply(DOY_y, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec_y[1:x,y] + alpha_rain*H[y])))}))
 }) 
 
 # Compute h

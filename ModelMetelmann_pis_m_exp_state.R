@@ -93,7 +93,35 @@ if (any(names(W_df)=="T_M")){
 #To be needed next: LAT and LON for each place; Human population in each pixel;
 LAT = 43.5*rep(1, n_r)
 LON = 7.3*rep(1, n_r)
-H = W_df$H
+
+
+
+
+
+
+
+
+
+
+
+
+H = matrix(W_df$H, nrow = n_d)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #elaborate temp and prec + sapply transpose matrices: need to t()
 temp_7 = temp[1,]
@@ -138,7 +166,7 @@ eps_fac = 0.01
 
 h = (1-eps_rat)*(1+eps_0)*exp(-eps_var*(prec-eps_opt)^2)/
   (exp(-eps_var*(prec-eps_opt)^2)+ eps_0) +
-  eps_rat*eps_dens/(eps_dens + exp(-eps_fac*matrix(H, nrow = n_d, byrow = T )))
+  eps_rat*eps_dens/(eps_dens + exp(-eps_fac*H)) #matrix(H, nrow = n_d, byrow = T )
 
 df <- function(t, x, parms) {
   
