@@ -225,6 +225,11 @@ E0_df <- E0_df %>%
                          labels=c("0-0.01", "0.01-0.1", "0.1-1", "1-10", "10-20", "20-50", "50-100"))) %>%
   mutate(E0_level=factor(as.character(E0_level), levels=rev(levels(E0_level))))
 
+cities_df <- data.frame("name" = c(Nice, Paris, Lyon, Marseille, ),
+                        "country" =,
+                        "T_av" =,
+                        "H" = )
+
 ggplot(E0_df, aes(T_av, H, fill= E0_level)) + 
   scale_fill_manual(values = rev(c("#65992E", "#8FB338", "#E2CF4D", "#F89061", "#F96970", "#F97ADC", "#A494FB")))+
   scale_y_log10()+
