@@ -80,6 +80,7 @@ n_d = length(DOS_sim) # simulation length
 
 temp = matrix(W_df$T_av, nrow = n_d)
 prec = matrix(W_df$P, nrow = n_d)
+H = matrix(W_df$H, nrow = n_d)
 
 if (any(names(W_df)=="T_M")){
   temp_M <- matrix(W_df$T_M, nrow = n_d)
@@ -93,35 +94,6 @@ if (any(names(W_df)=="T_M")){
 #To be needed next: LAT and LON for each place; Human population in each pixel;
 LAT = 43.5*rep(1, n_r)
 LON = 7.3*rep(1, n_r)
-
-
-
-
-
-
-
-
-
-
-
-
-H = matrix(W_df$H, nrow = n_d)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #elaborate temp and prec + sapply transpose matrices: need to t()
 temp_7 = temp[1,]
@@ -212,7 +184,7 @@ E0 = rep(0, n_r)
 J0 = rep(0, n_r)
 I0 = rep(0, n_r)
 A0 = rep(0, n_r)
-E_d_0 = 100*rep(1, n_r) # IN THIS EXPERIMENT WE FIX Ed0 to 100
+E_d_0 = 1*rep(1, n_r) # IN THIS EXPERIMENT WE FIX Ed0 to 100
 X_0 = c(E0, J0, I0, A0, E_d_0)
 
 #integration on multiple years 
@@ -247,6 +219,15 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
 
 E0_df$E0 = (Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)]/E_d_0)^(1/length(years_u))
 
-ggplot(E0_df, aes(T_av, H, fill= E0)) + 
+#https://hihayk.github.io/scale/#4/7/40/36/-50/151/0/14/F8C358/248/195/91/white
+E0_df <- E0_df %>%
+  mutate(E0_level=cut(E0, breaks=c(0, 0.01, 0.1, 1, 10, 20, 50, 100),
+                         labels=c("0-0.01", "0.01-0.1", "0.1-1", "1-10", "10-20", "20-50", "50-100"))) %>%
+  mutate(E0_level=factor(as.character(E0_level), levels=rev(levels(E0_level))))
+
+ggplot(E0_df, aes(T_av, H, fill= E0_level)) + 
+  scale_fill_manual(values = rev(c("#65992E", "#8FB338", "#E2CF4D", "#F89061", "#F96970", "#F97ADC", "#A494FB")))+
   scale_y_log10()+
-  geom_tile()
+  geom_tile()+
+  theme_test()
+
