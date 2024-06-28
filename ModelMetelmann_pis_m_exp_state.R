@@ -20,8 +20,8 @@ load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Weather_Ni
 H_dens = 4800 # humans/km2
 
 #T_av = 14.66509
-T_add = -9:10
-H_mult = 1.23618^(-9:10)
+T_add = -11:8
+H_mult = 1.23618^(-11:8)
 
 W_tot_cycle_l <- vector(mode = "list", length = length(T_add)*length(H_mult))
 
@@ -217,22 +217,57 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
                       "t" = rep(DOS_sim, n_r*5),
                       "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
 
-E0_df$E0 = (Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)]/E_d_0)^(1/length(years_u))
+E0_df$E0 = (pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)^(1/length(years_u))
+
 
 #https://hihayk.github.io/scale/#4/7/40/36/-50/151/0/14/F8C358/248/195/91/white
 E0_df <- E0_df %>%
-  mutate(E0_level=cut(E0, breaks=c(0, 0.01, 0.1, 1, 10, 20, 50, 100),
-                         labels=c("0-0.01", "0.01-0.1", "0.1-1", "1-10", "10-20", "20-50", "50-100"))) %>%
+  mutate(E0_level=cut(E0, breaks=c(-1, 10^-10, 0.01, 0.1, 1, 10, 20, 50, 100),
+                         labels=c("0", "0-0.01", "0.01-0.1", "0.1-1", "1-10", "10-20", "20-50", "50-100"))) %>%
   mutate(E0_level=factor(as.character(E0_level), levels=rev(levels(E0_level))))
 
-cities_df <- data.frame("name" = c(Nice, Paris, Lyon, Marseille, ),
-                        "country" =,
-                        "T_av" =,
-                        "H" = )
+cities_df <- data.frame("name" = c("Nice", "Paris", "Lyon", "Brest", "Sevilla", "Rome", "Munich",
+"Edinburgh", "Trondheim", "Prague"),
+                        "country" = c("", "FR", "FR", "FR", "ES", "IT", "GE", "UK", "NO", "CZ"),
+                        "T_av" = c(14.7, 12.4, 12.8, 11.7, 19.2, 17.6, 7.8, 8.6, 5.8, 8.4),
+                        "H" = c(4800, 21000, 11000, 2800, 4900, 2100, 5200, 1800, 500, 2800))
 
-ggplot(E0_df, aes(T_av, H, fill= E0_level)) + 
-  scale_fill_manual(values = rev(c("#65992E", "#8FB338", "#E2CF4D", "#F89061", "#F96970", "#F97ADC", "#A494FB")))+
+p1 <- ggplot() + 
+  geom_tile(data = E0_df, aes(x = T_av, y = H, fill= E0_level))+
+  scale_fill_manual(values = rev(c("#007917", "#65992E", "#8FB338", "#E2CF4D", "#F89061", "#F96970", "#F97ADC", "#A494FB")))+
   scale_y_log10()+
-  geom_tile()+
   theme_test()
 
+p1 + geom_point(data = cities_df, aes(x = T_av, y = H)) +
+  geom_text(data = cities_df, aes(x = T_av, y = H, label = name), hjust=-0.1, vjust=-0.1)
+
+# max mosquitoes per habitant
+A0_df <- E0_df %>%
+  select(-c("E0", "E0_level")) %>%
+  mutate(maxA = apply(Sim[, 1+(n_r*3+1):(n_r*4)], 2, max)) %>%
+  mutate(maxM = maxA/H)   
+
+mb = c(10^seq(-2, 6, length.out = 5))
+
+p2 <- ggplot() + 
+  geom_tile(data = A0_df, aes(x = T_av, y = H, fill= maxA))+
+  scale_y_log10()+
+  scale_fill_gradient(trans = "log",
+                      low = "white",
+                      high ="#F96970",
+                      breaks = mb,
+                      labels = mb)+
+  theme_test()  
+
+p2 + geom_point(data = cities_df, aes(x = T_av, y = H)) +
+  geom_text(data = cities_df, aes(x = T_av, y = H, label = name), hjust=-0.1, vjust=-0.1)
+
+p3 <- ggplot() + 
+  geom_tile(data = A0_df, aes(x = T_av, y = H, fill= maxM))+
+  scale_fill_gradient(low = "white",
+                    high ="#F96970")+
+  scale_y_log10()+
+  theme_test()  
+
+p3 + geom_point(data = cities_df, aes(x = T_av, y = H)) +
+  geom_text(data = cities_df, aes(x = T_av, y = H, label = name), hjust=-0.1, vjust=-0.1)
