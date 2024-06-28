@@ -51,10 +51,19 @@ if (any(names(W_df)=="T_M")){
   temp_m <- temp
 }
 
-#To be needed next: LAT and LON for each place; Human population in each pixel;
+
+
+
+
+
+#To be corrected here
 LAT = 44.5*rep(1, n_r)
 LON = 11.5*rep(1, n_r)
 H = rep(100, n_r) #human population density per km² SO FAR
+
+
+
+
 
 #elaborate temp and prec + sapply transpose matrices: need to t()
 temp_7 = temp[1,]
