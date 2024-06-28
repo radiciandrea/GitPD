@@ -54,7 +54,7 @@ if (any(names(W_df)=="T_M")){
 #To be needed next: LAT and LON for each place; Human population in each pixel;
 LAT = 44.5*rep(1, n_r)
 LON = 11.5*rep(1, n_r)
-H = 1000*c(2.78, 0.3, 0.4, 1, 0.8, 0.9, 0.2, 0.7, 1.1) #human population density per km² in E R
+H = rep(100, n_r) #human population density per km² SO FAR
 
 #elaborate temp and prec + sapply transpose matrices: need to t()
 temp_7 = temp[1,]
