@@ -228,7 +228,7 @@ E0_df <- E0_df %>%
 
 cities_df <- data.frame("name" = c("Nice", "Paris", "Lyon", "Brest", "Sevilla", "Rome", "Munich",
 "Edinburgh", "Trondheim", "Prague"),
-                        "country" = c("", "FR", "FR", "FR", "ES", "IT", "GE", "UK", "NO", "CZ"),
+                        "country" = c("FR", "FR", "FR", "FR", "ES", "IT", "GE", "UK", "NO", "CZ"),
                         "T_av" = c(14.7, 12.4, 12.8, 11.7, 19.2, 17.6, 7.8, 8.6, 5.8, 8.4),
                         "H" = c(4800, 21000, 11000, 2800, 4900, 2100, 5200, 1800, 500, 2800))
 
@@ -238,8 +238,12 @@ p1 <- ggplot() +
   scale_y_log10()+
   theme_test()
 
-p1 + geom_point(data = cities_df, aes(x = T_av, y = H)) +
-  geom_text(data = cities_df, aes(x = T_av, y = H, label = name), hjust=-0.1, vjust=-0.1)
+cities_temp_df <- cities_df %>% filter(name == "Nice")
+cities_temp_df <- cities_df %>% filter(country == "FR")
+cities_temp_df <- cities_df 
+
+p1 + geom_point(data = cities_temp_df, aes(x = T_av, y = H)) +
+  geom_text(data = cities_temp_df, aes(x = T_av, y = H, label = name), hjust=-0.1, vjust=-0.1)
 
 # max mosquitoes per habitant
 A0_df <- E0_df %>%
