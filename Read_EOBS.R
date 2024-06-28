@@ -2,6 +2,7 @@ library(ncdf4)
 library(raster)
 library(sf)
 library(dplyr)
+library(lubridate)
 
 rm(list = ls())
 
@@ -31,13 +32,83 @@ lat_m = lat[1]-(lat[2]-lat[1])/2
 lat_M = tail(lat, 1)+(lat[2]-lat[1])/2
 lon_m = lon[1]-(lon[2]-lon[1])/2
 lon_M = tail(lon, 1)+(lon[2]-lon[1])/2
+time_0 = time[1]-1
 
+date = as.Date(time, origin=as.Date("1950-01-01"))
+date_max = "2011-12-31" #"2020-12-31"
 
+date_sel = date[1:which(date == date_max)]
+time_sel = 1:length(date_sel)
+year_sel = sapply(date_sel, function(x){substr(x, 1, 4)})
 
 #select a subgrid to be kept. 
+grid_sel = st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_W_EU.shp")
 
+#find selected square
+i_lon_sel = min(grid_sel$col_index):max(grid_sel$col_index)
+i_lat_sel = min(grid_sel$row_index):max(grid_sel$row_index)
+
+# rain - precipitation
+# long # lat # time
 rr <- ncvar_get(data_rr, attributes(data_rr$var)$names[1])
+rr_sel <- rr[i_lon_sel, i_lat_sel, time_sel]
+rm(rr)
+
+# mean temperature
 tg <- ncvar_get(data_tg, attributes(data_tg$var)$names[1])
+tg_sel <- tg[i_lon_sel, i_lat_sel, time_sel]
+rm(tg)
+
+#min temperature
 tn <- ncvar_get(data_tn, attributes(data_tn$var)$names[1])
+tn_sel <- tn[i_lon_sel, i_lat_sel, time_sel]
+rm(tn)
+
+#max temperature
 tx <- ncvar_get(data_tx, attributes(data_tx$var)$names[1])
+tx_sel <- tx[i_lon_sel, i_lat_sel, time_sel]
+rm(tx)
+
+
+#extract weather in each location
+W_list <- vector(mode = "list", sum(is.na(tn_sel[,,1])==T))
+k = 1
+
+grid_sel <- grid_sel %>%
+  mutate(region = NA)
+
+for(j in 1:length(i_lat_sel)){
+  for(i in 1:length(i_lon_sel)){
+      
+    if(is.na(rr_sel[i,j,1])==F){
+      W_df <- data.frame(
+        region = k,
+        r_i = i_lon_sel[i],
+        r_j = i_lat_sel[j],
+        year = year_sel,
+        DOS = time_sel,
+        date = date_sel,
+        P = rr_sel[i,j,],
+        T_av = tg_sel[i,j,],
+        T_M = tx_sel[i,j,],
+        T_m = tn_sel[i,j,],
+        DOY = time_sel)
+      
+      grid_sel$region[which((domain_sel$row_index == i_lat_sel[j]) & (domain_sel$col_index == i_lon_sel[i]))] = k
+      
+      W_list[[k]]<-W_df
+      k = k+1
+    }
+  }
+}
+
+W_tot_df <- do.call("rbind", W_list)
+
+domain_sel = grid_sel%>%
+  filter(is.na(region)==F)
+
+#save
+save(W_tot_df, file = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011.RData")
+st_write(domain_sel, "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel.shp")
+  
 
