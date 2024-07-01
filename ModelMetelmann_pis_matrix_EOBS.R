@@ -14,16 +14,20 @@ library(pracma)
 #load T and P
 
 #Getting weather from EOBS
-load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011.RData") #EOBS
+load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_Occitanie.RData") #EOBS
+
+# distinct time and space
+regions_df <- W_tot_df %>% distinct(region, .keep_all = TRUE) %>%
+  select(c("region","r_i","r_j", "lon", "lat"))
 
 #Create a matrix over which integrate; each colums is a city, each row is a date
-regions = unique(W_tot_df$region)
+regions = regions_df$region
 DOS = unique(W_tot_df$DOS)
 
 # set simualtion horizon
 t_s = DOS[1] # simulate multiple year
 t_end = tail(DOS, n = 1)
-# t_end = 365*3+1
+#t_end = 365*3+1
 DOS_sim = t_s:t_end
 
 # reduce simulation horizon and redefine DOY and DOS
@@ -51,19 +55,11 @@ if (any(names(W_df)=="T_M")){
   temp_m <- temp
 }
 
-
-
-
-
-
-#To be corrected here
-LAT = 44.5*rep(1, n_r)
-LON = 11.5*rep(1, n_r)
-H = rep(100, n_r) #human population density per km² SO FAR
-
-
-
-
+# lat and lon
+LAT = regions_df$lat
+LON = regions_df$lon
+#H = rep(100, n_r) #human population density per km² SO FAR
+H =  matrix(rep(100, n_r*n_d), nrow = n_d)
 
 #elaborate temp and prec + sapply transpose matrices: need to t()
 temp_7 = temp[1,]
@@ -108,7 +104,7 @@ eps_fac = 0.01
 
 h = (1-eps_rat)*(1+eps_0)*exp(-eps_var*(prec-eps_opt)^2)/
   (exp(-eps_var*(prec-eps_opt)^2)+ eps_0) +
-  eps_rat*eps_dens/(eps_dens + exp(-eps_fac*matrix(rep(H, n_d), nrow = n_d, byrow = T )))
+  eps_rat*eps_dens/(eps_dens + exp(-eps_fac*matrix(H, nrow = n_d, byrow = T )))
 
 df <- function(t, x, parms) {
   
@@ -154,7 +150,7 @@ E0 = rep(0, n_r)
 J0 = rep(0, n_r)
 I0 = rep(0, n_r)
 A0 = rep(0, n_r)
-E_d_0 = 10^6*rep(1, n_r) # at 1st of January (10^6)
+E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
 
 X_0 = c(E0, J0, I0, A0, E_d_0)
 
@@ -188,6 +184,16 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
                       "t" = rep(DOS_sim, n_r*5),
                       "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
 
+E0 = (pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)
+
+#da trasferire in un altro file
+
+
+
+
+
+
+
 #plot
 id_reg = 1
 
@@ -206,3 +212,18 @@ Sim_x_df<- dcast(Sim_m_x_df, t ~ variable)
 #   theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
 
 # compute laid eggs: change into integration function #beta should be calculatedd hour by hour
+
+
+
+
+
+#resto del codice
+
+st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel.shp")
+
+load()
+
+domain_sel <- domain_sel%>%
+  mutate(E0 = E0)
+
+st_write(domain_sel, "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel.shp")
