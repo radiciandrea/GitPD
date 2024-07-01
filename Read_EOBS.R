@@ -18,7 +18,7 @@ data_tx <- nc_open(paste0(folder, "tx_ens_mean_0.25deg_reg_2011-2023_v29.0e.nc")
 # 25N-71.5N x 25W-45E
 
 # extract only 2021-2020
-years = 2011:2020
+# years = 2011:2020
 
 print(data_rr)
 #days since 1950-01-01 00:00
@@ -42,8 +42,9 @@ time_sel = 1:length(date_sel)
 year_sel = sapply(date_sel, function(x){substr(x, 1, 4)})
 
 #select a subgrid to be kept. 
+grid_sel = st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_France.shp")
+#grid_sel = st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_Occitanie.shp")
 #grid_sel = st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_W_EU.shp")
-grid_sel = st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_Occitanie.shp")
 
 #find selected square
 i_lon_sel = min(grid_sel$col_index):max(grid_sel$col_index)
@@ -91,6 +92,7 @@ for(j in 1:length(i_lat_sel)){
         r_j = i_lat_sel[j],
         lon = lon_sel[i],
         lat = lat_sel[j],
+        pop = grid_sel$pop[which((grid_sel$row_index == i_lat_sel[j]) & (grid_sel$col_index == i_lon_sel[i]))],
         year = year_sel,
         DOS = time_sel,
         date = date_sel,
@@ -114,7 +116,7 @@ domain_sel = grid_sel%>%
   filter(is.na(region)==F)
 
 #save
-save(W_tot_df, file = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_Occitanie.RData") #EOBS_sel_2011_W_EU
-st_write(domain_sel, "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_Occitanie.shp") #domain_sel_W_EU
+save(W_tot_df, file = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_Occitanie.RData") #EOBS_sel_2011_W_EU #EOBS_sel_2011_Occitanie.RData
+#st_write(domain_sel, "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_Occitanie.shp") #domain_sel_W_EU #domain_sel_Occitanie
   
 
