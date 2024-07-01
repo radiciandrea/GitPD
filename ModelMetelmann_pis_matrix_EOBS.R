@@ -14,11 +14,11 @@ library(pracma)
 #load T and P
 
 #Getting weather from EOBS
-load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_Occitanie.RData") #EOBS
+load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_France.RData") #EOBS domain_sel_W_EU #Occitanie
 
 # distinct time and space
 regions_df <- W_tot_df %>% distinct(region, .keep_all = TRUE) %>%
-  dplyr::select(c("region","r_i","r_j", "lon", "lat"))
+  dplyr::select(c("region","r_i","r_j", "lon", "lat", "pop"))
 
 #Create a matrix over which integrate; each colums is a city, each row is a date
 regions = regions_df$region
@@ -59,7 +59,7 @@ if (any(names(W_df)=="T_M")){
 LAT = regions_df$lat
 LON = regions_df$lon
 #H = rep(100, n_r) #human population density per km² SO FAR
-H =  matrix(rep(100, n_r*n_d), nrow = n_d)
+H =   matrix(rep(regions_df$pop, n_d), nrow = n_d, byrow = T ) 
 
 #elaborate temp and prec + sapply transpose matrices: need to t()
 temp_7 = temp[1,]
@@ -104,7 +104,7 @@ eps_fac = 0.01
 
 h = (1-eps_rat)*(1+eps_0)*exp(-eps_var*(prec-eps_opt)^2)/
   (exp(-eps_var*(prec-eps_opt)^2)+ eps_0) +
-  eps_rat*eps_dens/(eps_dens + exp(-eps_fac*matrix(H, nrow = n_d, byrow = T )))
+  eps_rat*eps_dens/(eps_dens + exp(-eps_fac*H))
 
 df <- function(t, x, parms) {
   
@@ -184,14 +184,15 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
                       "t" = rep(DOS_sim, n_r*5),
                       "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
 
-E0 = (pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)
+E0 = (pmax(Sim[nrow(Sim)-2, 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)
 
 #da trasferire in un altro file
 
 
-domain_sel <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_Occitanie.shp")
+domain_sel <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_Occitanie.shp") #domain_sel_W_EU
 
 domain_sel <- domain_sel%>%
+  arrange(region) %>%
   mutate(E0 = E0)
 
 ggplot()+
