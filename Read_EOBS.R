@@ -42,7 +42,8 @@ time_sel = 1:length(date_sel)
 year_sel = sapply(date_sel, function(x){substr(x, 1, 4)})
 
 #select a subgrid to be kept. 
-grid_sel = st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_W_EU.shp")
+#grid_sel = st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_W_EU.shp")
+grid_sel = st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_Occitanie.shp")
 
 #find selected square
 i_lon_sel = min(grid_sel$col_index):max(grid_sel$col_index)
@@ -69,6 +70,9 @@ tx <- ncvar_get(data_tx, attributes(data_tx$var)$names[1])
 tx_sel <- tx[i_lon_sel, i_lat_sel, time_sel]
 rm(tx)
 
+# sel also lat lon
+lat_sel = lat[i_lat_sel]
+lon_sel = lon[i_lon_sel]
 
 #extract weather in each location
 W_list <- vector(mode = "list", sum(is.na(tn_sel[,,1])==T))
@@ -85,6 +89,8 @@ for(j in 1:length(i_lat_sel)){
         region = k,
         r_i = i_lon_sel[i],
         r_j = i_lat_sel[j],
+        lon = lon_sel[i],
+        lat = lat_sel[j],
         year = year_sel,
         DOS = time_sel,
         date = date_sel,
@@ -94,7 +100,7 @@ for(j in 1:length(i_lat_sel)){
         T_m = tn_sel[i,j,],
         DOY = time_sel)
       
-      grid_sel$region[which((domain_sel$row_index == i_lat_sel[j]) & (domain_sel$col_index == i_lon_sel[i]))] = k
+      grid_sel$region[which((grid_sel$row_index == i_lat_sel[j]) & (grid_sel$col_index == i_lon_sel[i]))] = k
       
       W_list[[k]]<-W_df
       k = k+1
@@ -108,7 +114,7 @@ domain_sel = grid_sel%>%
   filter(is.na(region)==F)
 
 #save
-save(W_tot_df, file = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011.RData")
-st_write(domain_sel, "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel.shp")
+save(W_tot_df, file = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_Occitanie.RData") #EOBS_sel_2011_W_EU
+st_write(domain_sel, "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_Occitanie.shp") #domain_sel_W_EU
   
 
