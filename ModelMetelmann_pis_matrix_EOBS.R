@@ -184,19 +184,21 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
                       "t" = rep(DOS_sim, n_r*5),
                       "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
 
-E0 = (pmax(Sim[nrow(Sim)-2, 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)
+E0_v = (pmax(Sim[nrow(Sim)-2, 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)
+E0_v = (pmax(Sim[nrow(Sim), 1+1:n_r], 0)/E_d_0)
 
 #da trasferire in un altro file
 
 
-domain_sel <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_Occitanie.shp") #domain_sel_W_EU
+domain_sel <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_France.shp") #domain_sel_W_EU
 
 domain_sel <- domain_sel%>%
   arrange(region) %>%
-  mutate(E0 = E0)
+  mutate(E0 = E0_v)
 
 ggplot()+
-  geom_sf(data = domain_sel, aes(fill = E0))
+  geom_sf(data = domain_sel, aes(fill = E0_v))+
+ scale_fill_gradient(trans = "log")
 
 
 #plot
