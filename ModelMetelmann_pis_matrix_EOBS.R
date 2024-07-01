@@ -13,8 +13,9 @@ library(pracma)
 
 #load T and P
 
+name = "Occitanie"
 #Getting weather from EOBS
-load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_France.RData") #EOBS domain_sel_W_EU #Occitanie
+load(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_", name, ".RData")) #EOBS domain_sel_W_EU #Occitanie
 
 # distinct time and space
 regions_df <- W_tot_df %>% distinct(region, .keep_all = TRUE) %>%
@@ -184,21 +185,24 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
                       "t" = rep(DOS_sim, n_r*5),
                       "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
 
-E0_v = (pmax(Sim[nrow(Sim)-2, 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)
-E0_v = (pmax(Sim[nrow(Sim), 1+1:n_r], 0)/E_d_0)
+E0_v = (pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)
+#E0_v = (pmax(Sim[nrow(Sim), 1+1:n_r], 0)/E_d_0)
 
 #da trasferire in un altro file
 
 
-domain_sel <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_France.shp") #domain_sel_W_EU
+domain_sel <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_", name, ".shp") 
 
 domain_sel <- domain_sel%>%
   arrange(region) %>%
   mutate(E0 = E0_v)
 
+regions <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
+
 ggplot()+
   geom_sf(data = domain_sel, aes(fill = E0_v))+
- scale_fill_gradient(trans = "log")
+  geom_sf(data = regions, alpha = 0, colour = "grey90")+ 
+    scale_fill_gradient(trans = "log")
 
 
 #plot

@@ -34,17 +34,21 @@ lon_m = lon[1]-(lon[2]-lon[1])/2
 lon_M = tail(lon, 1)+(lon[2]-lon[1])/2
 time_0 = time[1]-1
 
+
+#select a subgrid to be kept. 
+
+name = "Occitanie" #Occitanie, W_EU, France
+year_f = "2012"
+
 date = as.Date(time, origin=as.Date("1950-01-01"))
-date_max = "2011-12-31" #"2020-12-31"
+date_max = paste0(year_f, "-12-31") #"2020-12-31"
 
 date_sel = date[1:which(date == date_max)]
 time_sel = 1:length(date_sel)
 year_sel = sapply(date_sel, function(x){substr(x, 1, 4)})
 
-#select a subgrid to be kept. 
-grid_sel = st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_France.shp")
-#grid_sel = st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_Occitanie.shp")
-#grid_sel = st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_W_EU.shp")
+grid_sel = st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_", name, ".shp"))
+
 
 #find selected square
 i_lon_sel = min(grid_sel$col_index):max(grid_sel$col_index)
@@ -116,7 +120,7 @@ domain_sel = grid_sel%>%
   filter(is.na(region)==F)
 
 #save
-save(W_tot_df, file = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_Occitanie.RData") #EOBS_sel_2011_W_EU #EOBS_sel_2011_Occitanie.RData
-#st_write(domain_sel, "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_Occitanie.shp") #domain_sel_W_EU #domain_sel_Occitanie
+save(W_tot_df, file = paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_", name, ".RData")) #EOBS_sel_2011_W_EU #EOBS_sel_2011_Occitanie.RData
+st_write(domain_sel, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_", name, ".shp")) #domain_sel_W_EU #domain_sel_Occitanie
   
 
