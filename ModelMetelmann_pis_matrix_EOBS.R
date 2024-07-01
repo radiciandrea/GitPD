@@ -18,7 +18,7 @@ load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2
 
 # distinct time and space
 regions_df <- W_tot_df %>% distinct(region, .keep_all = TRUE) %>%
-  select(c("region","r_i","r_j", "lon", "lat"))
+  dplyr::select(c("region","r_i","r_j", "lon", "lat"))
 
 #Create a matrix over which integrate; each colums is a city, each row is a date
 regions = regions_df$region
@@ -189,9 +189,13 @@ E0 = (pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)
 #da trasferire in un altro file
 
 
+domain_sel <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_Occitanie.shp")
 
+domain_sel <- domain_sel%>%
+  mutate(E0 = E0)
 
-
+ggplot()+
+  geom_sf(data = domain_sel, aes(fill = E0))
 
 
 #plot
@@ -203,27 +207,12 @@ Sim_m_x_df <- Sim_m_df %>%
   filter(region == region_x)
 Sim_x_df<- dcast(Sim_m_x_df, t ~ variable)
 
-# ggplot(Sim_m_x_df, aes(x = t, y = value, color = variable))+
-#   geom_line()+
-#   scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
-#   # ylim(1, max(Sim_m_x_df$value))+
-#   # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
-#   labs(color = paste0("Abundances per classes (", region_x, ")")) +
-#   theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
+ggplot(Sim_m_x_df, aes(x = t, y = value, color = variable))+
+  geom_line()+
+  scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
+  # ylim(1, max(Sim_m_x_df$value))+
+  # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
+  labs(color = paste0("Abundances per classes (", region_x, ")")) +
+  theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
 
 # compute laid eggs: change into integration function #beta should be calculatedd hour by hour
-
-
-
-
-
-#resto del codice
-
-st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel.shp")
-
-load()
-
-domain_sel <- domain_sel%>%
-  mutate(E0 = E0)
-
-st_write(domain_sel, "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel.shp")
