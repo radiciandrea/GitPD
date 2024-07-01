@@ -191,13 +191,19 @@ E0_v = (pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)
 #da trasferire in un altro file
 
 
-domain_sel <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_", name, ".shp") 
+domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_", name, ".shp")) 
 
 domain_sel <- domain_sel%>%
   arrange(region) %>%
   mutate(E0 = E0_v)
 
 regions <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
+
+if (name == "Occitanie") {
+  regions <- regions %>%
+    filter(Region == "Languedoc-Roussillon et Midi-P")
+}
+
 
 ggplot()+
   geom_sf(data = domain_sel, aes(fill = E0_v))+
