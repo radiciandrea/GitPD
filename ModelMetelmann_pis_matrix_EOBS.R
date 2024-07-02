@@ -172,11 +172,12 @@ for (year in years_u){
   X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
   
   DOY_y_2 = DOY_y[(max(DOY_y)-152): max(DOY_y)]
+  # Sim_y_2<- deSolve::rk4(X_0, DOY_y_2, df, parms)
   Sim_y_2<- ode(X_0, DOY_y_2, df, parms)
+  X_0 = c(rep(0, n_r*4), Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
   
   #break at 31/12 to zero everything except diapausing eggs
   Sim[id_d_y,] = rbind(Sim_y_1, Sim_y_2)
-  X_0 = c(rep(0, n_r*4), Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
 }
 toc()
 
@@ -195,7 +196,10 @@ domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/
 
 domain_sel <- domain_sel%>%
   arrange(region) %>%
-  mutate(E0 = E0_v)
+  mutate(E0 = E0_v)%>%
+  mutate(E0_level=cut(E0, breaks=c(0, 10^-(3:1), 2^(-1:4)),
+                      labels=sapply(breaks[-length(breaks)], function(x){paste0(">", as.character(x))}))) %>%
+  mutate(E0_level=factor(as.character(E0_level), levels=rev(levels(E0_level))))
 
 regions <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
 
@@ -206,9 +210,10 @@ if (name == "Occitanie") {
 
 
 ggplot()+
-  geom_sf(data = domain_sel, aes(fill = E0_v))+
-  geom_sf(data = regions, alpha = 0, colour = "grey90")+ 
-    scale_fill_gradient(trans = "log")
+  geom_sf(data = domain_sel, aes(fill = E0_level))+ #E0_v
+  scale_fill_manual(values = rev(c("#007917", "#65992E", "#8FB338", "#E2CF4D", "#F89061", "#F96970", "#F97ADC", "#A494FB")))+
+  geom_sf(data = regions, alpha = 0, colour = "grey90")
+  # + scale_fill_gradient(trans = "log")
 
 
 #plot
