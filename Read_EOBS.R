@@ -99,12 +99,12 @@ for(j in 1:length(i_lat_sel)){
         pop = grid_sel$pop[which((grid_sel$row_index == i_lat_sel[j]) & (grid_sel$col_index == i_lon_sel[i]))],
         year = year_sel,
         DOS = time_sel,
-        date = as.numeric(strftime(date_sel, format = "%j")),
+        date = date_sel,
         P = rr_sel[i,j,],
         T_av = tg_sel[i,j,],
         T_M = tx_sel[i,j,],
         T_m = tn_sel[i,j,],
-        DOY = time_sel)
+        DOY = as.numeric(strftime(date_sel, format = "%j")))
       
       grid_sel$region[which((grid_sel$row_index == i_lat_sel[j]) & (grid_sel$col_index == i_lon_sel[i]))] = k
       
