@@ -185,7 +185,7 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
                       "t" = rep(DOS_sim, n_r*5),
                       "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
 
-E0_v = (pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)
+E0_v = (pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)^(1/length(years_u))
 #E0_v = (pmax(Sim[nrow(Sim), 1+1:n_r], 0)/E_d_0)
 
 #da trasferire in un altro file
