@@ -17,12 +17,7 @@ name = "Occitanie"
 #Getting weather from EOBS
 load(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_", name, ".RData")) #EOBS domain_sel_W_EU #Occitanie
 
-# distinct time and space
-regions_df <- W_tot_df %>% distinct(region, .keep_all = TRUE) %>%
-  dplyr::select(c("region","r_i","r_j", "lon", "lat", "pop"))
-
 #Create a matrix over which integrate; each colums is a city, each row is a date
-regions = regions_df$region
 DOS = unique(W_tot_df$DOS)
 
 # set simualtion horizon
@@ -39,6 +34,12 @@ DOY = W_df$DOY[DOS_sim]
 years = W_df$year[DOS_sim]
 years_u = unique(years)
 date = W_df$date
+
+# distinct space
+regions_df <- W_tot_df %>% distinct(region, .keep_all = TRUE) %>%
+  dplyr::select(c("region","r_i","r_j", "lon", "lat", "pop"))
+
+regions = regions_df$region
 
 #dimensions
 n_r = length(regions) # number of regions/locations (added; 1 for no dimension)
@@ -172,7 +173,7 @@ for (year in years_u){
   X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
   
   DOY_y_2 = DOY_y[(max(DOY_y)-152): max(DOY_y)]
-  # Sim_y_2<- deSolve::rk4(X_0, DOY_y_2, df, parms)
+  #Sim_y_2<- deSolve::rk4(X_0, DOY_y_2, df, parms)
   Sim_y_2<- ode(X_0, DOY_y_2, df, parms)
   X_0 = c(rep(0, n_r*4), Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
   
