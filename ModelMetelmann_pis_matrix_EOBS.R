@@ -36,7 +36,7 @@ years_u = unique(years)
 date = W_df$date
 
 # distinct space
-regions_df <- W_tot_df %>% distinct(region, .keep_all = TRUE) %>%
+regions_df <- W_df %>% distinct(region, .keep_all = TRUE) %>%
   dplyr::select(c("region","r_i","r_j", "lon", "lat", "pop"))
 
 regions = regions_df$region
