@@ -38,7 +38,7 @@ time_0 = time[1]-1
 #select a subgrid to be kept. 
 
 name = "Occitanie" #Occitanie, W_EU, France
-year_f = "2012"
+year_f = "2020"
 
 date = as.Date(time, origin=as.Date("1950-01-01"))
 date_max = paste0(year_f, "-12-31") #"2020-12-31"
@@ -99,7 +99,7 @@ for(j in 1:length(i_lat_sel)){
         pop = grid_sel$pop[which((grid_sel$row_index == i_lat_sel[j]) & (grid_sel$col_index == i_lon_sel[i]))],
         year = year_sel,
         DOS = time_sel,
-        date = date_sel,
+        date = as.numeric(strftime(date_sel, format = "%j")),
         P = rr_sel[i,j,],
         T_av = tg_sel[i,j,],
         T_M = tx_sel[i,j,],
