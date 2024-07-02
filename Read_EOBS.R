@@ -37,7 +37,7 @@ time_0 = time[1]-1
 
 #select a subgrid to be kept. 
 
-name = "Occitanie" #Occitanie, W_EU, France
+name = "W_EU" #Occitanie, W_EU, France
 year_f = "2020"
 
 date = as.Date(time, origin=as.Date("1950-01-01"))
@@ -120,7 +120,7 @@ domain_sel = grid_sel%>%
   filter(is.na(region)==F)
 
 #save
-save(W_tot_df, file = paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_", name, ".RData")) #EOBS_sel_2011_W_EU #EOBS_sel_2011_Occitanie.RData
+save(W_tot_df, file = paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_", year_f, "_", name, ".RData")) #EOBS_sel_2011_W_EU #EOBS_sel_2011_Occitanie.RData
 st_write(domain_sel, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_", name, ".shp")) #domain_sel_W_EU #domain_sel_Occitanie
   
 

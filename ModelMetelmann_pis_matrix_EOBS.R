@@ -15,8 +15,9 @@ library(sf)
 #load T and P
 
 name = "Occitanie"
+year_f = "2011"
 #Getting weather from EOBS
-load(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_", name, ".RData")) #EOBS domain_sel_W_EU #Occitanie
+load(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_", year_f, "_", name, ".RData")) #EOBS domain_sel_W_EU #Occitanie #France
 
 #Create a matrix over which integrate; each colums is a city, each row is a date
 DOS = unique(W_tot_df$DOS)
@@ -162,7 +163,7 @@ X_0 = c(E0, J0, I0, A0, E_d_0)
 Sim <- matrix(nrow = length(DOS_sim), ncol = 1+n_r*5)
 
 #rk integration step
-is = 1/24
+is = 1/100
 
 tic()
 for (year in years_u){
@@ -177,10 +178,10 @@ for (year in years_u){
   X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
   
   DOY_y_2 = DOY_y[(max(DOY_y)-152): max(DOY_y)]
-  DOY_y_2_sim = seq((max(DOY_y)-152), max(DOY_y), by = is)
-  Sim_y_2_sim<- deSolve::rk4(X_0, DOY_y_2_sim, df, parms)
-  Sim_y_2 <-Sim_y_2_sim[1+(0:152)/is,]
-  #Sim_y_2<- ode(X_0, DOY_y_2, df, parms)
+  # DOY_y_2_sim = seq((max(DOY_y)-152), max(DOY_y), by = is)
+  # Sim_y_2_sim<- deSolve::rk4(X_0, DOY_y_2_sim, df, parms)
+  # Sim_y_2 <-Sim_y_2_sim[1+(0:152)/is,]
+  Sim_y_2<- ode(X_0, DOY_y_2, df, parms)
   X_0 = c(rep(0, n_r*4), Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
   
   #break at 31/12 to zero everything except diapausing eggs
@@ -188,20 +189,22 @@ for (year in years_u){
 }
 toc()
 
-Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*max(DOS_sim)),
-                      "region" = rep(rep(regions, each = max(DOS_sim)), 5),
-                      "t" = rep(DOS_sim, n_r*5),
-                      "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
+# Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*max(DOS_sim)),
+#                       "region" = rep(rep(regions, each = max(DOS_sim)), 5),
+#                       "t" = rep(DOS_sim, n_r*5),
+#                       "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
 
 E0_v = (pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)^(1/length(years_u))
 #E0_v = (pmax(Sim[nrow(Sim), 1+1:n_r], 0)/E_d_0)
+
+log10(max(E0_v, na.rm=T))
 
 #da trasferire in un altro file
 
 
 domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_", name, ".shp")) 
 
-br = c(0, 10^-(3:1), 2^(-1:4))
+br = c(0, 10^-(2:1), 2^(0:4), 10^200)
 
 domain_sel <- domain_sel%>%
   arrange(region) %>%
@@ -210,21 +213,27 @@ domain_sel <- domain_sel%>%
                       labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
   mutate(E0_level=factor(as.character(E0_level), levels=rev(levels(E0_level))))
 
-regions <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
+regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
 
 if (name == "Occitanie") {
-  regions <- regions %>%
+  regions_sh <- regions_sh %>%
     filter(Region == "Languedoc-Roussillon et Midi-P")
 }
 
 
 ggplot()+
-  geom_sf(data = domain_sel, aes(fill = E0_level))+ #E0_v
+  geom_sf(data = domain_sel, aes(fill = E0_level))+ #
   scale_fill_manual(values = rev(c("#007917", "#65992E", "#8FB338", "#E2CF4D", "#F89061", "#F96970", "#F97ADC", "#A494FB")))+
-  geom_sf(data = regions, alpha = 0, colour = "grey90")
+  geom_sf(data = regions_sh, alpha = 0, colour = "grey90")
   # + scale_fill_gradient(trans = "log")
 
+ggplot()+
+  geom_sf(data = domain_sel, aes(fill = E0_v))+ #E0_v
+  scale_fill_gradient(trans = "log")+
+  geom_sf(data = regions_sh, alpha = 0, colour = "grey90")
 
+
+# st_write(domain_sel, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/res_sim_2011_", name, ".shp"))
 #plot
 id_reg = 1
 
