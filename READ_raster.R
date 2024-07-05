@@ -11,6 +11,7 @@ rm(list = ls())
 library(raster)
 library(sf)
 library(stars)
+library(dplyr)
 
 rm(list = ls())
 
@@ -29,7 +30,9 @@ pop_gpw <- raster(paste0(folder_r, "gpw_v4_population_count_rev11_2015_15_min.ti
 pop_gpw_values <- extract(pop_gpw, st_transform(st_centroid(domain), st_crs(pop_gpw)))
 
 domain <- domain %>%
-  mutate(pop = pop_gpw_values)
+  mutate(pop = pop_gpw_values) 
+
+domain$popkm2 <- domain$pop*10^6/as.numeric(st_area(domain))
 
 # st_write(domain, paste0(folder_sh, "grid_eobs+pop.shp"))
 
