@@ -14,7 +14,7 @@ library(sf)
 
 #load T and P
 
-name = "Occitanie"
+name = "France"
 year_f = "2011"
 #Getting weather from EOBS
 load(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_", year_f, "_", name, ".RData")) #EOBS domain_sel_W_EU #Occitanie #France
@@ -163,7 +163,7 @@ X_0 = c(E0, J0, I0, A0, E_d_0)
 Sim <- matrix(nrow = length(DOS_sim), ncol = 1+n_r*5)
 
 #rk integration step
-is = 1/100
+is = 1/24
 
 tic()
 for (year in years_u){
@@ -189,11 +189,6 @@ for (year in years_u){
 }
 toc()
 
-# Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*max(DOS_sim)),
-#                       "region" = rep(rep(regions, each = max(DOS_sim)), 5),
-#                       "t" = rep(DOS_sim, n_r*5),
-#                       "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
-
 E0_v = (pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)^(1/length(years_u))
 #E0_v = (pmax(Sim[nrow(Sim), 1+1:n_r], 0)/E_d_0)
 
@@ -204,7 +199,11 @@ log10(max(E0_v, na.rm=T))
 
 domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_", name, ".shp")) 
 
-br = c(0, 10^-(2:1), 2^(0:4), 10^200)
+br = c(0, 10^(-3:3), 10^10)
+
+#Metelmann map
+#br = c(0, 10^(-3:3), 10^10)
+#col_br= c("#384AB9", "#4F71D4", "#8CB1FF", "#8CB1FF", "#8CB1FF", "#8CB1FF", "#8CB1FF", "#8CB1FF")
 
 domain_sel <- domain_sel%>%
   arrange(region) %>%
@@ -233,9 +232,15 @@ ggplot()+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")
 
 
+#plot pop
+Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*max(DOS_sim)),
+                      "region" = rep(rep(regions, each = max(DOS_sim)), 5),
+                      "t" = rep(DOS_sim, n_r*5),
+                      "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
+
 # st_write(domain_sel, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/res_sim_2011_", name, ".shp"))
 #plot
-id_reg = 1
+id_reg = 1 #Montpellier = 93 in Occitanie
 
 region_x = regions[id_reg]
 
