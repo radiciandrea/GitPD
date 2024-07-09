@@ -141,12 +141,12 @@ for (year in years_u){
   X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
   
   X_0_log = X_0
-  X_0_log[1+(n_r*3+1):(n_r*4)] = log(X_0[(n_r*3+1):(n_r*4)])
+  X_0_log[1:(n_r*4)] = log(X_0[1:(n_r*4)])
   
   DOY_y_2_sim = seq((max(DOY_y)-152), max(DOY_y), by = is)
-  Sim_y_2_sim<- deSolve::rk4(X_0, DOY_y_2_sim, df_log, parms)
+  Sim_y_2_sim<- deSolve::rk4(X_0_log, DOY_y_2_sim, df_log, parms)
   Sim_y_2 <-Sim_y_2_sim[1+(0:152)/is,]
-  Sim_y_2[, 1+(n_r*3+1):(n_r*4)] = exp(Sim_y_2[, 1+(n_r*3+1):(n_r*4)])
+  Sim_y_2[, 1+1:(n_r*4)] = exp(Sim_y_2[, 1+1:(n_r*4)])
   # DOY_y_2 = DOY_y[(max(DOY_y)-152): max(DOY_y)]
   # Sim_y_2<- ode(X_0, DOY_y_2, df, parms, hmin = is)
   X_0 = c(rep(0, n_r*4), Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
@@ -207,7 +207,7 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
 
 # st_write(domain_sel, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/res_sim_2011_", name, ".shp"))
 #plot
-id_reg = 93 #Montpellier = 93 in Occitanie #340 cella maledetta
+id_reg = 340 #Montpellier = 93 in Occitanie #340 cella maledetta
 
 region_x = regions[id_reg]
 

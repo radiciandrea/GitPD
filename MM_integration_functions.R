@@ -43,15 +43,17 @@ df <- function(t, x, parms) {
 }
 
 # this has the log of the adults
+# https://stackoverflow.com/questions/47401678/solving-odes-only-positive-solutions
+# https://stackoverflow.com/questions/41648878/replacing-negative-values-in-a-model-system-of-odes-with-zero
 
 df_log <- function(t, x, parms) {
   
   # initial conditions and parameters
   with(parms, { 
     
-    E = x[(1+n_r*0):(1*n_r)]
-    J = x[(1+n_r*1):(2*n_r)]
-    I = x[(1+n_r*2):(3*n_r)]
+    logE = x[(1+n_r*0):(1*n_r)]
+    logJ = x[(1+n_r*1):(2*n_r)]
+    logI = x[(1+n_r*2):(3*n_r)]
     logA = x[(1+n_r*3):(4*n_r)]
     E_d = x[(1+n_r*4):(5*n_r)]
     
@@ -72,13 +74,13 @@ df_log <- function(t, x, parms) {
     beta = (33.2*exp(-0.5*((temp_h-70.3)/14.1)^2)*(38.8 - temp_h)^1.5)*(temp_h<= 38.8) #fertility rate
     
     # ODE definition 
-    dE = beta*(1-omega[t_n, ])*exp(logA) - (h[t_n, ]*delta_E + mu_E)*E
-    dJ = h[t_n, ]*(delta_E*E + sigma[t_n, ]*gamma*E_d) - (delta_J + mu_J + J/K[t_n, ])*J  
-    dI = 0.5*delta_J*J - (delta_I + mu_A[t_n, ])*I
-    dlogA = delta_I*I/exp(logA) - mu_A[t_n, ]
+    dlogE = beta*(1-omega[t_n, ])*exp(logA)/exp(logE) - (h[t_n, ]*delta_E + mu_E)
+    dlogJ = h[t_n, ]*(delta_E*exp(logE) + sigma[t_n, ]*gamma*E_d)/exp(logJ) - (delta_J + mu_J + exp(logJ)/K[t_n, ])  
+    dlogI = 0.5*delta_J*exp(logJ)/exp(logI) - (delta_I + mu_A[t_n, ])
+    dlogA = delta_I*exp(logI)/exp(logA) - mu_A[t_n, ]
     dE_d = beta*omega[t_n, ]*exp(logA) -  h[t_n, ]*sigma[t_n, ]*E_d #I believe there should be an additional mortality due to winter
     
-    dx <- c(dE, dJ, dI, dlogA, dE_d)
+    dx <- c(dlogE, dlogJ, dlogI, dlogA, dE_d)
     
     # #ODE positive verification
     # dx <- ifelse(x + dx * dt < 0, 0, dx*dt)
