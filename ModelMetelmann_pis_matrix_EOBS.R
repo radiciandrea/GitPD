@@ -141,7 +141,7 @@ for (year in years_u){
   X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
   
   X_0_log = X_0
-  X_0_log[1+(n_r*3+1):(n_r*4)] = log(X_0[1+(n_r*3+1):(n_r*4)])
+  X_0_log[1+(n_r*3+1):(n_r*4)] = log(X_0[(n_r*3+1):(n_r*4)])
   
   DOY_y_2_sim = seq((max(DOY_y)-152), max(DOY_y), by = is)
   Sim_y_2_sim<- deSolve::rk4(X_0, DOY_y_2_sim, df_log, parms)
