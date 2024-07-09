@@ -110,45 +110,6 @@ h = (1-eps_rat)*(1+eps_0)*exp(-eps_var*(prec-eps_opt)^2)/
   (exp(-eps_var*(prec-eps_opt)^2)+ eps_0) +
   eps_rat*eps_dens/(eps_dens + exp(-eps_fac*H))
 
-df <- function(t, x, parms) {
-  
-  # initial conditions and parameters
-  with(parms, { 
-    
-    E = x[(1+n_r*0):(1*n_r)]
-    J = x[(1+n_r*1):(2*n_r)]
-    I = x[(1+n_r*2):(3*n_r)]
-    A = x[(1+n_r*3):(4*n_r)]
-    E_d = x[(1+n_r*4):(5*n_r)]
-    
-    #t_n = t[1]-t_s+1 # time of numerical integration to index matrix
-    t_n = t[1]
-    t_h = 24*(t - t_n) #should put t and not t[1]
-    TM = temp_M[max(1,t_n-1),]*(t_h<t_sr[t_n, ]) + temp_M[t_n,]*(t_h>t_sr[t_n, ])
-    Tm = temp_m[t_n, ]*(t_h<14) + temp_M[min(t_n+1, length(temp_m))]*(t_h>14)
-    
-    temp_h = ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h+10)/(10+t_sr[t_n, ])))*(t_h<t_sr[t_n, ])+
-      ((TM+Tm)/2 - (TM-Tm)/2*cos(pi*(t_h-t_sr[t_n, ])/(14-t_sr[t_n, ])))*(t_h>t_sr[t_n, ])*(t_h<14)+
-      ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h-14)/(10+t_sr[t_n, ])))*(t_h>14)
-    
-    delta_J = 1/(83.85 - 4.89*temp_h + 0.08*temp_h^2) #juvenile development rate (in SI: 82.42 - 4.87*temp_h + 0.08*temp_h^ 2)
-    delta_I = 1/(50.1 - 3.574*temp_h + 0.069*temp_h^2) #first pre blood mean rate
-    mu_E = -log(0.955 * exp(-0.5*((temp_h-18.8)/21.53)^6)) # egg mortality rate
-    mu_J = -log(0.977 * exp(-0.5*((temp_h-21.8)/16.6)^6)) # juvenile mortality rate
-    beta = (33.2*exp(-0.5*((temp_h-70.3)/14.1)^2)*(38.8 - temp_h)^1.5)*(temp_h<= 38.8) #fertility rate
-    
-    # ODE definition 
-    dE = beta*(1-omega[t_n, ])*A - (h[t_n, ]*delta_E + mu_E)*E
-    dJ = h[t_n, ]*(delta_E*E + sigma[t_n, ]*gamma*E_d) - (delta_J + mu_J + J/K[t_n, ])*J  
-    dI = 0.5*delta_J*J - (delta_I + mu_A[t_n, ])*I
-    dA = delta_I*I - mu_A[t_n, ]*A
-    dE_d = beta*omega[t_n, ]*A -  h[t_n, ]*sigma[t_n, ]*E_d #I believe there should be an additional mortality due to winter
-    
-    dx <- c(dE, dJ, dI, dA, dE_d)
-    
-    return(list(dx))})
-}
-
 # System initialization
 E0 = rep(0, n_r)
 J0 = rep(0, n_r)
@@ -158,12 +119,14 @@ E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
 
 X_0 = c(E0, J0, I0, A0, E_d_0)
 
+source("MM_integration_functions.R")
+
 #integration on multiple years 
 
 Sim <- matrix(nrow = length(DOS_sim), ncol = 1+n_r*5)
 
 #rk integration step
-is = 1/24
+is = 1/48 #24 or 48 or 100
 
 tic()
 for (year in years_u){
@@ -177,11 +140,15 @@ for (year in years_u){
   Sim_y_1<- ode(X_0, DOY_y_1, df, parms)
   X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
   
-  DOY_y_2 = DOY_y[(max(DOY_y)-152): max(DOY_y)]
-  # DOY_y_2_sim = seq((max(DOY_y)-152), max(DOY_y), by = is)
-  # Sim_y_2_sim<- deSolve::rk4(X_0, DOY_y_2_sim, df, parms)
-  # Sim_y_2 <-Sim_y_2_sim[1+(0:152)/is,]
-  Sim_y_2<- ode(X_0, DOY_y_2, df, parms)
+  X_0_log = X_0
+  X_0_log[1+(n_r*3+1):(n_r*4)] = log(X_0[1+(n_r*3+1):(n_r*4)])
+  
+  DOY_y_2_sim = seq((max(DOY_y)-152), max(DOY_y), by = is)
+  Sim_y_2_sim<- deSolve::rk4(X_0, DOY_y_2_sim, df_log, parms)
+  Sim_y_2 <-Sim_y_2_sim[1+(0:152)/is,]
+  Sim_y_2[, 1+(n_r*3+1):(n_r*4)] = exp(Sim_y_2[, 1+(n_r*3+1):(n_r*4)])
+  # DOY_y_2 = DOY_y[(max(DOY_y)-152): max(DOY_y)]
+  # Sim_y_2<- ode(X_0, DOY_y_2, df, parms, hmin = is)
   X_0 = c(rep(0, n_r*4), Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
   
   #break at 31/12 to zero everything except diapausing eggs
@@ -240,7 +207,7 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
 
 # st_write(domain_sel, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/res_sim_2011_", name, ".shp"))
 #plot
-id_reg = 1 #Montpellier = 93 in Occitanie
+id_reg = 93 #Montpellier = 93 in Occitanie #340 cella maledetta
 
 region_x = regions[id_reg]
 
