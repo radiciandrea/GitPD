@@ -94,8 +94,8 @@ for (year in years){
   #exctract params
   temp = matrix(W_tot_df$T_av, nrow = n_d)
   prec = matrix(W_tot_df$P, nrow = n_d)
-  temp_DJF = rbind(matrix(W_D_df$T_av, nrow = 31),
-                   matrix(W_tot_df$T_av[which(W_tot_df$DOY <= (max(DOY_y)-306))], nrow = (max(DOY_y)-306)))
+  temp_DJF = rbind(matrix(W_D_df$T_m, nrow = 31),
+                   matrix(W_tot_df$T_m[which(W_tot_df$DOY <= (max(DOY_y)-306))], nrow = (max(DOY_y)-306)))
   
   if (any(names(W_tot_df)=="T_M")){
     temp_M <- matrix(W_tot_df$T_M, nrow = n_d)

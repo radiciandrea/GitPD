@@ -71,9 +71,9 @@ H =   matrix(rep(regions_df$pop, n_d), nrow = n_d, byrow = T )
 temp_7 = temp[1,]
 temp_7 = rbind(temp_7, t(sapply(2:n_d,
                                 function(x){return(colMeans(temp[max(1,(x-7)):x,]))}))) # temp of precedent 7 days
-temp_min_DJF = temp[1,]
+temp_min_DJF = temp_m[1,]
 temp_min_DJF = rbind(temp_min_DJF, t(sapply(2:n_d,
-                                            function(x){return(apply(temp[max(1,x-300):x, ], 2, min))}))) #min temp of last winter (daily or hours?)
+                                            function(x){return(apply(temp_m[max(1,x-300):x, ], 2, min))}))) #min temp of last winter (daily or hours?)
 
 #photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
 SunTimes_df<- getSunlightTimes(data = data.frame("date" = as.Date(W_df$date), "lat"= rep(LAT, n_d), "lon" = rep(LON, n_d)))# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice

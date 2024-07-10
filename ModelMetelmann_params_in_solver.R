@@ -51,7 +51,7 @@ doy = W_df$DOY
 
 #elaborate temp and prec
 temp_7 = sapply(1:length(temp), function(x){return(mean(temp[max(1,x-7):x]))}) # temp of precedent 7 days
-temp_min_DJF = sapply(1:length(temp), function(x){return(min(temp[max(1,x-300):x]))}) #min temp of last winter (daily or hours?)
+temp_min_DJF = sapply(1:length(temp), function(x){return(min(temp_m[max(1,x-300):x]))}) #min temp of last winter (daily or hours?)
 
 #photoperiod Ph_P (which variables should I take? sunrise - sunset)
 SunTimes_df<- getSunlightTimes(as.Date(W_df$date), lat= 44.5, lon = 11.5)# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
