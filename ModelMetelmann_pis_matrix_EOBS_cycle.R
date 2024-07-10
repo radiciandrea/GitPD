@@ -67,6 +67,14 @@ A0 = rep(0, n_r)
 E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
 
 for (year in years){
+  
+  #getting weather from EOBS <- previous year
+  load(paste0(folder_eobs, "/EOBS_sel_", year-1, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+  
+  #Extract only temp in December
+  W_D_df <- W_tot_df %>%
+    filter(DOY >= (max(DOY)-30))
+  
   #Getting weather from EOBS
   load(paste0(folder_eobs, "/EOBS_sel_", year, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
   
@@ -83,8 +91,11 @@ for (year in years){
   #dimensions
   n_d = length(DOS_y) # simulation length
   
+  #exctract params
   temp = matrix(W_tot_df$T_av, nrow = n_d)
   prec = matrix(W_tot_df$P, nrow = n_d)
+  temp_DJF = rbind(matrix(W_D_df$T_av, nrow = 31),
+                   matrix(W_tot_df$T_av[which(W_tot_df$DOY <= (max(DOY_y)-306))], nrow = (max(DOY_y)-306)))
   
   if (any(names(W_tot_df)=="T_M")){
     temp_M <- matrix(W_tot_df$T_M, nrow = n_d)
@@ -102,9 +113,7 @@ for (year in years){
   temp_7 = temp[1,]
   temp_7 = rbind(temp_7, t(sapply(2:n_d,
                                   function(x){return(colMeans(temp[max(1,(x-7)):x,]))}))) # temp of precedent 7 days
-  temp_min_DJF = temp[1,]
-  temp_min_DJF = rbind(temp_min_DJF, t(sapply(2:n_d,
-                                              function(x){return(apply(temp[max(1,x-300):x, ], 2, min))}))) #min temp of last winter (daily or hours?)
+  temp_min_DJF = apply(temp_DJF, 2, function(x){min(x)}) #min temp of last winter (daily or hours?)
   
   #photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
   SunTimes_df<- getSunlightTimes(data = data.frame("date" = as.Date(W_tot_df$date), "lat"= rep(LAT, n_d), "lon" = rep(LON, n_d)))# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
@@ -135,22 +144,7 @@ for (year in years){
   
   source("MM_integration_functions.R")
   
-  #rk integration step
-  is = 1/60 #24 or 48 or 100
-  
   tic() #previous cycle
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  #da controllare
-  
   parms = list(omega = omega,
                h = h,
                K = K,
@@ -161,30 +155,9 @@ for (year in years){
                temp_M = temp_M,
                temp_m = temp_m)
   
-  
-  
-  
-  
-  
-  
-  
   #break at 1/8 to zero diapausing eggs, even for odd years
   DOY_y_1 = DOY_y[1:(max(DOY_y)-153)] 
   Sim_y_1<- ode(X_0, DOY_y_1, df, parms)
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
   
