@@ -19,6 +19,8 @@ library(sf)
 name = "W_EU"
 years = 2005:2023
 
+years = 2005
+
 #load first EOBS to get lon lat
 folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab/"
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim/"
@@ -65,6 +67,9 @@ J0 = rep(0, n_r)
 I0 = rep(0, n_r)
 A0 = rep(0, n_r)
 E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
+
+#integration step
+is = 1/60
 
 for (year in years){
   
