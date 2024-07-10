@@ -1,6 +1,8 @@
 # I try to code the model by Metelmann 2019
 # Running on matrix in which we alter the weather variable
 
+# EXPOSURE STATE + PARAMETERS IN SOLVER
+
 rm(list = ls())
 gc()
 

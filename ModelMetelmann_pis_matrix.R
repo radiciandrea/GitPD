@@ -2,6 +2,8 @@
 # Running on matrix
 # Here the model works with day-varying temperature 
 
+# LOAD MATRIX OF DATA + PARAMETERS IN SOLVER
+
 rm(list = ls())
 
 library(deSolve)

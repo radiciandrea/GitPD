@@ -2,6 +2,8 @@
 # Running on matrix EOBS SEl
 # Here the model works with day-varying temperature 
 
+# LOAD EOBS AS MATRIX + PARAMETERS IN SOLVER
+
 rm(list = ls())
 
 library(deSolve)
@@ -14,10 +16,10 @@ library(sf)
 
 #load T and P
 
-name = "France"
+name = "W_EU"
 year_f = "2011"
 #Getting weather from EOBS
-load(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_", year_f, "_", name, ".RData")) #EOBS domain_sel_W_EU #Occitanie #France
+load(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sel_2011_", year_f, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
 
 #Create a matrix over which integrate; each colums is a city, each row is a date
 DOS = unique(W_tot_df$DOS)
@@ -126,7 +128,7 @@ source("MM_integration_functions.R")
 Sim <- matrix(nrow = length(DOS_sim), ncol = 1+n_r*5)
 
 #rk integration step
-is = 1/48 #24 or 48 or 100
+is = 1/60 #24 or 48 or 100
 
 tic()
 for (year in years_u){
@@ -207,7 +209,7 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
 
 # st_write(domain_sel, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/res_sim_2011_", name, ".shp"))
 #plot
-id_reg = 340 #Montpellier = 93 in Occitanie #340 cella maledetta
+id_reg = 210 #Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
 
 region_x = regions[id_reg]
 
