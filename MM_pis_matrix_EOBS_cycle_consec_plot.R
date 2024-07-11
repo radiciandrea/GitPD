@@ -12,7 +12,7 @@ library(dplyr)
 library(pracma)
 library(sf)
 
-folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim"
+folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec"
 
 # name = "W_EU"
 # year = 2005
@@ -25,15 +25,19 @@ years = substring(files, 15, 18)
 first_day = as.Date(paste0(min(years), "-01-01"))
 last_day = as.Date(paste0(max(years), "-12-31"))
 
-DOS_sim = seq(from = first_day, to = last_day, by = 'day')
+date_sim = seq(from = first_day, to = last_day, by = 'day')
+DOS_sim = 1:length(date_sim)
 n_d = length(DOS_sim)
 
 #carichiamo 1 per le dimensioni
 load(paste0(folder_out, "/", files[1]))
 
-n_r = ncol(Sim)-1
+n_c = 5 # numero di classi
+n_r = (ncol(Sim)-1)/n_c #numero di regioni
+regions = 1:n_r
+
 n_d_i = nrow(Sim)
-Sim_tot = matrix(NA, ncol = n_r, nrow = n_d) 
+Sim_tot = matrix(NA, ncol = n_r+1, nrow = n_d) 
 Sim_tot[1:n_d_i,]=Sim
 
 k = n_d_i
@@ -41,20 +45,17 @@ for (i in 2:length(files)){
   file = files[i]
   load(paste0(folder_out, "/", file))
   n_d_i = nrow(Sim)
-  
-  Sim_tot[]
+  Sim_tot[k + 1:n_d_i,]=Sim
+  k = k + n_d_i
 }
 
-# correzione degli NaN con formula geomatrica
-E0_m_c <- apply(E0_m, 2, function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
-# E0_m_c <- E0_m
 
 #########################
 #plot pop
 Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*max(DOS_sim)),
-                      "region" = rep(rep(regions, each = max(DOS_sim)), 5),
-                      "t" = rep(DOS_sim, n_r*5),
-                      "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
+                      "region" = rep(rep(regions, each = max(DOS_sim)), n_c),
+                      "t" = rep(DOS_sim, n_r*n_c),
+                      "value" = c(Sim_tot[, 2:(1+n_c*n_r)])) #5 classes
 
 # st_write(domain_sel, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/res_sim_2011_", name, ".shp"))
 #plot
