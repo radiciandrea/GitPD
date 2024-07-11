@@ -47,7 +47,8 @@ date_sel = date[1:which(date == date_max)]
 time_sel = 1:length(date_sel)
 year_sel = sapply(date_sel, function(x){substr(x, 1, 4)})
 
-grid_sel = st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_", name, ".shp"))
+# grid_sel = st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_", name, ".shp"))
+grid_sel = st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_01_", name, ".shp"))
 
 
 #find selected square
