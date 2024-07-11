@@ -37,7 +37,7 @@ n_r = (ncol(Sim)-1)/n_c #numero di regioni
 regions = 1:n_r
 
 n_d_i = nrow(Sim)
-Sim_tot = matrix(NA, ncol = n_r+1, nrow = n_d) 
+Sim_tot = matrix(NA, ncol = n_c*n_r+1, nrow = n_d) 
 Sim_tot[1:n_d_i,]=Sim
 
 k = n_d_i
@@ -59,7 +59,10 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
 
 # st_write(domain_sel, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/res_sim_2011_", name, ".shp"))
 #plot
-id_reg = 210 #Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
+
+#210
+
+id_reg = 1#Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
 
 region_x = regions[id_reg]
 
