@@ -22,15 +22,27 @@ files = list.files(folder_out)
 name = substring(files[1], 10, 13)
 years = substring(files, 15, 18)
 
+first_day = as.Date(paste0(min(years), "-01-01"))
+last_day = as.Date(paste0(max(years), "-12-31"))
+
+DOS_sim = seq(from = first_day, to = last_day, by = 'day')
+n_d = length(DOS_sim)
+
 #carichiamo 1 per le dimensioni
 load(paste0(folder_out, "/", files[1]))
 
-E0_m = matrix(NA, ncol = length(E0_v), nrow = length(files))
+n_r = ncol(Sim)-1
+n_d_i = nrow(Sim)
+Sim_tot = matrix(NA, ncol = n_r, nrow = n_d) 
+Sim_tot[1:n_d_i,]=Sim
 
-for (i in 1:length(files)){
+k = n_d_i
+for (i in 2:length(files)){
   file = files[i]
   load(paste0(folder_out, "/", file))
-  E0_m[i,]= E0_v
+  n_d_i = nrow(Sim)
+  
+  Sim_tot[]
 }
 
 # correzione degli NaN con formula geomatrica

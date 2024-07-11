@@ -12,7 +12,7 @@ library(dplyr)
 library(pracma)
 library(sf)
 
-folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim"
+folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec"
 
 # name = "W_EU"
 # year = 2005
