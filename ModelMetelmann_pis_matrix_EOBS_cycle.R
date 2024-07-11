@@ -2,6 +2,7 @@
 # Running on matrix EOBS SEl
 # Here the model works with day-varying temperature 
 
+# LOAD EOBS AS MATRIX + PARAMETERS IN SOLVER
 # codice che scorre di anno in anno.
 
 rm(list = ls())
@@ -17,13 +18,20 @@ library(sf)
 #load T and P
 
 name = "W_EU"
+#years = 2005:2023
+
 years = 2005:2023
 
-years = 2005
-
 #load first EOBS to get lon lat
-folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab/"
-folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim/"
+if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codice/local.R")){
+  folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab"
+  folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim"
+} else {
+  folder_eobs = "EOBS_elab"
+  folder_out = "EOBS_sim"
+}
+
+dir.create(folder_out)
 
 #Getting weather from EOBS
 load(paste0(folder_eobs, "/EOBS_sel_", years[1], "_", name, ".RData")) #EOBS W_EU #Occitanie #France
@@ -166,22 +174,25 @@ for (year in years){
   
   X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
   
+  
+  #uncomment to run as lsoda instead of rk
+  # DOY_y_2 = DOY_y[(max(DOY_y)-152): max(DOY_y)]
+  # Sim_y_2<- ode(X_0, DOY_y_2, df, parms)
+  # X_0 = c(rep(0, n_r*4), Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
+  
   X_0_log = X_0
   X_0_log[1:(n_r*4)] = log(X_0[1:(n_r*4)])
-  
   DOY_y_2_sim = seq((max(DOY_y)-152), max(DOY_y), by = is)
   Sim_y_2_sim<- deSolve::rk4(X_0_log, DOY_y_2_sim, df_log, parms)
   Sim_y_2 <-Sim_y_2_sim[1+(0:152)/is,]
   Sim_y_2[, 1+1:(n_r*4)] = exp(Sim_y_2[, 1+1:(n_r*4)])
-  # DOY_y_2 = DOY_y[(max(DOY_y)-152): max(DOY_y)]
-  # Sim_y_2<- ode(X_0, DOY_y_2, df, parms, hmin = is)
-  X_0 = c(rep(0, n_r*4), Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
+  
   
   #break at 31/12 to zero everything except diapausing eggs
   Sim = rbind(Sim_y_1, Sim_y_2)
-  E0_v = (pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)^(1/length(years_u))
+  E0_v = pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0
   
-  save(Sim, E0_v, file = paste0(folder_out, "_", name, "_", year, ".RData"))
+  save(Sim, E0_v, file = paste0(folder_out, "/Sim_EOBS_", name, "_", year, ".RData"))
   toc()
 }
 
