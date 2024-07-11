@@ -14,13 +14,13 @@ rm(list = ls())
 
 #load first EOBS to get lon lat
 if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codice/local.R")){
-  folder_in = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS"
-  folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab"
-  folder_shape = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab"
+  folder_in = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS/"
+  folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab/"
+  folder_shape = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/"
 } else {
-  folder_eobs = "EOBS"
-  folder_out = "EOBS_elab"
-  folder_shape = "Shp_elab"
+  folder_eobs = "EOBS/"
+  folder_out = "EOBS_elab/"
+  folder_shape = "Shp_elab/"
 }
 
 res = "0.1"
