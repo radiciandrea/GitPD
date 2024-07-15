@@ -39,12 +39,12 @@ type = "01"
 
 #Getting weather from EOBS
 load(paste0(folder_eobs, "/EOBS_sel_", type, "_", years[1], "_", name, ".RData")) #EOBS W_EU #Occitanie #France
-rm(W_tot_df)
 
 # distinct space
 regions_df <- W_tot_df %>% 
   distinct(region, .keep_all = TRUE) %>%
   dplyr::select(c("region","r_i","r_j", "lon", "lat", "pop"))
+rm(W_tot_df)
 
 regions = regions_df$region
 n_r = length(regions) # number of regions/locations (added; 1 for no dimension)
@@ -96,7 +96,6 @@ for (year in years){
   
   #Getting weather from EOBS
   load(paste0(folder_eobs, "/EOBS_sel_", type, "_", year, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
-  rm(W_tot_df)
   
   #Create a matrix over which integrate; each colums is a city, each row is a date
   DOS_y = unique(W_tot_df$DOS)
@@ -143,6 +142,8 @@ for (year in years){
   Ph_P = matrix(Ph_P, nrow = n_d)
   t_sr = matrix(t_sr, nrow = n_d)
   
+  rm(W_tot_df)
+  
   #parameters (Metelmann 2019)
   sigma = 0.1 *(temp_7 > CTT_s)*(Ph_P > CPP_s) # spring hatching rate (1/day)
   omega = 0.5 *(Ph_P < CPP_a)*(matrix(rep(DOY_y, n_r), ncol = n_r) > 183) # fraction of eggs going into diapause
@@ -181,7 +182,7 @@ for (year in years){
   
   DOY_y_1_sim = seq(1, (max(DOY_y)-153), by = is)
   Sim_y_1_sim<- ode(X_0, DOY_y_1_sim, df, parms)
-  Sim_y_1 <-Sim_y_1_sim[1+(0:(max(DOY_y)-153))/is,]
+  Sim_y_1 <-Sim_y_1_sim[1+(0:(max(DOY_y)-154))/is,]
   
   X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
   
