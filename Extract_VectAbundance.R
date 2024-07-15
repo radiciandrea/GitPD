@@ -1,4 +1,5 @@
 # code to extract abundances from VectAbundance (Da Re et al)
+#in our domain 025
 
 #https://ecoevorxiv.org/repository/view/6444/
 
@@ -64,8 +65,8 @@ for(i in row(data_geo)){
   k <- which(dist_2 == min(dist_2))
   data_geo$region[i] = k[1]
   
-  #write also in domain
-  domain$IdVAb[domain$region == k] = data_geo$ID[i]
+  # #write also in domain
+  # domain$IdVAb[domain$region == k] = data_geo$ID[i]
 }
 
 # #plot test
