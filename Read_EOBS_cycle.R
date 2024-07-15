@@ -160,6 +160,11 @@ data_tn <- nc_open(paste0(folder_in, "tn_ens_mean_", res,"deg_reg_2011-2023_v29.
 data_tx <- nc_open(paste0(folder_in, "tx_ens_mean_", res,"deg_reg_2011-2023_v29.0e.nc"))
 years = 2011:2023
 
+
+time = ncvar_get(data_rr, "time") # days since 1950-01-01 00:00
+date = as.Date(time, origin=as.Date("1950-01-01"))
+year_rep = sapply(date, function(x){substr(x, 1, 4)})
+
 # rain - precipitation
 # long # lat # time
 rr <- ncvar_get(data_rr, attributes(data_rr$var)$names[1])
