@@ -71,6 +71,15 @@ for(i in row(data_geo)){
 # ggplot()+
 #   geom_sf(data = domain, aes(fill = IdVAb))
 
-
 #join by region
-data_sel_geo <- left_join(data_geo, data_sel)%>%
+data_sel_geo <- left_join(data_geo, data_sel)
+id_more_frequent<- c()
+
+#extract for each locations only the longest series
+for (k in unique(data_sel_geo$region)){
+  IDs <- data_sel_geo$ID[data_sel_geo$region == k]
+  id_more_frequent <- c(id_more_frequent, names(sort(table(IDs), decreasing =T)[1]))
+}
+
+data_sel_geo <- data_sel_geo%>%
+  filter(ID %in% id_more_frequent)
