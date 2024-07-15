@@ -3,7 +3,8 @@
 # Here the model works with day-varying temperature 
 
 # LOAD EOBS AS MATRIX + PARAMETERS IN SOLVER
-# codice che scorre di anno in anno, riaggionrando ogni volta lo stato iniziale
+# codice che scorre di anno in anno: lo stato iniziale è lo stato finale dell'anno precedente
+# small correction: if E_0 <1 -> E_0 = 1 (to reduce impact of nan)
 
 rm(list = ls())
 
@@ -20,7 +21,7 @@ library(sf)
 name = "W_EU"
 
 #years = 2005:2023
-years = 2005
+years = 2005:2023
 
 #load first EOBS to get lon lat
 if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codice/local.R")){
@@ -87,6 +88,7 @@ E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
 #integration step
 is = 1/60
 
+#distinguisch between condition of first year (00) and of every year
 X_0 = c(E0, J0, I0, A0, E_d_0)
 
 for (year in years){
@@ -191,9 +193,10 @@ for (year in years){
   #DOY_y_1 = DOY_y[1:(max(DOY_y)-153)]
   #Sim_y_1<- ode(X_0, DOY_y_1, df, parms)
   
-  DOY_y_1_sim = seq(1, (max(DOY_y)-152), by = is)
-  Sim_y_1_sim<- ode(X_0, DOY_y_1_sim, df, parms)
-  Sim_y_1 <-Sim_y_1_sim[1+(0:(max(DOY_y)-152))/is,]
+  #here smooth
+  DOY_y_1_sim = seq(1, (max(DOY_y)-153), by = is*10)
+  Sim_y_1_sim<- deSolve::rk4(X_0, DOY_y_1_sim, df, parms)
+  Sim_y_1 <-Sim_y_1_sim[1+(0:(max(DOY_y)-154))/(is*10),]
   
   X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
   
@@ -217,7 +220,8 @@ for (year in years){
   
   save(Sim, E0_v, file = paste0(folder_out, "/Sim_EOBS_", name, "_", year, ".RData"))
   
-  X_0 = c(rep(0, n_r*4), Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
+  E_d_0_y = pmax(1, Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
+  X_0 = c(rep(0, n_r*4), E_d_0_y)
   
   toc()
 }

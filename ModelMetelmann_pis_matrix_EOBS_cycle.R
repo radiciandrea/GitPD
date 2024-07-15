@@ -181,7 +181,7 @@ for (year in years){
   #Sim_y_1<- ode(X_0, DOY_y_1, df, parms)
   
   DOY_y_1_sim = seq(1, (max(DOY_y)-153), by = is)
-  Sim_y_1_sim<- ode(X_0, DOY_y_1_sim, df, parms)
+  Sim_y_1_sim<- deSolve::rk4(X_0, DOY_y_1_sim, df, parms)
   Sim_y_1 <-Sim_y_1_sim[1+(0:(max(DOY_y)-154))/is,]
   
   X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
