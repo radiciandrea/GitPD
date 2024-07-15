@@ -33,8 +33,10 @@ if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codi
 
 dir.create(folder_out)
 
+type = "01"
+
 #Getting weather from EOBS
-load(paste0(folder_eobs, "/EOBS_sel_", years[1], "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+load(paste0(folder_eobs, "/EOBS_sel_", type, "_", years[1], "_", name, ".RData")) #EOBS W_EU #Occitanie #France
 
 # distinct space
 regions_df <- W_tot_df %>% 
@@ -82,14 +84,14 @@ is = 1/60
 for (year in years){
   
   #getting weather from EOBS <- previous year
-  load(paste0(folder_eobs, "/EOBS_sel_", year-1, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+  load(paste0(folder_eobs, "/EOBS_sel_", type, "_", year-1, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
   
   #Extract only temp in December
   W_D_df <- W_tot_df %>%
     filter(DOY >= (max(DOY)-30))
   
   #Getting weather from EOBS
-  load(paste0(folder_eobs, "/EOBS_sel_", year, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+  load(paste0(folder_eobs, "/EOBS_sel_", type, "_", year, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
   
   #Create a matrix over which integrate; each colums is a city, each row is a date
   DOS_y = unique(W_tot_df$DOS)
@@ -192,7 +194,7 @@ for (year in years){
   Sim = rbind(Sim_y_1, Sim_y_2)
   E0_v = pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0
   
-  save(Sim, E0_v, file = paste0(folder_out, "/Sim_EOBS_", name, "_", year, ".RData"))
+  save(Sim, E0_v, file = paste0(folder_out, "/Sim_EOBS_", type, "_", name, "_", year, ".RData"))
   toc()
 }
 
