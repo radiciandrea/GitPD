@@ -38,12 +38,24 @@ E0_m_c <- apply(E0_m, 2, function(x){x[which(is.nan(x))] = exp(mean(log(x[which(
 # E0_m_c <- E0_m
 
 #Metelamnn, geometric mean. = exp(mean(log))
-years_sel = 2017:2023 # 2017:2023 # 2006:2016
-E0_sel = apply(E0_m_c[which(years %in% years_sel),], 2, function(x){exp(mean(log(x)))})
+years_sel_1 = 2006:2016 # 2017:2023 # 2006:2016
+E0_m_c_sel_1 <- apply(E0_m[which(years %in% years_sel_1),], 2,
+                    function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
+E0_sel_1 = apply(E0_m_c_sel_1, 2,
+               function(x){exp(mean(log(x)))})
 
-E0_diff = 100*(apply(E0_m_c[which(years %in% 2017:2023),], 2, function(x){exp(mean(log(x)))})- 
-  apply(E0_m_c[which(years %in% 2006:2016),], 2, function(x){exp(mean(log(x)))}))/
-  apply(E0_m_c[which(years %in% 2006:2016),], 2, function(x){exp(mean(log(x)))})
+years_sel_2 = 2017:2023 # 2017:2023 # 2006:2016
+E0_m_c_sel_2 <- apply(E0_m[which(years %in% years_sel_2),], 2,
+                      function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
+E0_sel_2 = apply(E0_m_c_sel_2, 2,
+                 function(x){exp(mean(log(x)))})
+
+E0_diff = (E0_sel_2 - E0_sel_1)/E0_sel_1
+
+# to plot
+
+year_sel = years_sel_2
+E0_sel = E0_sel_2
 
 domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_", name, ".shp")) 
 
@@ -67,11 +79,14 @@ domain_years_sel <- domain_sel%>%
                       labels=sapply(br_diff[-length(br_diff)], function(x){paste0(">", as.character(x))}))) %>%
   mutate(E0_diff_level=factor(as.character(E0_diff_level), levels=rev(levels(E0_diff_level))))
 
-regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
-
-if (name == "Occitanie") {
+if (name == "France") {
+  regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
+} else if (name == "Occitanie") {
+  regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
   regions_sh <- regions_sh %>%
     filter(Region == "Languedoc-Roussillon et Midi-P")
+} else if (name == "W_EU") {
+  regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/W_EU_s.shp")
 }
 
 ggplot()+
