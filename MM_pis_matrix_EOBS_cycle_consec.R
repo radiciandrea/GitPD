@@ -20,7 +20,7 @@ library(sf)
 name = "W_EU"
 
 #years = 2005:2023
-years = 2005:2007
+years = 2005
 
 #load first EOBS to get lon lat
 if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codice/local.R")){
@@ -33,7 +33,7 @@ if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codi
 
 dir.create(folder_out)
 
-filter_region = 1
+filter_region = 0
 
 #Getting weather from EOBS
 load(paste0(folder_eobs, "/EOBS_sel_", years[1], "_", name, ".RData")) #EOBS W_EU #Occitanie #France
@@ -187,8 +187,13 @@ for (year in years){
                temp_m = temp_m)
   
   #break at 1/8 to zero diapausing eggs, even for odd years
-  DOY_y_1 = DOY_y[1:(max(DOY_y)-153)] 
-  Sim_y_1<- ode(X_0, DOY_y_1, df, parms)
+  
+  #DOY_y_1 = DOY_y[1:(max(DOY_y)-153)]
+  #Sim_y_1<- ode(X_0, DOY_y_1, df, parms)
+  
+  DOY_y_1_sim = seq(1, (max(DOY_y)-152), by = is)
+  Sim_y_1_sim<- ode(X_0, DOY_y_1_sim, df, parms)
+  Sim_y_1 <-Sim_y_2_sim[1+(0:(max(DOY_y)-152))/is,]
   
   X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
   
@@ -210,7 +215,7 @@ for (year in years){
   Sim = rbind(Sim_y_1, Sim_y_2)
   E0_v = pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0
   
-  #save(Sim, E0_v, file = paste0(folder_out, "/Sim_EOBS_", name, "_", year, ".RData"))
+  save(Sim, E0_v, file = paste0(folder_out, "/Sim_EOBS_", name, "_", year, ".RData"))
   
   X_0 = c(rep(0, n_r*4), Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
   
