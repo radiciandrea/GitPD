@@ -13,6 +13,7 @@ library(pracma)
 library(sf)
 
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec"
+folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/"
 
 # name = "W_EU"
 # year = 2005
@@ -80,3 +81,53 @@ ggplot(Sim_m_x_df, aes(x = t, y = value, color = variable))+
   theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
 
 # compute laid eggs: change into integration function #beta should be calculatedd hour by hour
+
+###### plot specific cell in vectAbundance
+
+load(paste0(folder_obs, "VectAbundance_025.RData"))
+
+#Eg Nice = 1537
+
+id_reg = 1537
+
+region_x = regions[id_reg]
+
+Eggs_obs_df <- Eggs_tot_df %>%
+  filter(region == region_x) %>%
+  mutate("type" = "laid, obs") %>%
+  select("eggs", "type", "date") 
+  
+
+date_sel = Eggs_obs_df$date
+
+Eggs_obs_df <- Eggs_obs_df
+
+#Sim starts in 2005
+date = as.Date(DOS_sim, origin = first_day-1)
+
+Sim_m_x_df <- Sim_m_df %>%
+  filter(region == region_x) %>%
+  mutate(date = rep(date, n_c)) %>%
+  filter(date %in% date_sel)
+
+Sim_x_df<- dcast(Sim_m_x_df, date ~ variable)
+
+#accidenti, dovevo salvare anche beta!
+
+beta_approx = 12
+
+Eggs_sim_df <- data.frame(date = Sim_x_df$date,
+                                         eggs = beta_approx*Sim_x_df$A, #"all eggs, diapaused or not"
+                                         type = "laid, simulated")
+
+# join sims
+Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_df) %>%
+  group_by(type)%>%
+  mutate(relative_eggs_m = 100*eggs/mean(eggs, na.rm = T))%>%
+  mutate(relative_eggs_M = 100*eggs/max(eggs, na.rm = T))%>%
+  ungroup()
+
+ggplot(Egg_comp_df, aes(x = date, y = relative_eggs_M, color = type))+
+  geom_line(data = Egg_comp_df %>% filter(type != "observed"))+
+  geom_point(data = Egg_comp_df %>% filter(type == "observed"))+
+  theme_test()
