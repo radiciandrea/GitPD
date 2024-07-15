@@ -89,6 +89,7 @@ data_sel_geo <- data_sel_geo%>%
 Eggs_tot_df <- data_sel_geo %>%
   mutate(eggs = value) %>%
   mutate(type = "observed") %>%
+  mutate(date = as.Date(date)) %>%
   group_by(region)%>%
   mutate(DOY = yday(date)) %>%
   mutate(DOS = julian(as.Date(date), origin = as.Date(paste0(min(as.numeric(year)-1),'-12-31')))) %>%
