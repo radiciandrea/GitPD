@@ -12,10 +12,11 @@ library(lubridate)
 
 name = "W_EU"
 
-folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/VectAbundance/"
+folder_in = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/VectAbundance/"
+folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/"
 
 #read excel
-data <- read_excel(path = paste0(folder_eobs, "Vectabundace_v015.xlsx"))
+data <- read_excel(path = paste0(folder_in, "Vectabundace_v015.xlsx"))
 
 #the database contains only "eggs" of "albopictus" in "ovitrap" 
 #keep only important info, remove NA
@@ -83,3 +84,14 @@ for (k in unique(data_sel_geo$region)){
 
 data_sel_geo <- data_sel_geo%>%
   filter(ID %in% id_more_frequent)
+
+Eggs_tot_df <- data_sel_geo %>%
+  mutate(eggs = value) %>%
+  mutate(type = "observed") %>%
+  group_by(region)%>%
+  mutate(DOY = yday(date)) %>%
+  mutate(DOS = julian(as.Date(date), origin = as.Date(paste0(min(as.numeric(year)-1),'-12-31')))) %>%
+  ungroup()%>%
+  select(c("region", "DOS", "eggs","DOY", "date"))
+
+save(Eggs_tot_df, file = paste0(folder_out, "VectAbundance_025.RData"))
