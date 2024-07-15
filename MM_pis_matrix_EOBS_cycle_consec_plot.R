@@ -62,12 +62,13 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
 
 #210
 
-id_reg = 1#Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
+id_reg = 210 #Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
 
 region_x = regions[id_reg]
 
 Sim_m_x_df <- Sim_m_df %>%
   filter(region == region_x)
+
 Sim_x_df<- dcast(Sim_m_x_df, t ~ variable)
 
 ggplot(Sim_m_x_df, aes(x = t, y = value, color = variable))+
