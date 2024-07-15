@@ -13,7 +13,6 @@ library(pracma)
 library(sf)
 
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec"
-folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/"
 
 # name = "W_EU"
 # year = 2005
@@ -84,23 +83,26 @@ ggplot(Sim_m_x_df, aes(x = t, y = value, color = variable))+
 
 ###### plot specific cell in vectAbundance
 
-load(paste0(folder_obs, "VectAbundance_025.RData"))
+folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/"
 
+load(paste0(folder_obs, "VectAbundance_025.RData"))
 #Eg Nice = 1537
 
 id_reg = 1537
-
 region_x = regions[id_reg]
 
+
+# other sources
+load(paste0(folder_obs, "Eggs_Weather_Nice_200811.RData"))
+region_v = "NICE"
+
 Eggs_obs_df <- Eggs_tot_df %>%
-  filter(region == region_x) %>%
+  filter(region == region_v) %>%
   mutate("type" = "laid, obs") %>%
+  mutate(date = as.Date((date))) %>%
   select("eggs", "type", "date") 
-  
 
 date_sel = Eggs_obs_df$date
-
-Eggs_obs_df <- Eggs_obs_df
 
 #Sim starts in 2005
 date = as.Date(DOS_sim, origin = first_day-1)
