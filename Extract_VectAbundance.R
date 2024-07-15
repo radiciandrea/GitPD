@@ -8,6 +8,7 @@ library(readxl)
 library(dplyr)
 library(sf)
 library(ggplot2)
+library(lubridate)
 
 name = "W_EU"
 
@@ -17,9 +18,10 @@ folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/V
 data <- read_excel(path = paste0(folder_eobs, "Vectabundace_v015.xlsx"))
 
 #the database contains only "eggs" of "albopictus" in "ovitrap" 
-
+#keep only important info, remove NA
 data_sel <- data %>%
-  select(c("ID", "year", "date", "value", "longitude", "latitude"))
+  select(c("ID", "year", "date", "value", "longitude", "latitude"))%>%
+  filter(is.na(value)==F)
 
 #extract geo
 
@@ -59,12 +61,16 @@ for(i in row(data_geo)){
   dist_2 = (lon_cen-(lon_right+lon_left)/2)^2 + (lat_cen-(lat_top+lat_top)/2)^2
   
   k <- which(dist_2 == min(dist_2))
-  data_geo$region[i] = k
+  data_geo$region[i] = k[1]
   
   #write also in domain
   domain$IdVAb[domain$region == k] = data_geo$ID[i]
 }
 
-#plot test
-ggplot()+
-  geom_sf(data = domain, aes(fill = IdVAb))
+# #plot test
+# ggplot()+
+#   geom_sf(data = domain, aes(fill = IdVAb))
+
+
+#join by region
+data_sel_geo <- left_join(data_geo, data_sel)%>%
