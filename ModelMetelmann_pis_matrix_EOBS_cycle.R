@@ -5,6 +5,8 @@
 # LOAD EOBS AS MATRIX + PARAMETERS IN SOLVER
 # codice che scorre di anno in anno.
 
+# rk both before and after august; log trans after august
+
 rm(list = ls())
 
 library(deSolve)
@@ -37,6 +39,7 @@ type = "01"
 
 #Getting weather from EOBS
 load(paste0(folder_eobs, "/EOBS_sel_", type, "_", years[1], "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+rm(W_tot_df)
 
 # distinct space
 regions_df <- W_tot_df %>% 
@@ -89,9 +92,11 @@ for (year in years){
   #Extract only temp in December
   W_D_df <- W_tot_df %>%
     filter(DOY >= (max(DOY)-30))
+  rm(W_tot_df)
   
   #Getting weather from EOBS
   load(paste0(folder_eobs, "/EOBS_sel_", type, "_", year, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+  rm(W_tot_df)
   
   #Create a matrix over which integrate; each colums is a city, each row is a date
   DOS_y = unique(W_tot_df$DOS)
@@ -171,8 +176,12 @@ for (year in years){
                temp_m = temp_m)
   
   #break at 1/8 to zero diapausing eggs, even for odd years
-  DOY_y_1 = DOY_y[1:(max(DOY_y)-153)] 
-  Sim_y_1<- ode(X_0, DOY_y_1, df, parms)
+  #DOY_y_1 = DOY_y[1:(max(DOY_y)-153)]
+  #Sim_y_1<- ode(X_0, DOY_y_1, df, parms)
+  
+  DOY_y_1_sim = seq(1, (max(DOY_y)-152), by = is)
+  Sim_y_1_sim<- ode(X_0, DOY_y_1_sim, df, parms)
+  Sim_y_1 <-Sim_y_2_sim[1+(0:(max(DOY_y)-152))/is,]
   
   X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
   
@@ -197,6 +206,3 @@ for (year in years){
   save(Sim, E0_v, file = paste0(folder_out, "/Sim_EOBS_", type, "_", name, "_", year, ".RData"))
   toc()
 }
-
-
-
