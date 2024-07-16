@@ -39,9 +39,6 @@ domain <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post
 domain <- domain %>%
   arrange(region)
 
-#IdVectAbundance
-domain$IdVAb =NA
-
 # in cycle 
 
 lat_top <- domain$top
@@ -69,10 +66,6 @@ for(i in row(data_geo)){
   # domain$IdVAb[domain$region == k] = data_geo$ID[i]
 }
 
-# #plot test
-# ggplot()+
-#   geom_sf(data = domain, aes(fill = IdVAb))
-
 #join by region
 data_sel_geo <- left_join(data_geo, data_sel)
 id_more_frequent<- c()
@@ -96,4 +89,21 @@ Eggs_tot_df <- data_sel_geo %>%
   ungroup()%>%
   select(c("region", "DOS", "eggs","DOY", "date"))
 
-save(Eggs_tot_df, file = paste0(folder_out, "VectAbundance_025.RData"))
+# save(Eggs_tot_df, file = paste0(folder_out, "VectAbundance_025.RData"))
+
+
+# Save shp
+
+domain_VectAbundance <- data_sel_geo %>%
+  mutate("IDVectAb" = ID) %>%
+  select(c("region", "IDVectAb")) %>%
+  unique()
+  
+domain_VectAbundance <- left_join(domain, domain_VectAbundance)%>%
+  select(c("region", "IDVectAb"))
+  
+#plot test
+ggplot()+
+  geom_sf(data = domain_VectAbundance, aes(fill = IDVectAb))
+
+# st_write(domain_VectAbundance, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_", name, "_IDVectAb.shp"))
