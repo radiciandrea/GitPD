@@ -42,13 +42,13 @@ E0_m_c <- apply(E0_m, 2, function(x){x[which(is.nan(x))] = exp(mean(log(x[which(
 # E0_m_c <- E0_m
 
 #Metelamnn, geometric mean. = exp(mean(log))
-years_sel_1 = 2006:2015 # # 2006:2016
+years_sel_1 = 2005:2015 # # 2006:2016
 E0_m_c_sel_1 <- apply(E0_m[which(years %in% years_sel_1),], 2,
                     function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
 E0_sel_1 = apply(E0_m_c_sel_1, 2,
                function(x){exp(mean(log(x)))})
 
-years_sel_2 = 2017:2023 # 2017:2023 
+years_sel_2 = 2011:2016 # 2017:2023 
 E0_m_c_sel_2 <- apply(E0_m[which(years %in% years_sel_2),], 2,
                       function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
 E0_sel_2 = apply(E0_m_c_sel_2, 2,
@@ -93,18 +93,23 @@ if (name == "France") {
   regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/W_EU_s.shp")
 }
 
+obs_Kramer <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/Kramer_2015_Albo_W_EU.shp")
+
 ggplot()+
-  geom_sf(data = domain_years_sel, aes(fill = E0_level))+ #
+  geom_sf(data = domain_years_sel, aes(fill = E0_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
+  geom_sf(data = obs_Kramer, alpha = 1, colour = "grey10")+
   ggtitle(paste0("R0 diapausing eggs, period = ", min(years_sel), "-", max(years_sel)))
 # + scale_fill_gradient(trans = "log")
 
 ggplot()+
-  geom_sf(data = domain_years_sel, aes(fill = E0_diff_level))+ #
+  geom_sf(data = domain_years_sel, aes(fill = E0_diff_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
-  ggtitle("% difference R0 diapausing eggs, [2017-2023] vs [2006-2016]")
+  ggtitle(paste0("% multiplier R0 diapausing eggs, [",
+                 min(years_sel_2),"-", max(years_sel_2),"] vs [",
+                 min(years_sel_1),"-", max(years_sel_1),"]"))
 # + scale_fill_gradient(trans = "log")
 
 ggplot()+
@@ -112,3 +117,13 @@ ggplot()+
   scale_fill_gradient(trans = "log")+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")
 
+# alternative
+
+E0_freq_m <- colSums(E0_m>1, na.rm = T)/colSums(E0_m>0, na.rm = T)
+
+ggplot()+
+  geom_sf(data = domain_years_sel, aes(fill = E0_freq_m), colour = NA)+ #
+  geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
+  geom_sf(data = obs_Kramer, alpha = 1, colour = "grey10")+
+  ggtitle(paste0("R0 diapausing eggs, period = ", min(years_sel), "-", max(years_sel)))
+# + scale_fill_gradient(trans = "log")
