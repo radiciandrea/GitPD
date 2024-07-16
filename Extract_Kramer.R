@@ -44,12 +44,12 @@ data_Albo <- data %>%
 # https://epsg.io/4326
 Albo_W_EU <- st_as_sf(x = data_sel,
                       coords = c("lon", "lat"),
-                      crs = "4326")
+                      crs = 4326)
 
 Albo <- st_as_sf(x = data_Albo,
                       coords = c("lon", "lat"),
-                      crs = "4326")
+                      crs = 4326)
 
-st_write(Albo_W_EU, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/Kramer_2015_Albo_W_EU.shp"))
+st_write(Albo_W_EU, "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/Kramer_2015_Albo_W_EU.shp")
 
-st_write(Albo, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/Kramer_2015_Albo.shp"))
+st_write(Albo, "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/Kramer_2015_Albo.shp")
