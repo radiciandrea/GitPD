@@ -12,25 +12,29 @@ library(dplyr)
 library(pracma)
 library(sf)
 
-folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim"
+type = "_01"
+
+folder_out = paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim", type)
 
 # name = "W_EU"
 # year = 2005
 
 files = list.files(folder_out)
 
-name = substring(files[1], 10, 13)
-years = substring(files, 15, 18)
+name = substring(files[1], nchar(type)+10, nchar(type)+13)
+years = substring(files, nchar(type)+15, nchar(type)+18) #CORREGGGERE QUI
 
 #carichiamo 1 per le dimensioni
 load(paste0(folder_out, "/", files[1]))
 
 E0_m = matrix(NA, ncol = length(E0_v), nrow = length(files))
+rm(Sim)
 
 for (i in 1:length(files)){
   file = files[i]
   load(paste0(folder_out, "/", file))
   E0_m[i,]= E0_v
+  rm(Sim)
 }
 
 # correzione degli NaN con formula geomatrica
@@ -38,13 +42,13 @@ E0_m_c <- apply(E0_m, 2, function(x){x[which(is.nan(x))] = exp(mean(log(x[which(
 # E0_m_c <- E0_m
 
 #Metelamnn, geometric mean. = exp(mean(log))
-years_sel_1 = 2006:2016 # 2017:2023 # 2006:2016
+years_sel_1 = 2006:2015 # # 2006:2016
 E0_m_c_sel_1 <- apply(E0_m[which(years %in% years_sel_1),], 2,
                     function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
 E0_sel_1 = apply(E0_m_c_sel_1, 2,
                function(x){exp(mean(log(x)))})
 
-years_sel_2 = 2017:2023 # 2017:2023 # 2006:2016
+years_sel_2 = 2017:2023 # 2017:2023 
 E0_m_c_sel_2 <- apply(E0_m[which(years %in% years_sel_2),], 2,
                       function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
 E0_sel_2 = apply(E0_m_c_sel_2, 2,
@@ -54,10 +58,10 @@ E0_diff = (E0_sel_2 - E0_sel_1)/E0_sel_1
 
 # to plot
 
-year_sel = years_sel_2
-E0_sel = E0_sel_2
+years_sel = years_sel_1
+E0_sel = E0_sel_1
 
-domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_", name, ".shp")) 
+domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel", type, "_", name,".shp")) 
 
 br = c(0, 10^(-3:3), 10^10)
 br_diff = c(-10^c(2, log(50,10), 0), 0, 10^(0:3), 10^10)
