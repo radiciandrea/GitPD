@@ -40,12 +40,17 @@ n_d_i = nrow(Sim)
 Sim_tot = matrix(NA, ncol = n_c*n_r+1, nrow = n_d) 
 Sim_tot[1:n_d_i,]=Sim
 
+#same for beta
+beta_approx_tot = matrix(NA, ncol = n_r, nrow = n_d) 
+beta_approx_tot[1:n_d_i,]=beta_approx
+
 k = n_d_i
 for (i in 2:length(files)){
   file = files[i]
   load(paste0(folder_out, "/", file))
   n_d_i = nrow(Sim)
   Sim_tot[k + 1:n_d_i,]=Sim
+  beta_approx_tot[k + 1:n_d_i,]=beta_approx
   k = k + n_d_i
 }
 
@@ -56,6 +61,11 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
                       "region" = rep(rep(regions, each = max(DOS_sim)), n_c),
                       "t" = rep(DOS_sim, n_r*n_c),
                       "value" = c(Sim_tot[, 2:(1+n_c*n_r)])) #5 classes
+
+beta_approx_m_df = data.frame("variable" = "beta",
+                      "region" = rep(regions, each = max(DOS_sim)),
+                      "t" = rep(DOS_sim, n_r),
+                      "value" = c(beta_approx_tot)) #5 classes
 
 # st_write(domain_sel, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/res_sim_2011_", name, ".shp"))
 #plot
@@ -108,6 +118,8 @@ Sim_A_x_average_df <- Sim_m_x_df %>%
   summarize(adults_2010s = mean(value))%>%
   ungroup()
 
+Sup_approx = 57590 #ha (ma non dovrebbe essere tenuta in considerazione...)
+
 ggplot(Sim_A_x_average_df, aes(x = date_dj, y = adults_2010s))+
   geom_line()+
   # scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
@@ -128,7 +140,6 @@ load(paste0(folder_obs, "VectAbundance_025.RData"))
 
 id_reg = 1537
 region_x = regions[id_reg]
-
 
 # other sources
 load(paste0(folder_obs, "Eggs_Weather_Nice_200811.RData"))
@@ -154,10 +165,13 @@ Sim_x_df<- dcast(Sim_m_x_df, date ~ variable)
 
 #accidenti, dovevo salvare anche beta!
 
-beta_approx = 12
+beta_approx_x_df = beta_approx_m_df %>%
+  filter(region == region_x) %>%
+  mutate(date = date) %>%
+  filter(date %in% date_sel)
 
 Eggs_sim_df <- data.frame(date = Sim_x_df$date,
-                                         eggs = beta_approx*Sim_x_df$A, #"all eggs, diapaused or not"
+                                         eggs = beta_approx_x_df$value*Sim_x_df$A, #"all eggs, diapaused or not"
                                          type = "laid, simulated")
 
 # join sims
