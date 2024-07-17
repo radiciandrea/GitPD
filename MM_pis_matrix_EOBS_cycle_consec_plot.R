@@ -62,7 +62,9 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
 
 #210
 
-id_reg = 210 #Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
+id_reg = 1091 #Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
+
+#Roma: 1091, 1992
 
 region_x = regions[id_reg]
 
@@ -78,6 +80,42 @@ ggplot(Sim_m_x_df, aes(x = t, y = value, color = variable))+
   # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
   labs(color = paste0("Abundances per classes (", region_x, ")")) +
   theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
+
+#plot eg only adults
+
+Sim_A_x_df <- Sim_m_x_df %>% 
+  filter(variable == "A") %>%
+  mutate(date = date_sim) 
+
+ggplot(Sim_A_x_df, aes(x = date, y = value))+
+  geom_line()+
+  # scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
+  # ylim(1, max(Sim_m_x_df$value))+
+  # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
+  labs(color = paste0("Abundances per classes, adult")) +
+  theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
+
+#only mean_by_day
+Sim_A_x_average_df <- Sim_m_x_df %>% 
+  filter(variable == "A") %>%
+  mutate(date = date_sim) %>%
+  mutate(date_dj = as.Date(substr(date, 6, 10), format = "%m-%d")) %>%
+  # mutate(year = substr(date_sim, 1, 4))  %>%
+  # group_by(date)%>%
+  # mutate(DOY = julian(date, origin = as.Date(paste0(as.numeric(year)-1, "-12-31"))))%>%
+  # ungroup()%>%
+  group_by(date_dj)%>%
+  summarize(adults_2010s = mean(value))%>%
+  ungroup()
+
+ggplot(Sim_A_x_average_df, aes(x = date_dj, y = adults_2010s))+
+  geom_line()+
+  # scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
+  # ylim(1, max(Sim_m_x_df$value))+
+  # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
+  labs(color = paste0("Abundances per classes, adult")) +
+  theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
+
 
 # compute laid eggs: change into integration function #beta should be calculatedd hour by hour
 
