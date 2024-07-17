@@ -13,7 +13,8 @@ name = "W_EU"
 
 folder_in = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Kraemer2015/"
 
-data = read.csv2(paste0(folder_in , "aegypti_albopictus.csv"), sep = ",")
+# data = read.csv2(paste0(folder_in , "aegypti_albopictus.csv"), sep = ",")
+data = read.csv2(paste0(folder_in , "albopictus_corrected.csv"), sep = ",")
 
 data$lat<-as.numeric(data$Y)
 data$lon<-as.numeric(data$X)
@@ -31,13 +32,13 @@ data_sel <- data %>%
   filter(lon< lon_right) %>%
   filter(lon>lon_left) %>%
   filter(lat<lat_top) %>%
-  filter(lat>lat_bot) %>%
-  filter(VECTOR == "Aedes albopictus") %>%
-  filter(LOCATION_TYPE == "point")
+  filter(lat>lat_bot) # %>%
+  # filter(VECTOR == "Aedes albopictus") %>%
+  # filter(LOCATION_TYPE == "point")
 
-data_Albo <- data %>%
-  filter(VECTOR == "Aedes albopictus") %>%
-  filter(LOCATION_TYPE == "point")
+data_Albo <- data # %>%
+  #  filter(VECTOR == "Aedes albopictus") %>%
+  # filter(LOCATION_TYPE == "point")
 
 
 # WGS1984 Datum
