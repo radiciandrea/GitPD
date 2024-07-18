@@ -34,16 +34,19 @@ if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codi
 
 dir.create(folder_out)
 
-filter_region = 0
+filter_region = 1
+filtered_regions = c(1091, 1092) #Rome
 
 #Getting weather from EOBS
 load(paste0(folder_eobs, "/EOBS_sel_", years[1], "_", name, ".RData")) #EOBS W_EU #Occitanie #France
 
 if(filter_region == 1){
   W_tot_df <- W_tot_df %>%
-    filter(region %in% c(210, 212))
+    filter(region %in% filtered_regions)
+  
+  folder_out = paste0(folder_out, "_", paste(filtered_regions, collapse = "_"))
+  dir.create(folder_out)
 }
-
 
 # distinct space
 regions_df <- W_tot_df %>% 
@@ -99,7 +102,7 @@ for (year in years){
   
   if(filter_region == 1){
     W_tot_df <- W_tot_df %>%
-      filter(region %in% c(210, 212))
+      filter(region %in% filtered_regions)
   }
   
   #Extract only temp in December
@@ -111,7 +114,7 @@ for (year in years){
   
   if(filter_region == 1){
     W_tot_df <- W_tot_df %>%
-      filter(region %in% c(210, 212))
+      filter(region %in% filtered_regions)
   }
   
   #Create a matrix over which integrate; each colums is a city, each row is a date
