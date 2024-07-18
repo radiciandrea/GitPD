@@ -82,7 +82,8 @@ A0 = rep(0, n_r)
 E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
 
 #integration step
-is = 1/60
+is_1 = 1/100
+is_2 = 1/100
 
 for (year in years){
   
@@ -180,9 +181,9 @@ for (year in years){
   #DOY_y_1 = DOY_y[1:(max(DOY_y)-153)]
   #Sim_y_1<- ode(X_0, DOY_y_1, df, parms)
   
-  DOY_y_1_sim = seq(1, (max(DOY_y)-153), by = is*10)
+  DOY_y_1_sim = seq(1, (max(DOY_y)-153), by = is_1)
   Sim_y_1_sim<- deSolve::rk4(X_0, DOY_y_1_sim, df, parms)
-  Sim_y_1 <-Sim_y_1_sim[1+(0:(max(DOY_y)-154))/(is*10),]
+  Sim_y_1 <-Sim_y_1_sim[1+(0:(max(DOY_y)-154))/is_1,]
   
   X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
   
@@ -194,9 +195,9 @@ for (year in years){
   
   X_0_log = X_0
   X_0_log[1:(n_r*4)] = log(X_0[1:(n_r*4)])
-  DOY_y_2_sim = seq((max(DOY_y)-152), max(DOY_y), by = is)
+  DOY_y_2_sim = seq((max(DOY_y)-152), max(DOY_y), by = is_2)
   Sim_y_2_sim<- deSolve::rk4(X_0_log, DOY_y_2_sim, df_log, parms)
-  Sim_y_2 <-Sim_y_2_sim[1+(0:152)/is,]
+  Sim_y_2 <-Sim_y_2_sim[1+(0:152)/is_2,]
   Sim_y_2[, 1+1:(n_r*4)] = exp(Sim_y_2[, 1+1:(n_r*4)])
   
   
