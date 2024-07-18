@@ -73,8 +73,8 @@ SunTimes_df<- getSunlightTimes(data = data.frame("date" = as.Date(W_df$date), "l
 Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
 t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
 
-Ph_P = matrix(Ph_P, nrow = n_d)
-t_sr = matrix(t_sr, nrow = n_d)
+Ph_P = matrix(Ph_P, nrow = n_d, byrow = T)
+t_sr = matrix(t_sr, nrow = n_d, byrow = T)
 
 #parameters (Metelmann 2019)
 CTT_s = 11 #critical temperature over one week in spring (°C )

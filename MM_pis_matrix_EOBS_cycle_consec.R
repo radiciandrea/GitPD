@@ -21,7 +21,7 @@ library(sf)
 name = "W_EU"
 
 #years = 2005:2023
-years = 2005:2023
+years = 2005
 
 #load first EOBS to get lon lat
 if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codice/local.R")){
@@ -89,8 +89,8 @@ A0 = rep(0, n_r)
 E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
 
 #integration step
-is_1 = 1/100
-is_2 = 1/100
+is_1 = 1/6
+is_2 = 1/60
 
 #distinguisch between condition of first year (00) and of every year
 X_0 = c(E0, J0, I0, A0, E_d_0)
@@ -159,8 +159,8 @@ for (year in years){
   Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
   t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
   
-  Ph_P = matrix(Ph_P, nrow = n_d)
-  t_sr = matrix(t_sr, nrow = n_d)
+  Ph_P = matrix(Ph_P, nrow = n_d, byrow = T)
+  t_sr = matrix(t_sr, nrow = n_d, byrow = T)
   
   #parameters (Metelmann 2019)
   sigma = 0.1 *(temp_7 > CTT_s)*(Ph_P > CPP_s) # spring hatching rate (1/day)

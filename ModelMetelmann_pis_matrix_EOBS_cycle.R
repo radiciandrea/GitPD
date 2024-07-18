@@ -140,8 +140,8 @@ for (year in years){
   Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
   t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
   
-  Ph_P = matrix(Ph_P, nrow = n_d)
-  t_sr = matrix(t_sr, nrow = n_d)
+  Ph_P = matrix(Ph_P, nrow = n_d, byrow = T)
+  t_sr = matrix(t_sr, nrow = n_d, byrow = T)
   
   rm(W_tot_df)
   
