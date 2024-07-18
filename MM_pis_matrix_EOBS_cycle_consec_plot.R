@@ -139,7 +139,7 @@ load(paste0(folder_obs, "VectAbundance_025.RData"))
 #Eg Nice = 1537
 
 id_reg = 1537
-region_x = regions[id_reg]
+region_v = regions[id_reg]
 
 # other sources
 load(paste0(folder_obs, "Eggs_Weather_Nice_200811.RData"))
