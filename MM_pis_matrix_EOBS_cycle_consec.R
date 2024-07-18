@@ -34,8 +34,8 @@ if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codi
 
 dir.create(folder_out)
 
-filter_region = 1
-filtered_regions = c(1091, 1092) #Rome
+filter_region = 0
+# filtered_regions = c(1091, 1092) #Rome
 
 #Getting weather from EOBS
 load(paste0(folder_eobs, "/EOBS_sel_", years[1], "_", name, ".RData")) #EOBS W_EU #Occitanie #France
@@ -89,7 +89,7 @@ A0 = rep(0, n_r)
 E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
 
 #integration step
-is_1 = 1/6
+is_1 = 1/24
 is_2 = 1/60
 
 #distinguisch between condition of first year (00) and of every year
