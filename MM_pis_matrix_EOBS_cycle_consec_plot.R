@@ -72,11 +72,11 @@ beta_approx_m_df = data.frame("variable" = "beta",
 
 #210
 
-id_reg = 1091 #Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
+id_reg = 1092 #Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
 
 #Roma: 1091, 1992
 
-region_x = regions[id_reg]
+region_x = id_reg #regions[id_reg]
 
 Sim_m_x_df <- Sim_m_df %>%
   filter(region == region_x)
@@ -110,7 +110,8 @@ Sim_A_x_average_df <- Sim_m_x_df %>%
   filter(variable == "A") %>%
   mutate(date = date_sim) %>%
   mutate(date_dj = as.Date(substr(date, 6, 10), format = "%m-%d")) %>%
-  # mutate(year = substr(date_sim, 1, 4))  %>%
+  mutate(year = as.numeric(substr(date_sim, 1, 4)))  %>%
+  filter(year > 2009) %>%
   # group_by(date)%>%
   # mutate(DOY = julian(date, origin = as.Date(paste0(as.numeric(year)-1, "-12-31"))))%>%
   # ungroup()%>%
