@@ -213,12 +213,14 @@ for (year in years){
   Sim_y_2 <-Sim_y_2_sim[1+(0:152)/is,]
   Sim_y_2[, 1+1:(n_r*4)] = exp(Sim_y_2[, 1+1:(n_r*4)])
   
-  
   #break at 31/12 to zero everything except diapausing eggs
   Sim = rbind(Sim_y_1, Sim_y_2)
   E0_v = pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0
   
-  save(Sim, E0_v, file = paste0(folder_out, "/Sim_EOBS_", name, "_", year, ".RData"))
+  # Compute beta_approx
+  beta_approx = (33.2*exp(-0.5*((temp-70.3)/14.1)^2)*(38.8 - temp)^1.5)*(temp<= 38.8) #fertility rate
+  
+  save(Sim, E0_v, beta_approx, file = paste0(folder_out, "/Sim_EOBS_", name, "_", year, ".RData"))
   
   E_d_0_y = pmax(1, Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
   X_0 = c(rep(0, n_r*4), E_d_0_y)
