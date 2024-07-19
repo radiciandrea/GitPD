@@ -13,8 +13,11 @@ name = "W_EU"
 
 folder_in = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/GBIF/"
 
-# data = read.csv2(paste0(folder_in , "aegypti_albopictus.csv"), sep = ",")
-data = read.csv2(paste0(folder_in , "albopictus_presence_GBIF.csv"), sep = "")
+# little proble: this is identic to Kramer
+# data = read.csv2(paste0(folder_in , "albopictus_presence_GBIF.csv"), sep = ",")
+
+# little problem: more columns than names. preprocessing by hand
+data = read.csv2(paste0(folder_in , "albopictus_AIMSurv_updated_GBIF_mod.csv"))
 
 data$lat<-as.numeric(data$decimalLatitude)
 data$lon<-as.numeric(data$decimalLongitude)
@@ -28,17 +31,21 @@ lon_right <- max(domain$right)
 lon_left <- min(domain$left)
 
 #remove obs outside; #remove other vector # keep only points
-data_sel <- data %>%
+data_W_EU <- data %>%
   filter(lon< lon_right) %>%
   filter(lon>lon_left) %>%
   filter(lat<lat_top) %>%
-  filter(lat>lat_bot) 
+  filter(lat>lat_bot) %>%
+  filter(species == "Aedes albopictus")
 
-data_Albo <- data 
+data_Albo <- data %>%
+  filter(species == "Aedes albopictus") %>%
+  filter(is.na(lon) == F) %>%
+  filter(is.na(lat) == F)
 
 # WGS1984 Datum
 # https://epsg.io/4326
-Albo_W_EU <- st_as_sf(x = data_sel,
+Albo_W_EU <- st_as_sf(x = data_W_EU,
                       coords = c("lon", "lat"),
                       crs = 4326)
 
