@@ -97,7 +97,7 @@ for(j in 1:length(i_lat_sel)){
         r_j = i_lat_sel[j],
         lon = lon_sel[i],
         lat = lat_sel[j],
-        pop = grid_sel$pop[which((grid_sel$row_index == i_lat_sel[j]) & (grid_sel$col_index == i_lon_sel[i]))],
+        pop = grid_sel$popkm2[which((grid_sel$row_index == i_lat_sel[j]) & (grid_sel$col_index == i_lon_sel[i]))],
         year = year_sel,
         DOS = time_sel,
         date = date_sel,
