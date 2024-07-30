@@ -43,37 +43,44 @@ domain <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post
 domain <- domain %>%
   arrange(region)
 
-# in cycle 
 
-lat_max <- max(domain$top)
-lat_min <- min(domain$bottom)
-lon_max <- max(domain$left)
-lon_min <- min(domain$right)
+# in cycle
+lat_top <- domain$top
+lat_bottom <- domain$bottom
+lon_right <- domain$right
+lon_left <- domain$left
+
+# pre_selection
+
+lat_max <- max(lat_top)
+lat_min <- min(lat_bottom)
+lon_max <- max(lon_right)
+lon_min <- min(lon_left)
 
 toll = 0.25/2
 
 #remove obs outside 
-data_geo_sel <- data_geo %>%
+data_geo_pre_sel <- data_geo %>%
   filter(longitude<=lon_max+toll)%>%
   filter(longitude>=lon_min-toll)%>%
   filter(latitude<=lat_max+toll)%>%
   filter(latitude>=lat_min-toll)
 
-for(i in row(data_geo)){
-  lon_cen <- data_geo$longitude[i]
-  lat_cen <- data_geo$latitude[i]
+for(i in row(data_geo_pre_sel )){
+  lon_cen <- data_geo_pre_sel $longitude[i]
+  lat_cen <- data_geo_pre_sel $latitude[i]
   
   dist_2 = (lon_cen-(lon_right+lon_left)/2)^2 + (lat_cen-(lat_top+lat_top)/2)^2
   
   k <- which(dist_2 == min(dist_2))
-  data_geo$region[i] = k[1]
+  data_geo_pre_sel $region[i] = k[1]
   
   # #write also in domain
   # domain$IdVAb[domain$region == k] = data_geo$ID[i]
 }
 
 #join by region
-data_sel_geo <- left_join(data_geo, data_sel)
+data_sel_geo <- left_join(data_geo_pre_sel, data_sel)
 id_more_frequent<- c()
 
 #extract for each locations only the longest series
