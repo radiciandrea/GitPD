@@ -196,9 +196,9 @@ folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eg
 
 load(paste0(folder_obs, "VectAbundance_025.RData"))
 
-regions_availab = unique(Eggs_tot_df$region)
+regions_availab = sort(unique(Eggs_tot_df$region))
 
-for(id_region in regions_availab){
+for(id_reg in regions_availab){
   
   region_v = regions[id_reg]
   
@@ -206,9 +206,12 @@ for(id_region in regions_availab){
     filter(region == region_v) %>%
     mutate("type" = "laid, obs") %>%
     mutate(date = as.Date((date))) %>%
-    select("eggs", "type", "date") 
+    select("eggs", "type", "date") %>%
+    mutate(relative_eggs_M = 100*eggs/max(eggs, na.rm = T))
   
   date_sel = Eggs_obs_df$date
+  date_min = min(date_sel)
+  date_max = max(date_sel)
   
   #Sim starts in 2005
   date = as.Date(DOS_sim, origin = first_day-1)
@@ -216,7 +219,8 @@ for(id_region in regions_availab){
   Sim_m_x_df <- Sim_m_df %>%
     filter(region == region_x) %>%
     mutate(date = rep(date, n_c)) %>%
-    filter(date %in% date_sel)
+    filter(date >= date_min) %>%
+    filter(date <= date_max)
   
   Sim_x_df<- dcast(Sim_m_x_df, date ~ variable)
   
@@ -225,22 +229,30 @@ for(id_region in regions_availab){
   beta_approx_x_df = beta_approx_m_df %>%
     filter(region == region_x) %>%
     mutate(date = date) %>%
-    filter(date %in% date_sel)
+    filter(date >= date_min) %>%
+    filter(date <= date_max)
   
   Eggs_sim_df <- data.frame(date = Sim_x_df$date,
                             eggs = beta_approx_x_df$value*Sim_x_df$A, #"all eggs, diapaused or not"
                             type = "laid, simulated")
   
+  
+  #alcolo il max solo relativo al date_sel per il plot
+  
+  Eggs_sim_max_date_sel <- max(Eggs_sim_df$eggs[Eggs_sim_df$date %in% date_sel], na.rm = T)
+  
+  Eggs_sim_df <- Eggs_sim_df %>%
+    mutate(relative_eggs_M = 100*eggs/Eggs_sim_max_date_sel)
+  
   # join sims
-  Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_df) %>%
-    group_by(type)%>%
-    mutate(relative_eggs_m = 100*eggs/mean(eggs, na.rm = T))%>%
-    mutate(relative_eggs_M = 100*eggs/max(eggs, na.rm = T))%>%
-    ungroup()
+  Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_df) 
   
   ggplot(Egg_comp_df, aes(x = date, y = relative_eggs_M, color = type))+
-    geom_line(data = Egg_comp_df %>% filter(type != "observed"))+
-    geom_point(data = Egg_comp_df %>% filter(type == "observed"))+
+    ggtitle(paste0("Eggs abundance, VectoClim (points) vs simulated, cell id ", region_v))+
+    geom_line(data = Egg_comp_df %>% filter(type == "laid, simulated"))+
+    geom_point(data = Egg_comp_df %>% filter(type != "laid, simulated"))+
+    guides(color = FALSE)+
+    ylab("normalized abundance (%)")+
     theme_test()
   
   
