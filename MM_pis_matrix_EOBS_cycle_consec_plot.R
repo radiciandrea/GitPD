@@ -73,7 +73,7 @@ beta_approx_m_df = data.frame("variable" = "beta",
 
 #210
 
-id_reg = 1092 #Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
+id_reg = 921 #Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
 
 #Roma: 1091, 1992
 
@@ -218,7 +218,7 @@ for(id_reg in regions_availab){
   date = as.Date(DOS_sim, origin = first_day-1)
   
   Sim_m_x_df <- Sim_m_df %>%
-    filter(region == region_x) %>%
+    filter(region == region_v) %>%
     mutate(date = rep(date, n_c)) %>%
     filter(date >= date_min) %>%
     filter(date <= date_max)
@@ -249,7 +249,7 @@ for(id_reg in regions_availab){
   Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_df) 
   
   egg_plot <- ggplot(Egg_comp_df, aes(x = date, y = relative_eggs_M, color = type))+
-    ggtitle(paste0("Eggs abundance, VectoClim (points) vs simulated, cell id ", region_v))+
+    ggtitle(paste0("Eggs abundance, VectAbundance (points) vs simulated, cell id ", region_v))+
     geom_line(data = Egg_comp_df %>% filter(type == "laid, simulated"))+
     geom_point(data = Egg_comp_df %>% filter(type != "laid, simulated"))+
     guides(color = FALSE)+
