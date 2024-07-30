@@ -70,7 +70,7 @@ for(i in row(data_geo_pre_sel )){
   lon_cen <- data_geo_pre_sel $longitude[i]
   lat_cen <- data_geo_pre_sel $latitude[i]
   
-  dist_2 = (lon_cen-(lon_right+lon_left)/2)^2 + (lat_cen-(lat_top+lat_top)/2)^2
+  dist_2 = (lon_cen-(lon_right+lon_left)/2)^2 + (lat_cen-(lat_top+lat_bottom)/2)^2
   
   k <- which(dist_2 == min(dist_2))
   data_geo_pre_sel $region[i] = k[1]
