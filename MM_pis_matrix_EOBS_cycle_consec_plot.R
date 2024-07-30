@@ -73,9 +73,10 @@ beta_approx_m_df = data.frame("variable" = "beta",
 
 #210
 
-id_reg = 921 #Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
+id_reg = 1597 #
 
 #Roma: 1091, 1992
+#Nizza:
 
 region_x = id_reg #regions[id_reg]
 
@@ -138,9 +139,9 @@ folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eg
 
 load(paste0(folder_obs, "VectAbundance_025.RData"))
 #Eggs_tot_df
-#Eg Nice = 1537
+#Eg Nice = 1597
 
-id_reg = 1537
+id_reg = 1597
 region_v = regions[id_reg]
 
 # other sources
@@ -199,12 +200,15 @@ load(paste0(folder_obs, "VectAbundance_025.RData"))
 
 regions_availab = sort(unique(Eggs_tot_df$region))
 
+#Sim starts in 2005
+date = as.Date(DOS_sim, origin = first_day-1)
+
 for(id_reg in regions_availab){
   
-  region_v = regions[id_reg]
+  region_x = regions[id_reg]
   
   Eggs_obs_df <- Eggs_tot_df %>%
-    filter(region == region_v) %>%
+    filter(region == region_x) %>%
     mutate("type" = "laid, obs") %>%
     mutate(date = as.Date((date))) %>%
     select("eggs", "type", "date") %>%
@@ -213,9 +217,6 @@ for(id_reg in regions_availab){
   date_sel = Eggs_obs_df$date
   date_min = min(date_sel)
   date_max = max(date_sel)
-  
-  #Sim starts in 2005
-  date = as.Date(DOS_sim, origin = first_day-1)
   
   Sim_m_x_df <- Sim_m_df %>%
     filter(region == region_v) %>%
@@ -228,7 +229,7 @@ for(id_reg in regions_availab){
   #accidenti, dovevo salvare anche beta!
   
   beta_approx_x_df = beta_approx_m_df %>%
-    filter(region == region_x) %>%
+    filter(region == region_v) %>%
     mutate(date = date) %>%
     filter(date >= date_min) %>%
     filter(date <= date_max)
@@ -257,7 +258,6 @@ for(id_reg in regions_availab){
     theme_test()
   
   ggsave(paste0(folder_plot, "/egg_plot_cell_id_", region_v, ".png"), plot = egg_plot, dpi = 300)
-  
   
 }
 
