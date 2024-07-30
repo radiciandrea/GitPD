@@ -85,12 +85,12 @@ id_more_frequent<- c()
 
 #extract for each locations only the longest series
 for (k in unique(data_sel_geo$region)){
-  IDs <- data_sel_geo$ID[data_sel_geo$region == k]
+  IDs <- data_sel_geo$ID_VA[data_sel_geo$region == k]
   id_more_frequent <- c(id_more_frequent, names(sort(table(IDs), decreasing =T)[1]))
 }
 
 data_sel_geo <- data_sel_geo%>%
-  filter(ID %in% id_more_frequent)
+  filter(ID_VA %in% id_more_frequent)
 
 Eggs_tot_df <- data_sel_geo %>%
   mutate(eggs = value) %>%
@@ -102,13 +102,13 @@ Eggs_tot_df <- data_sel_geo %>%
   ungroup()%>%
   select(c("region", "DOS", "eggs","DOY", "date"))
 
-# save(Eggs_tot_df, file = paste0(folder_out, "VectAbundance_025.RData"))
+save(Eggs_tot_df, file = paste0(folder_out, "VectAbundance_025.RData"))
 
 
 # Save shp
 
 domain_VectAbundance <- data_sel_geo %>%
-  mutate("IDVectAb" = ID) %>%
+  mutate("IDVectAb" = ID_VA) %>%
   select(c("region", "IDVectAb")) %>%
   unique()
   
