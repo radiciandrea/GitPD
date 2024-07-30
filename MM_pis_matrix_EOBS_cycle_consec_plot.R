@@ -13,6 +13,7 @@ library(pracma)
 library(sf)
 
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec"
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_plot"
 
 # name = "W_EU"
 # year = 2005
@@ -247,13 +248,15 @@ for(id_reg in regions_availab){
   # join sims
   Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_df) 
   
-  ggplot(Egg_comp_df, aes(x = date, y = relative_eggs_M, color = type))+
+  egg_plot <- ggplot(Egg_comp_df, aes(x = date, y = relative_eggs_M, color = type))+
     ggtitle(paste0("Eggs abundance, VectoClim (points) vs simulated, cell id ", region_v))+
     geom_line(data = Egg_comp_df %>% filter(type == "laid, simulated"))+
     geom_point(data = Egg_comp_df %>% filter(type != "laid, simulated"))+
     guides(color = FALSE)+
     ylab("normalized abundance (%)")+
     theme_test()
+  
+  ggsave(paste0(folder_plot, "/egg_plot_cell_id_", region_v, ".png"), plot = egg_plot, dpi = 300)
   
   
 }
