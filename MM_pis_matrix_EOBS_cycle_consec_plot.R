@@ -72,7 +72,7 @@ beta_approx_m_df = data.frame("variable" = "beta",
 
 #210
 
-id_reg = 1091 #Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
+id_reg = 1092 #Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
 
 #Roma: 1091, 1992
 
@@ -112,6 +112,7 @@ Sim_A_x_average_df <- Sim_m_x_df %>%
   mutate(date_dj = as.Date(substr(date, 6, 10), format = "%m-%d")) %>%
   mutate(year = as.numeric(substr(date_sim, 1, 4)))  %>%
   filter(year > 2009) %>%
+  filter(year < 2020) %>%
   # group_by(date)%>%
   # mutate(DOY = julian(date, origin = as.Date(paste0(as.numeric(year)-1, "-12-31"))))%>%
   # ungroup()%>%
@@ -135,14 +136,15 @@ ggplot(Sim_A_x_average_df, aes(x = date_dj, y = adults_2010s))+
 folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/"
 
 load(paste0(folder_obs, "VectAbundance_025.RData"))
+#Eggs_tot_df
 #Eg Nice = 1537
 
 id_reg = 1537
 region_v = regions[id_reg]
 
 # other sources
-load(paste0(folder_obs, "Eggs_Weather_Nice_200811.RData"))
-region_v = "NICE"
+# load(paste0(folder_obs, "Eggs_Weather_Nice_200811.RData"))
+# region_v = "NICE"
 
 Eggs_obs_df <- Eggs_tot_df %>%
   filter(region == region_v) %>%
@@ -184,3 +186,63 @@ ggplot(Egg_comp_df, aes(x = date, y = relative_eggs_M, color = type))+
   geom_line(data = Egg_comp_df %>% filter(type != "observed"))+
   geom_point(data = Egg_comp_df %>% filter(type == "observed"))+
   theme_test()
+
+
+########## plot cycle
+
+###### plot specific cell in vectAbundance
+
+folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/"
+
+load(paste0(folder_obs, "VectAbundance_025.RData"))
+
+regions_availab = unique(Eggs_tot_df$region)
+
+for(id_region in regions_availab){
+  
+  region_v = regions[id_reg]
+  
+  Eggs_obs_df <- Eggs_tot_df %>%
+    filter(region == region_v) %>%
+    mutate("type" = "laid, obs") %>%
+    mutate(date = as.Date((date))) %>%
+    select("eggs", "type", "date") 
+  
+  date_sel = Eggs_obs_df$date
+  
+  #Sim starts in 2005
+  date = as.Date(DOS_sim, origin = first_day-1)
+  
+  Sim_m_x_df <- Sim_m_df %>%
+    filter(region == region_x) %>%
+    mutate(date = rep(date, n_c)) %>%
+    filter(date %in% date_sel)
+  
+  Sim_x_df<- dcast(Sim_m_x_df, date ~ variable)
+  
+  #accidenti, dovevo salvare anche beta!
+  
+  beta_approx_x_df = beta_approx_m_df %>%
+    filter(region == region_x) %>%
+    mutate(date = date) %>%
+    filter(date %in% date_sel)
+  
+  Eggs_sim_df <- data.frame(date = Sim_x_df$date,
+                            eggs = beta_approx_x_df$value*Sim_x_df$A, #"all eggs, diapaused or not"
+                            type = "laid, simulated")
+  
+  # join sims
+  Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_df) %>%
+    group_by(type)%>%
+    mutate(relative_eggs_m = 100*eggs/mean(eggs, na.rm = T))%>%
+    mutate(relative_eggs_M = 100*eggs/max(eggs, na.rm = T))%>%
+    ungroup()
+  
+  ggplot(Egg_comp_df, aes(x = date, y = relative_eggs_M, color = type))+
+    geom_line(data = Egg_comp_df %>% filter(type != "observed"))+
+    geom_point(data = Egg_comp_df %>% filter(type == "observed"))+
+    theme_test()
+  
+  
+}
+
