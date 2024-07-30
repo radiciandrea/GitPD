@@ -45,17 +45,19 @@ domain <- domain %>%
 
 # in cycle 
 
-lat_top <- domain$top
-lat_bot <- domain$bottom
-lon_right <- domain$right
-lon_left <- domain$left
+lat_max <- max(domain$top)
+lat_min <- min(domain$bottom)
+lon_max <- max(domain$left)
+lon_min <- min(domain$right)
+
+toll = 0.25/2
 
 #remove obs outside 
 data_geo_sel <- data_geo %>%
-  filter(longitude<max(lon_right))%>%
-  filter(longitude>min(lon_left))%>%
-  filter(latitude<max(lat_top))%>%
-  filter(latitude>min(lat_bot))
+  filter(longitude<=lon_max+toll)%>%
+  filter(longitude>=lon_min-toll)%>%
+  filter(latitude<=lat_max+toll)%>%
+  filter(latitude>=lat_min-toll)
 
 for(i in row(data_geo)){
   lon_cen <- data_geo$longitude[i]
