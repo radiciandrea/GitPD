@@ -72,7 +72,7 @@ beta_approx_m_df = data.frame("variable" = "beta",
 
 #210
 
-id_reg = 1092 #Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
+id_reg = 1091 #Montpellier = 93 in Occitanie # in Francia 340 cella maledetta, 568, 569, 608, 650 # 126 (maghreb), 210 max
 
 #Roma: 1091, 1992
 
@@ -118,8 +118,6 @@ Sim_A_x_average_df <- Sim_m_x_df %>%
   group_by(date_dj)%>%
   summarize(adults_2010s = mean(value))%>%
   ungroup()
-
-Sup_approx = 57590 #ha (ma non dovrebbe essere tenuta in considerazione...)
 
 ggplot(Sim_A_x_average_df, aes(x = date_dj, y = adults_2010s))+
   geom_line()+
