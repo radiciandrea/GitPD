@@ -22,13 +22,17 @@ data <- read_excel(path = paste0(folder_in, "Vectabundace_v015.xlsx"))
 #the database contains only "eggs" of "albopictus" in "ovitrap" 
 #keep only important info, remove NA
 data_sel <- data %>%
-  select(c("ID", "year", "date", "value", "longitude", "latitude"))%>%
+  mutate(ID_VA = ID) %>%
+  mutate(region_VA = Region)%>%
+  select(c("ID_VA", "region_VA", "year", "date", "value", "longitude", "latitude"))%>%
   filter(is.na(value)==F)
 
 #extract geo
 
 data_geo <- data %>%
-  select(c("ID", "longitude", "latitude", "Country"))%>%
+  mutate(ID_VA = ID) %>%
+  mutate(region_VA = Region)%>%
+  select(c("ID_VA", "region_VA", "longitude", "latitude", "Country"))%>%
   unique()
 
 data_geo$region = NA
