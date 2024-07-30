@@ -42,13 +42,13 @@ E0_m_c <- apply(E0_m, 2, function(x){x[which(is.nan(x))] = exp(mean(log(x[which(
 # E0_m_c <- E0_m
 
 #Metelamnn, geometric mean. = exp(mean(log))
-years_sel_1 = 2005:2015 # # 2006:2016
+years_sel_1 = 2006:2016 # # 2006:2016
 E0_m_c_sel_1 <- apply(E0_m[which(years %in% years_sel_1),], 2,
                     function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
 E0_sel_1 = apply(E0_m_c_sel_1, 2,
                function(x){exp(mean(log(x)))})
 
-years_sel_2 = 2011:2016 # 2017:2023 
+years_sel_2 = 2017:2023 # 2017:2023 
 E0_m_c_sel_2 <- apply(E0_m[which(years %in% years_sel_2),], 2,
                       function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
 E0_sel_2 = apply(E0_m_c_sel_2, 2,
@@ -58,8 +58,8 @@ E0_diff = (E0_sel_2 - E0_sel_1)/E0_sel_1
 
 # to plot
 
-years_sel = years_sel_1
-E0_sel = E0_sel_1
+years_sel = years_sel_2
+E0_sel = E0_sel_2
 
 domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel", type, "_", name,".shp")) 
 
@@ -94,12 +94,14 @@ if (name == "France") {
 }
 
 obs_Kramer <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/Kramer_2015_Albo_W_EU.shp")
+obs_GBIF <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/GBIF_dwnl_Albo_W_EU.shp")
 
 ggplot()+
   geom_sf(data = domain_years_sel, aes(fill = E0_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
-  geom_sf(data = obs_Kramer, alpha = 1, colour = "grey10")+
+  geom_sf(data = obs_GBIF, alpha = 1, colour = "green")+
+  geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow")+
   ggtitle(paste0("R0 diapausing eggs, period = ", min(years_sel), "-", max(years_sel)))
 # + scale_fill_gradient(trans = "log")
 
@@ -124,6 +126,6 @@ E0_freq_m <- colSums(E0_m>1, na.rm = T)/colSums(E0_m>0, na.rm = T)
 ggplot()+
   geom_sf(data = domain_years_sel, aes(fill = E0_freq_m), colour = NA)+ #
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
-  geom_sf(data = obs_Kramer, alpha = 1, colour = "grey10")+
+  geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow")+
   ggtitle(paste0("R0 diapausing eggs, period = ", min(years_sel), "-", max(years_sel)))
 # + scale_fill_gradient(trans = "log")
