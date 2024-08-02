@@ -129,3 +129,21 @@ ggplot()+
   geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow")+
   ggtitle(paste0("R0 diapausing eggs, period = ", min(years_sel), "-", max(years_sel)))
 # + scale_fill_gradient(trans = "log")
+
+
+## New areas with R0 > 1 (Risk of establishment)
+
+domain_indicators <- domain_sel%>%
+  arrange(region) %>%
+  mutate(E0_hist = E0_sel_1)%>%
+  mutate(E0_recent = E0_sel_2)%>%
+  mutate(Risk_zones = case_when(
+    (E0_hist > 1) & (E0_recent > 1) ~ "Consolidated areas",
+    (E0_hist < 1) & (E0_recent > 1) ~ "New risk areas",
+    (E0_hist > 1) & (E0_recent < 1) ~ "Decline ares",
+    (E0_hist < 1) & (E0_recent < 1) ~ "Persistently absence",
+    .default = "No possible comparison"
+  ))
+
+ggplot()+
+  geom_sf(data = domain_indicators, aes(fill = Risk_zones), colour = NA)
