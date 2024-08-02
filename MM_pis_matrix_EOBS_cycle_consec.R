@@ -89,8 +89,8 @@ A0 = rep(0, n_r)
 E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
 
 #integration step
-is_1 = 1/24
-is_2 = 1/60
+is_1 = 1/30
+is_2 = 1/72
 
 #distinguisch between condition of first year (00) and of every year
 X_0 = c(E0, J0, I0, A0, E_d_0)

@@ -82,8 +82,8 @@ A0 = rep(0, n_r)
 E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
 
 #integration step
-is_1 = 1/36
-is_2 = 1/96
+is_1 = 1/30
+is_2 = 1/72
 
 for (year in years){
   
