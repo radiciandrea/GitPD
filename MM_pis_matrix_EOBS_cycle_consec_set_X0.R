@@ -25,4 +25,6 @@ load(paste0(folder_out, "/", files[which(years == min(as.numeric(years))+10)]))
 E0_v[which(E0_v<1)] = 1
 E0_v[which(is.na(E0_v))] = 1
 
-save(E0_v, file = paste0(folder_in, "/X0_E0_consec_W_EU.RData"))
+E_d_0 = E0_v
+
+save(E_d_0, file = paste0(folder_in, "/X0_E0_consec_W_EU.RData"))
