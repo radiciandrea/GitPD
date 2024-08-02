@@ -226,6 +226,7 @@ for (year in years){
   
   save(Sim, E0_v, beta_approx, file = paste0(folder_out, "/Sim_EOBS_", name, "_", year, ".RData"))
   
+  #values <1 are set to 1
   E_d_0_y = pmax(1, Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
   
   #correct NAs to 1
