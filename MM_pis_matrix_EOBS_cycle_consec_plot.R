@@ -73,10 +73,10 @@ beta_approx_m_df = data.frame("variable" = "beta",
 
 #210
 
-id_reg = 1597 #
+id_reg = 1092 #
 
 #Roma: 1091, 1992
-#Nizza:
+#Nizza: 1597 e un'altra
 
 region_x = id_reg #regions[id_reg]
 
@@ -219,7 +219,7 @@ for(id_reg in regions_availab){
   date_max = max(date_sel)
   
   Sim_m_x_df <- Sim_m_df %>%
-    filter(region == region_v) %>%
+    filter(region == region_x) %>%
     mutate(date = rep(date, n_c)) %>%
     filter(date >= date_min) %>%
     filter(date <= date_max)
@@ -229,7 +229,7 @@ for(id_reg in regions_availab){
   #accidenti, dovevo salvare anche beta!
   
   beta_approx_x_df = beta_approx_m_df %>%
-    filter(region == region_v) %>%
+    filter(region == region_x) %>%
     mutate(date = date) %>%
     filter(date >= date_min) %>%
     filter(date <= date_max)
@@ -250,14 +250,14 @@ for(id_reg in regions_availab){
   Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_df) 
   
   egg_plot <- ggplot(Egg_comp_df, aes(x = date, y = relative_eggs_M, color = type))+
-    ggtitle(paste0("Eggs abundance, VectAbundance (points) vs simulated, cell id ", region_v))+
+    ggtitle(paste0("Eggs abundance, VectAbundance (points) vs simulated, cell id ", region_x))+
     geom_line(data = Egg_comp_df %>% filter(type == "laid, simulated"))+
     geom_point(data = Egg_comp_df %>% filter(type != "laid, simulated"))+
     guides(color = FALSE)+
     ylab("normalized abundance (%)")+
     theme_test()
   
-  ggsave(paste0(folder_plot, "/egg_plot_cell_id_", region_v, ".png"), plot = egg_plot, dpi = 300)
+  ggsave(paste0(folder_plot, "/egg_plot_cell_id_", region_x, ".png"), plot = egg_plot, dpi = 300)
   
 }
 
