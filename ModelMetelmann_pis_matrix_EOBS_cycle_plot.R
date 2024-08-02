@@ -100,8 +100,8 @@ ggplot()+
   geom_sf(data = domain_years_sel, aes(fill = E0_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
-  geom_sf(data = obs_GBIF, alpha = 1, colour = "green")+
-  geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow")+
+  geom_sf(data = obs_GBIF, alpha = 1, colour = "green", size=0.3)+
+  geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow", size=0.8)+
   ggtitle(paste0("R0 diapausing eggs, period = ", min(years_sel), "-", max(years_sel)))
 # + scale_fill_gradient(trans = "log")
 
