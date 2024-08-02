@@ -21,7 +21,7 @@ library(sf)
 name = "W_EU"
 
 #years = 2005:2023
-years = 2005
+years = 2005:2023
 
 #load first EOBS to get lon lat
 if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codice/local.R")){
@@ -227,6 +227,10 @@ for (year in years){
   save(Sim, E0_v, beta_approx, file = paste0(folder_out, "/Sim_EOBS_", name, "_", year, ".RData"))
   
   E_d_0_y = pmax(1, Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
+  
+  #correct NAs to 1
+  E_d_0_y[which(is.na(E0_v))] = 1
+  
   X_0 = c(rep(0, n_r*4), E_d_0_y)
   
   toc()
