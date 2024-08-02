@@ -135,10 +135,17 @@ for (year in years){
                                   function(x){return(colMeans(temp[max(1,(x-7)):x,]))}))) # temp of precedent 7 days
   temp_min_DJF = apply(temp_DJF, 2, function(x){min(x)}) #min temp of last winter (daily or hours?)
   
-  #photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
-  SunTimes_df<- getSunlightTimes(data = data.frame("date" = as.Date(W_tot_df$date), "lat"= rep(LAT, n_d), "lon" = rep(LON, n_d)))# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
-  Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
-  t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
+  # #photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
+  # SunTimes_df<- getSunlightTimes(data = data.frame("date" = as.Date(W_tot_df$date), "lat"= rep(LAT, n_d), "lon" = rep(LON, n_d)))# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
+  # Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
+  # t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
+  
+  # Daylight model from SI Metelmann: faster
+  theta = 0.2163108 + 2*atan(0.9671396*tan(0.0086*(W_tot_df$DOY - 186))) 
+  phi = asin(0.39795 *cos(theta)) 
+  
+  Ph_P = 24-24/pi*acos(sin(pi*rep(LAT,n_d)/180)*sin(phi)/(cos(pi*rep(LAT,n_d)/180)*cos(phi)))
+  t_sr = 12/pi*acos(sin(pi*rep(LAT,n_d)/180)*sin(phi)/(cos(pi*rep(LAT,n_d)/180)*cos(phi)))
   
   Ph_P = matrix(Ph_P, nrow = n_d, byrow = T)
   t_sr = matrix(t_sr, nrow = n_d, byrow = T)

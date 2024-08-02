@@ -27,9 +27,11 @@ years = 2005:2023
 if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codice/local.R")){
   folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab"
   folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec"
+  folder_in = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Data_sim"
 } else {
   folder_eobs = "EOBS_elab"
   folder_out = "EOBS_sim_consec"
+  folder_in = "Data_sim"
 }
 
 dir.create(folder_out)
@@ -86,7 +88,9 @@ E0 = rep(0, n_r)
 J0 = rep(0, n_r)
 I0 = rep(0, n_r)
 A0 = rep(0, n_r)
-E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
+# E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
+# load new initial condition
+load(paste0(folder_in, "/X0_E0_consec_", name, ".RData"))
 
 #integration step
 is_1 = 1/30
@@ -154,10 +158,17 @@ for (year in years){
                                   function(x){return(colMeans(temp[max(1,(x-7)):x,]))}))) # temp of precedent 7 days
   temp_min_DJF = apply(temp_DJF, 2, function(x){min(x)}) #min temp of last winter (daily or hours?)
   
-  #photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
-  SunTimes_df<- getSunlightTimes(data = data.frame("date" = as.Date(W_tot_df$date), "lat"= rep(LAT, n_d), "lon" = rep(LON, n_d)))# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
-  Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
-  t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
+  # #photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
+  # SunTimes_df<- getSunlightTimes(data = data.frame("date" = as.Date(W_tot_df$date), "lat"= rep(LAT, n_d), "lon" = rep(LON, n_d)))# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
+  # Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
+  # t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
+  
+  # Daylight model from SI Metelmann: faster
+  theta = 0.2163108 + 2*atan(0.9671396*tan(0.0086*(W_tot_df$DOY - 186))) 
+  phi = asin(0.39795 *cos(theta)) 
+  
+  Ph_P = 24-24/pi*acos(sin(pi*rep(LAT,n_d)/180)*sin(phi)/(cos(pi*rep(LAT,n_d)/180)*cos(phi)))
+  t_sr = 12/pi*acos(sin(pi*rep(LAT,n_d)/180)*sin(phi)/(cos(pi*rep(LAT,n_d)/180)*cos(phi))) 
   
   Ph_P = matrix(Ph_P, nrow = n_d, byrow = T)
   t_sr = matrix(t_sr, nrow = n_d, byrow = T)
