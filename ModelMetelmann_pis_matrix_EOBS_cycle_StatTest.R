@@ -44,13 +44,13 @@ E0_m_c <- apply(E0_m, 2, function(x){x[which(is.nan(x))] = exp(mean(log(x[which(
 years_sel_1 = 2006:2014 # # 2006:2016
 E0_m_c_sel_1 <- apply(E0_m[which(years %in% years_sel_1),], 2,
                       function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
-E0_sel_1 = apply(E0_m_c_sel_1, 2,
+E0_2006_2014 = apply(E0_m_c_sel_1, 2,
                  function(x){exp(mean(log(x)))})
 
 years_sel_2 = 2015:2023 # 2017:2023 
 E0_m_c_sel_2 <- apply(E0_m[which(years %in% years_sel_2),], 2,
                       function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
-E0_sel_2 = apply(E0_m_c_sel_2, 2,
+E0_2015_2023 = apply(E0_m_c_sel_2, 2,
                  function(x){exp(mean(log(x)))})
 
 domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel", type, "_", name,".shp")) 
