@@ -64,3 +64,15 @@ domain_years_sel <- domain_sel%>%
 obs_Kramer <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/Kramer_2015_Albo_W_EU.shp")
 #2015_2023
 obs_GBIF <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/GBIF_dwnl_Albo_W_EU.shp")
+
+# ROC AUC
+# https://www.youtube.com/watch?v=qcvAqAH60Yw
+
+library(pROC)
+
+par(pty = "s")
+#roc(obese, glm.fit$fitted.values, plot = TRUE)
+roc(obese, glm.fit$fitted.values, plot = TRUE, col = "#377eb8", lwd = 3)
+
+# x = (1- specificity) = false positive %
+# y = (sensitivity) = true positive %
