@@ -28,17 +28,22 @@ domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/
 
 people_ha = domain_sel$popkm2/100
 
-#carichiamo 1 per le dimensioni
-load(paste0(folder_out, "/", files[1]))
-
 #indicatori
+n_r = nrow(domain_sel) # numer of regions
 
 # fist appereance (date where M/A > 1)
-F0_m = matrix(NA, ncol = length(E0_v), nrow = length(files))
+F0_m = matrix(NA, ncol = n_r, nrow = length(files))
 
 # seasonal lenght (number of days where M/A > 1)
-S0_m = matrix(NA, ncol = length(E0_v), nrow = length(files))
+S0_m = matrix(NA, ncol = n_r, nrow = length(files))
 
 # abundance - mean number of adult per person during season
-A0_m = matrix(NA, ncol = length(E0_v), nrow = length(files))
+A0_m = matrix(NA, ncol = n_r, nrow = length(files))
+
+for (i in 1:length(files)){
+  file = files[i]
+  load(paste0(folder_out, "/", file))
+  
+    rm(Sim)
+}
 
