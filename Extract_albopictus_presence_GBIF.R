@@ -25,11 +25,12 @@ data = read.csv2(paste0(folder_in , "download_GBIF_mod.csv"))
 data$lat<-as.numeric(data$decimalLatitude)
 data$lon<-as.numeric(data$decimalLongitude)
 
-#filter missing values
+#filter missing values and absence
 data_Albo <- data %>%
   filter(species == "Aedes albopictus") %>%
   filter(is.na(lon) == F) %>%
-  filter(is.na(lat) == F)
+  filter(is.na(lat) == F) %>%
+  filter(occurrenceStatus == "PRESENT")
 
 #load sf domain
 domain <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_", name, ".shp")) 
@@ -58,7 +59,7 @@ Albo <- st_as_sf(x = data_Albo,
 
 #plot
 ggplot()+
-  geom_sf(data = Albo)
+  geom_sf(data = Albo_W_EU)
 
 st_write(Albo_W_EU, "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/GBIF_dwnl_Albo_W_EU.shp")
 
