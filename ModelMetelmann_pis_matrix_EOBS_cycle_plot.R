@@ -42,7 +42,7 @@ E0_m_c <- apply(E0_m, 2, function(x){x[which(is.nan(x))] = exp(mean(log(x[which(
 # E0_m_c <- E0_m
 
 #Metelamnn, geometric mean. = exp(mean(log))
-years_sel_1 = 2006:2016 # # 2006:2016
+years_sel_1 = 2007:2013 # # 2006:2016
 E0_m_c_sel_1 <- apply(E0_m[which(years %in% years_sel_1),], 2,
                     function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
 E0_sel_1 = apply(E0_m_c_sel_1, 2,
@@ -58,8 +58,8 @@ E0_diff = (E0_sel_2 - E0_sel_1)/E0_sel_1
 
 # to plot
 
-years_sel = years_sel_2
-E0_sel = E0_sel_2
+years_sel = years_sel_1
+E0_sel = E0_sel_1
 
 domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel", type, "_", name,".shp")) 
 
@@ -147,3 +147,19 @@ domain_indicators <- domain_sel%>%
 
 ggplot()+
   geom_sf(data = domain_indicators, aes(fill = Risk_zones), colour = NA)
+
+### plot for EMERGENCE
+
+regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
+
+domain_years_sel_FR <- domain_years_sel %>%
+  filter(Country == "France")
+
+ggplot()+
+  geom_sf(data = domain_years_sel_FR, aes(fill = E0_level), colour = NA)+ #
+  scale_fill_manual(values = rev(col_br))+
+  geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
+  # geom_sf(data = obs_GBIF, alpha = 1, colour = "green", size=0.3)+
+  # geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow", size=0.8)+
+  ggtitle(paste0("R0 diapausing eggs, period = ", min(years_sel), "-", max(years_sel)))
+# + scale_fill_gradient(trans = "log")
