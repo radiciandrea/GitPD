@@ -1,7 +1,7 @@
 # code to create pseudoabsences from GBIF
 
 # https://www.gbif.org/species/1651430
-# I do modify and I look fro Culex pipiens
+# I do modify and I look for Culex pipiens
 # https://www.gbif.org/species/1652991
 
 rm(list = ls())
@@ -15,7 +15,7 @@ name = "W_EU"
 
 folder_in = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/GBIF/"
 
-#coordinats are weak: download from gbif website - preprocessing by hand (text to column; cooridndiates to number
+#coordinats are weak: download from gbif website - preprocessing by hand (text to column; coordinates to number; set "," as decimal separator.
 data_c = read.csv2(paste0(folder_in , "download_GBIF_Culex_mod.csv"))
 
 data$lat<-as.numeric(data$decimalLatitude)
