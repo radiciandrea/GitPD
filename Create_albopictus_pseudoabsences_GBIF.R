@@ -15,8 +15,8 @@ name = "W_EU"
 
 folder_in = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/GBIF/"
 
-#coordinats are weak: download from gbif website - preprocessing by hand (text to column; cooridnates to number
-data = read.csv2(paste0(folder_in , "download_GBIF_Culex_mod.csv"))
+#coordinats are weak: download from gbif website - preprocessing by hand (text to column; cooridndiates to number
+data_c = read.csv2(paste0(folder_in , "download_GBIF_Culex_mod.csv"))
 
 data$lat<-as.numeric(data$decimalLatitude)
 data$lon<-as.numeric(data$decimalLongitude)

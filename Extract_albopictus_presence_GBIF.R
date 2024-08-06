@@ -19,7 +19,7 @@ folder_in = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/GBI
 # little problem: more columns than names. preprocessing by hand (text to column)
 #data = read.csv2(paste0(folder_in , "albopictus_AIMSurv_updated_GBIF_mod.csv"))
 
-#coordinats are weak: download from gbif website - preprocessing by hand (text to column; cooridnates to number
+#coordinats are weak: download from gbif website - preprocessing by hand (text to column; coordinates to number
 data = read.csv2(paste0(folder_in , "download_GBIF_mod.csv"))
 
 data$lat<-as.numeric(data$decimalLatitude)
