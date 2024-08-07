@@ -58,9 +58,6 @@ E0_diff = (E0_sel_2 - E0_sel_1)/E0_sel_1
 
 # to plot
 
-years_sel = years_sel_1
-E0_sel = E0_sel_1
-
 domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel", type, "_", name,".shp")) 
 
 br = c(0, 10^(-3:3), 10^10)
@@ -74,13 +71,17 @@ col_br= c("#384AB4", "#5570DF", "#8EB0FE", "#C5D7F3", "#F2CDBB", "#F29878", "#D0
 
 domain_years_sel <- domain_sel%>%
   arrange(region) %>%
-  mutate(E0 = E0_sel)%>%
-  mutate(E0_level=cut(E0, breaks=br,
+  mutate(E0_1 = E0_sel_1)%>%
+  mutate(E0_1_level=cut(E0_1, breaks=br,
                       labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
-  mutate(E0_level=factor(as.character(E0_level), levels=rev(levels(E0_level)))) %>%
+  mutate(E0_1_level=factor(as.character(E0_1_level), levels=rev(levels(E0_1_level)))) %>%
+  mutate(E0_2 = E0_sel_2)%>%
+  mutate(E0_2_level=cut(E0_2, breaks=br,
+                        labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
+  mutate(E0_2_level=factor(as.character(E0_2_level), levels=rev(levels(E0_2_level)))) %>%
   mutate(E0_diff = E0_diff)%>%
   mutate(E0_diff_level=cut(E0_diff, breaks=br_diff,
-                      labels=sapply(br_diff[-length(br_diff)], function(x){paste0(">", as.character(x))}))) %>%
+                           labels=sapply(br_diff[-length(br_diff)], function(x){paste0(">", as.character(x))}))) %>%
   mutate(E0_diff_level=factor(as.character(E0_diff_level), levels=rev(levels(E0_diff_level))))
 
 if (name == "France") {
@@ -96,13 +97,23 @@ if (name == "France") {
 obs_Kramer <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/Kramer_2015_Albo_W_EU.shp")
 obs_GBIF <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/GBIF_dwnl_Albo_W_EU.shp")
 
+# Plots: 2010 and 2020s
+
 ggplot()+
-  geom_sf(data = domain_years_sel, aes(fill = E0_level), colour = NA)+ #
+  geom_sf(data = domain_years_sel, aes(fill = E0_1_level), colour = NA)+ #
+  scale_fill_manual(values = rev(col_br))+
+  geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
+  geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow", size=0.8)+
+  ggtitle(paste0("R0 diapausing eggs, period = ", min(years_sel_1), "-", max(years_sel_1)))
+# + scale_fill_gradient(trans = "log")
+
+ggplot()+
+  geom_sf(data = domain_years_sel, aes(fill = E0_2_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
   geom_sf(data = obs_GBIF, alpha = 1, colour = "green", size=0.3)+
   geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow", size=0.8)+
-  ggtitle(paste0("R0 diapausing eggs, period = ", min(years_sel), "-", max(years_sel)))
+  ggtitle(paste0("R0 diapausing eggs, period = ", min(years_sel_2), "-", max(years_sel_2)))
 # + scale_fill_gradient(trans = "log")
 
 ggplot()+
@@ -148,18 +159,31 @@ domain_indicators <- domain_sel%>%
 ggplot()+
   geom_sf(data = domain_indicators, aes(fill = Risk_zones), colour = NA)
 
-### plot for EMERGENCE
+### plot for EMERGENCE conference
 
 regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
 
 domain_years_sel_FR <- domain_years_sel %>%
   filter(Country == "France")
 
+#plot 1
+
 ggplot()+
-  geom_sf(data = domain_years_sel_FR, aes(fill = E0_level), colour = NA)+ #
+  geom_sf(data = domain_years_sel_FR, aes(fill = E0_1_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
   # geom_sf(data = obs_GBIF, alpha = 1, colour = "green", size=0.3)+
   # geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow", size=0.8)+
-  ggtitle(paste0("R0 diapausing eggs, period = ", min(years_sel), "-", max(years_sel)))
+  ggtitle(paste0("R0 diapausing eggs, period = ", min(years_sel_1), "-", max(years_sel_1)))
+# + scale_fill_gradient(trans = "log")
+
+#plot 2
+
+ggplot()+
+  geom_sf(data = domain_years_sel_FR, aes(fill = E0_2_level), colour = NA)+ #
+  scale_fill_manual(values = rev(col_br))+
+  geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
+  # geom_sf(data = obs_GBIF, alpha = 1, colour = "green", size=0.3)+
+  # geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow", size=0.8)+
+  ggtitle(paste0("R0 diapausing eggs, period = ", min(years_sel_2), "-", max(years_sel_2)))
 # + scale_fill_gradient(trans = "log")
