@@ -200,6 +200,7 @@ cities_sf <- st_sf('city' = cities_df$name, 'geometry' = points_sf)
 #plot 1
 
 ggplot()+
+  #annotation_map_tile(zoom = 6, cachedir = system.file("rosm.cache", package = "ggspatial")) +
   geom_sf(data = domain_years_sel_FR, aes(fill = E0_1_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
@@ -214,7 +215,7 @@ ggplot()+
 #plot 2
 
 ggplot()+
-  annotation_map_tile(zoom = 6, cachedir = system.file("rosm.cache", package = "ggspatial")) +
+  #annotation_map_tile(zoom = 6, cachedir = system.file("rosm.cache", package = "ggspatial")) +
   geom_sf(data = domain_years_sel_FR, aes(fill = E0_2_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
