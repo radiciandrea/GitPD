@@ -192,7 +192,7 @@ locateCountry = function(nameCity, codeCountry) {
   } else return(rep(NA,2)) 
 }
 
-cities_df <- data.frame(name = c("Paris", "Marseille", "Lyon", "Toulouse", "Bordeaux", "Nice", "Lille", "Montpellier", "Strasbourg", "Rennes", "Nantes"))
+cities_df <- data.frame(name = c("Paris", "Marseille", "Lyon", "Toulouse", "Bordeaux", "Nice", "Lille", "Montpellier", "Strasbourg", "Rennes", "Nantes", "Ajaccio"))
 cities_df$code = "FR"
 
 coord = t(apply(cities_df, 1, function(aRow) as.numeric(locateCountry(aRow[1], aRow[2]))))
@@ -247,5 +247,7 @@ ggplot()+
   theme_test()+
   guides(fill=guide_legend(title="Change"))+
   geom_sf(data = cities_sf) +
-  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name))
+  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
+                   label.padding = 0.15)
   # geom_text(data = cities_df, aes(x = lon, y = lat, label = name), hjust=-0.1, vjust=-0.1)
+
