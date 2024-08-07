@@ -70,12 +70,13 @@ obs_GBIF <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/
 obs_GBIF <- obs_GBIF %>%
   dplyr::select(c("gbifID"))
 
-domain_years_GBIF <-st_join(obs_GBIF, domain_years_sel, join = st_within)
+domain_GBIF <-st_join(obs_GBIF, domain_sel, join = st_within)
+#domain_GBIF <-st_join(domain_sel, obs_GBIF, join = st_contains) 
 
-count(as_tibble(domain_years_GBIF), region) %>%
-  print()
+count_intersection <- count(as_tibble(domain_GBIF), region) 
 
-# Bisogna farlo al contrario!
+domain_years_sel <- left_join(domain_years_sel, count_intersection) %>%
+  mutate(presence = !is.na(n))
 
 # Load and elaborate ECDC absences
 
