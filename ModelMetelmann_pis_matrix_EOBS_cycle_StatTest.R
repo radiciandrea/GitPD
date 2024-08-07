@@ -99,6 +99,25 @@ domain_years_sel <- left_join(domain_years_sel, count_intersection) %>%
 
 ECDC_Albo <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/ECDC/20230828_ECDC_Albo.shp")
 
+#spatial issue
+sf::sf_use_s2(FALSE)
+ECDC_Albo <- sf::st_make_valid(ECDC_Albo)
+
+domain_intersect <- st_intersection(ECDC_Albo, domain_sel)
+
+# st_write(domain_intersect, "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/ECDC/domain_intersect.shp")
+
+#once obtained the intersect: i want a vector (or dataframe) of all cells that are only "absent".
+# For instance, I could assign 1 to all non-absence, and then consider only those regions who sum to 0
+
+tic()
+domain_intersect <- domain_intersect %>%
+  mutate(Status_code = 1*(Status != "Absent"))%>%
+  select(c("region", "Status_code"))%>%
+  group_by(region)%>%
+  dplyr::summarise(absence = sum(Status_code)==0) %>%
+  ungroup()
+toc() # 89.1 seconds 
 
 # ROC AUC
 # https://www.youtube.com/watch?v=qcvAqAH60Yw
