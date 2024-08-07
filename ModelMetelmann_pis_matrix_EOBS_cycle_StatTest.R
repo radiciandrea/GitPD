@@ -63,7 +63,41 @@ domain_years_sel <- domain_sel%>%
 #2006_2014
 obs_Kramer <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/Kramer_2015_Albo_W_EU.shp")
 #2015_2023
-obs_GBIF <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/GBIF_dwnl_Albo_W_EU.shp")
+obs_GBIF <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/GBIF_dwnl_Albo_W_EU.shp") 
+
+# observation intersection 
+
+obs_GBIF <- obs_GBIF %>%
+  dplyr::select(c("gbifID"))
+
+domain_years_GBIF <-st_join(obs_GBIF, domain_years_sel, join = st_within)
+
+count(as_tibble(domain_years_GBIF), region) %>%
+  print()
+
+# Bisogna farlo al contrario!
+
+# Load and elaborate ECDC absences
+
+# ECDC <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/ECDC/20230828_VectorFlatFileGDB.shp")
+# 
+# #filter albopictus, modify status
+# 
+# ECDC_Albo <- ECDC %>%
+#   filter(VectorSpec == "Aedes albopictus")%>%
+#   mutate(Status = case_when(AssessedDi == "INV001A" ~ "Established",
+#                             AssessedDi == "INV002A" ~ "Introduced",
+#                             AssessedDi == "INV003A" ~ "Absent",
+#                             AssessedDi == "INV004A" ~ "No data")) %>%
+#   select(c("OBJECTID", "VectorSpec", "Status", "LocationCo", "LocationNa", "CountryCod", "Date_Map_T", "geometry"))
+#
+# ggplot()+
+#   geom_sf(data = ECDC_Albo, aes(fill = Status))
+# 
+# st_write(ECDC_Albo, "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/ECDC/20230828_ECDC_Albo.shp")
+
+ECDC_Albo <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/ECDC/20230828_ECDC_Albo.shp")
+
 
 # ROC AUC
 # https://www.youtube.com/watch?v=qcvAqAH60Yw
