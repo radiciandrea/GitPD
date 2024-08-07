@@ -160,11 +160,13 @@ ggplot()+
   geom_sf(data = domain_indicators, aes(fill = Risk_zones), colour = NA)
 
 ### plot for EMERGENCE conference
+library(ggspatial)
+library(prettymapr)
 
 regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
 
 domain_years_sel_FR <- domain_years_sel %>%
-  filter(Country == "France")
+  filter(!is.na(Country))
 
 #plot 1
 
@@ -174,16 +176,22 @@ ggplot()+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
   # geom_sf(data = obs_GBIF, alpha = 1, colour = "green", size=0.3)+
   # geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow", size=0.8)+
-  ggtitle(paste0("R0 diapausing eggs, period = ", min(years_sel_1), "-", max(years_sel_1)))
+  ggtitle(bquote(E[0]~~(period~2006-2014)))+
+  theme_test()+
+  guides(fill=guide_legend(title=bquote(E[0])))
 # + scale_fill_gradient(trans = "log")
 
 #plot 2
 
 ggplot()+
+  annotation_map_tile(zoom = 6, cachedir = system.file("rosm.cache", package = "ggspatial")) +
   geom_sf(data = domain_years_sel_FR, aes(fill = E0_2_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
   # geom_sf(data = obs_GBIF, alpha = 1, colour = "green", size=0.3)+
   # geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow", size=0.8)+
-  ggtitle(paste0("R0 diapausing eggs, period = ", min(years_sel_2), "-", max(years_sel_2)))
-# + scale_fill_gradient(trans = "log")
+  ggtitle(bquote(E[0]~~(period~2015-2022)))+
+  theme_test()+
+  guides(fill=guide_legend(title=bquote(E[0])))
+
+#ylab(expression(Anthropogenic~SO[4]^{"2-"}~(ngm^-3)))+
