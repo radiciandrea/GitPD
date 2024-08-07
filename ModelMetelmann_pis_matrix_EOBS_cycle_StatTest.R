@@ -132,18 +132,21 @@ domain_years_sel_p_a <- left_join(domain_years_sel_presence, domain_absence)%>%
                              .default = absence))%>%
   mutate(absence = case_when(absence+presence == 2 ~ 0, 
                              .default = absence))%>%
-  mutate(status = case_when(absence == 1 ~ "absent",
-                            presence == 1 ~ "present",
-                            .default = "unknown"))
+  mutate(status = case_when(absence == 1 ~ 0,
+                            presence == 1 ~ 1,
+                            .default = NA))
 
 # ROC AUC
 # https://www.youtube.com/watch?v=qcvAqAH60Yw
 
 library(pROC)
 
+category = domain_years_sel_p_a$status[which(!is.na(domain_years_sel_p_a$status))]
+prediction = domain_years_sel_p_a$E0_2015_2023[which(!is.na(domain_years_sel_p_a$status))]
+
 par(pty = "s")
 #roc(obese, glm.fit$fitted.values, plot = TRUE)
-roc(obese, glm.fit$fitted.values, plot = TRUE, col = "#377eb8", lwd = 3)
+roc(category , prediction, plot = TRUE, col = "#377eb8", lwd = 3)
 
 # x = (1- specificity) = false positive %
 # y = (sensitivity) = true positive %
