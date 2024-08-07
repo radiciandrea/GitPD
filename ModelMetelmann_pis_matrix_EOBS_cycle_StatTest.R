@@ -11,6 +11,7 @@ library(reshape2)
 library(dplyr)
 library(pracma)
 library(sf)
+library(tidyverse)
 
 type = "_01"
 
@@ -75,8 +76,10 @@ domain_GBIF <-st_join(obs_GBIF, domain_sel, join = st_within)
 
 count_intersection <- count(as_tibble(domain_GBIF), region) 
 
-domain_years_sel <- left_join(domain_years_sel, count_intersection) %>%
-  mutate(presence = !is.na(n))
+domain_presence <- left_join(domain_sel, count_intersection) %>%
+  mutate(presence = 1*(!is.na(n)))%>%
+  select(c("region", "presence"))%>%
+  st_drop_geometry()
 
 # Load and elaborate ECDC absences
 
@@ -111,13 +114,27 @@ domain_intersect <- st_intersection(ECDC_Albo, domain_sel)
 # For instance, I could assign 1 to all non-absence, and then consider only those regions who sum to 0
 
 tic()
-domain_intersect <- domain_intersect %>%
+domain_absence <- domain_intersect %>%
   mutate(Status_code = 1*(Status != "Absent"))%>%
   select(c("region", "Status_code"))%>%
   group_by(region)%>%
-  dplyr::summarise(absence = sum(Status_code)==0) %>%
-  ungroup()
+  dplyr::summarise(absence = 1*sum(Status_code)==0) %>%
+  ungroup() %>%
+  st_drop_geometry()
 toc() # 89.1 seconds 
+
+# join all and doing some manipulations: set NA absence to 0, 
+#overlapping presence and absence -> presence wins.
+
+domain_years_sel_presence <- left_join(domain_years_sel, domain_presence)
+domain_years_sel_p_a <- left_join(domain_years_sel_presence, domain_absence)%>%
+  mutate(absence = case_when(is.na(absence) ~ 0, 
+                             .default = absence))%>%
+  mutate(absence = case_when(absence+presence == 2 ~ 0, 
+                             .default = absence))%>%
+  mutate(status = case_when(absence == 1 ~ "absent",
+                            presence == 1 ~ "present",
+                            .default = "unknown"))
 
 # ROC AUC
 # https://www.youtube.com/watch?v=qcvAqAH60Yw
