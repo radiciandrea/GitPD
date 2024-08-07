@@ -168,6 +168,35 @@ regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_do
 domain_years_sel_FR <- domain_years_sel %>%
   filter(!is.na(Country))
 
+# plot cities (from)
+
+locateCountry = function(nameCity, codeCountry) {
+  cleanCityName = gsub(' ', '%20', nameCity)
+  url = paste(
+    "http://nominatim.openstreetmap.org/search?city="
+    , cleanCityName
+    , "&countrycodes="
+    , codeCountry
+    , "&limit=9&format=json"
+    , sep="")
+  resOSM = fromJSON(url)
+  if(length(resOSM) > 0) {
+    return(c(resOSM[[1]]$lon, resOSM[[1]]$lat))
+  } else return(rep(NA,2)) 
+}
+
+cities_df <- data.frame(name = c("Paris", "Marseille", "Lyon", "Toulouse", "Bordeaux", "Nice", "Lille", "Montpellier", "Strasbourg", "Rennes", "Nantes"))
+cities_df$code = "FR"
+
+coord = t(apply(cities_df, 1, function(aRow) as.numeric(locateCountry(aRow[1], aRow[2]))))
+
+cities_df$lon = coord[,1]
+cities_df$lat = coord[,2]
+
+points <- lapply(1:nrow(coord), function(i){st_point(coord[i,])})
+points_sf <- st_sfc(points, crs = 4326)
+cities_sf <- st_sf('city' = cities_df$name, 'geometry' = points_sf)  
+
 #plot 1
 
 ggplot()+
@@ -176,11 +205,12 @@ ggplot()+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
   # geom_sf(data = obs_GBIF, alpha = 1, colour = "green", size=0.3)+
   # geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow", size=0.8)+
+  geom_sf(data = points_sf)+
   ggtitle(bquote(E[0]~~(period~2006-2014)))+
   theme_test()+
-  guides(fill=guide_legend(title=bquote(E[0])))
-# + scale_fill_gradient(trans = "log")
-
+  guides(fill=guide_legend(title=bquote(E[0])))+
+  geom_sf(data = cities_sf) +
+  geom_text(data = cities_df, aes(x = lon, y = lat, label = nom), hjust=-0.1, vjust=-0.1)
 #plot 2
 
 ggplot()+
@@ -192,6 +222,8 @@ ggplot()+
   # geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow", size=0.8)+
   ggtitle(bquote(E[0]~~(period~2015-2022)))+
   theme_test()+
-  guides(fill=guide_legend(title=bquote(E[0])))
+  guides(fill=guide_legend(title=bquote(E[0])))+
+  geom_sf(data = cities_sf) +
+  geom_text(data = cities_df, aes(x = lon, y = lat, label = nom), hjust=-0.1, vjust=-0.1)
 
 #ylab(expression(Anthropogenic~SO[4]^{"2-"}~(ngm^-3)))+
