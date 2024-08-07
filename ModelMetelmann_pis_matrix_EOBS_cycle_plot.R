@@ -63,9 +63,6 @@ domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/
 br = c(0, 10^(-3:3), 10^10)
 br_diff = c(-10^c(2, log(50,10), 0), 0, 10^(0:3), 10^10)
 
-#green-yellow-red-purple
-col_br= c("#007917", "#65992E", "#8FB338", "#E2CF4D", "#F89061", "#F96970", "#F97ADC", "#A494FB")
-
 #Metelmann map
 col_br= c("#384AB4", "#5570DF", "#8EB0FE", "#C5D7F3", "#F2CDBB", "#F29878", "#D04B45", "#B00026")
 
@@ -144,28 +141,38 @@ ggplot()+
 
 ## New areas with R0 > 1 (Risk of establishment)
 
+col_br_sint= c("#384AB4", "#8EB0FE", "#F29878", "#B00026")
+levels_sint= c("Historically suitable", "Recently suitable", "Recently unsuitable", "Historically unsuitable")
+
 domain_indicators <- domain_sel%>%
   arrange(region) %>%
   mutate(E0_hist = E0_sel_1)%>%
   mutate(E0_recent = E0_sel_2)%>%
-  mutate(Risk_zones = case_when(
-    (E0_hist > 1) & (E0_recent > 1) ~ "Consolidated areas",
-    (E0_hist < 1) & (E0_recent > 1) ~ "New risk areas",
-    (E0_hist > 1) & (E0_recent < 1) ~ "Decline ares",
-    (E0_hist < 1) & (E0_recent < 1) ~ "Persistently absence",
-    .default = "No possible comparison"
+  mutate(Risk_zone = case_when(
+    (E0_hist > 1) & (E0_recent > 1) ~ "Historically suitable",
+    (E0_hist < 1) & (E0_recent > 1) ~ "Recently suitable",
+    (E0_hist > 1) & (E0_recent < 1) ~ "Recently unsuitable",
+    (E0_hist < 1) & (E0_recent < 1) ~ "Historically unsuitable",
+    .default = "NA"
   ))
 
+domain_indicators$Risk_zone <- factor(domain_indicators$Risk_zone, levels = levels_sint)
+
 ggplot()+
-  geom_sf(data = domain_indicators, aes(fill = Risk_zones), colour = NA)
+  geom_sf(data = domain_indicators, aes(fill = Risk_zone), colour = NA)+
+  scale_fill_manual(values = rev(col_br_sint))
 
 ### plot for EMERGENCE conference
 library(ggspatial)
 library(prettymapr)
+library(ggrepel)
 
 regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
 
 domain_years_sel_FR <- domain_years_sel %>%
+  filter(!is.na(Country))
+
+domain_indicators_FR <- domain_indicators %>%
   filter(!is.na(Country))
 
 # plot cities (from)
@@ -211,7 +218,8 @@ ggplot()+
   theme_test()+
   guides(fill=guide_legend(title=bquote(E[0])))+
   geom_sf(data = cities_sf) +
-  geom_text(data = cities_df, aes(x = lon, y = lat, label = nom), hjust=-0.1, vjust=-0.1)
+  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name))
+
 #plot 2
 
 ggplot()+
@@ -225,6 +233,19 @@ ggplot()+
   theme_test()+
   guides(fill=guide_legend(title=bquote(E[0])))+
   geom_sf(data = cities_sf) +
-  geom_text(data = cities_df, aes(x = lon, y = lat, label = nom), hjust=-0.1, vjust=-0.1)
+  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name))
 
-#ylab(expression(Anthropogenic~SO[4]^{"2-"}~(ngm^-3)))+
+# plot 3
+
+col_br_sint_FR<- c("#384AB4",  "#F29878", "#B00026") #"#8EB0FE",
+
+ggplot()+
+  geom_sf(data = domain_indicators_FR, aes(fill = Risk_zone), colour = NA)+
+  scale_fill_manual(values = rev(col_br_sint_FR))+
+  geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
+  ggtitle(bquote(E[0]~qualitative~variation))+
+  theme_test()+
+  guides(fill=guide_legend(title="Change"))+
+  geom_sf(data = cities_sf) +
+  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name))
+  # geom_text(data = cities_df, aes(x = lon, y = lat, label = name), hjust=-0.1, vjust=-0.1)
