@@ -42,13 +42,13 @@ E0_m_c <- apply(E0_m, 2, function(x){x[which(is.nan(x))] = exp(mean(log(x[which(
 # E0_m_c <- E0_m
 
 #Metelamnn, geometric mean. = exp(mean(log))
-years_sel_1 = 2007:2013 # # 2006:2016
+years_sel_1 = 2007:2014 # # 2006:2016
 E0_m_c_sel_1 <- apply(E0_m[which(years %in% years_sel_1),], 2,
                     function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
 E0_sel_1 = apply(E0_m_c_sel_1, 2,
                function(x){exp(mean(log(x)))})
 
-years_sel_2 = 2017:2023 # 2017:2023 
+years_sel_2 = 2015:2022 # 2017:2023 
 E0_m_c_sel_2 <- apply(E0_m[which(years %in% years_sel_2),], 2,
                       function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
 E0_sel_2 = apply(E0_m_c_sel_2, 2,
