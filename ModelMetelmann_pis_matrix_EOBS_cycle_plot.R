@@ -158,6 +158,9 @@ domain_indicators <- domain_sel%>%
 
 domain_indicators$Risk_zone <- factor(domain_indicators$Risk_zone, levels = levels_sint)
 
+# net increase suitable area
+100*(sum(domain_indicators$E0_recent>1, na.rm = T)/sum(domain_indicators$E0_hist>1, na.rm = T)-1)
+
 ggplot()+
   geom_sf(data = domain_indicators, aes(fill = Risk_zone), colour = NA)+
   scale_fill_manual(values = rev(col_br_sint))
@@ -166,6 +169,7 @@ ggplot()+
 library(ggspatial)
 library(prettymapr)
 library(ggrepel)
+library(RJSONIO)
 
 regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
 
@@ -174,6 +178,9 @@ domain_years_sel_FR <- domain_years_sel %>%
 
 domain_indicators_FR <- domain_indicators %>%
   filter(!is.na(Country))
+
+# net increase suitable area in France
+100*(sum(domain_indicators_FR$E0_recent>1, na.rm = T)/sum(domain_indicators_FR$E0_hist>1, na.rm = T)-1)
 
 # plot cities (from)
 
@@ -214,7 +221,7 @@ ggplot()+
   # geom_sf(data = obs_GBIF, alpha = 1, colour = "green", size=0.3)+
   # geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow", size=0.8)+
   geom_sf(data = points_sf)+
-  ggtitle(bquote(E[0]~~(period~2006-2014)))+
+  ggtitle(bquote(E[0]~~(period~2007-2014)))+
   theme_test()+
   guides(fill=guide_legend(title=bquote(E[0])))+
   geom_sf(data = cities_sf) +
