@@ -27,7 +27,7 @@ names(data_2008_reg) = c("dep", "commune", "station", "lat", "lon", "id_piege", 
 data_2008_reg$date_first_pose = as.Date(as.numeric(data_2008_reg$date_first_pose), origin = "1899-12-30")
 
 #by observing the database
-n_sites = ncol(data_2008_read)
+n_sites = nrow(data_2008_read)
 n_dates = (ncol(data_2008_read)-7)/4
 
 #create a new database
@@ -46,7 +46,7 @@ date_pose = data_2008_reg$date_first_pose
 for(i in 1:n_dates){
   
   date_detection = as.Date(as.numeric(data_2008_read[,8+4*(i-1)]), origin = "1899-12-30")
-  data_2008$date_detection[((i-1)*n_dates+1) : (i*n_dates)] = date_detection
+  data_2008$date_detection[((i-1)*n_sites+1) : (i*n_sites)] = date_detection
   
   #should elaborate this:
   # N means "negatif" = 0; 
@@ -68,9 +68,10 @@ for(i in 1:n_dates){
                         eggs_brut == "NR" ~ 0,
                         .default = as.numeric(eggs_brut))
   
-  data_2008$observed_eggs[((i-1)*n_dates+1) : (i*n_dates)] = eggs_brut_elab
-  data_2008$trapping_days[((i-1)*n_dates+1) : (i*n_dates)] = date_detection - date_pose
-  data_2008$eggs_per_day[((i-1)*n_dates+1) : (i*n_dates)] = eggs_brut_elab/as.numeric(date_detection - date_pose)
+  data_2008$observed_eggs[((i-1)*n_sites+1) : (i*n_sites)] = eggs_brut_elab
+  data_2008$trapping_days[((i-1)*n_sites+1) : (i*n_sites)] = date_detection - date_pose
+  data_2008$eggs_per_day[((i-1)*n_sites+1) : (i*n_sites)] = eggs_brut_elab/as.numeric(date_detection - date_pose)
   
-  date_first_pose = date_detection
+  date_first_pose = date_pose
 }
+
