@@ -1,7 +1,7 @@
 # plot del cycle
 # 2
 
-# per plottare anni consecutivi a Montpellier
+# per plottare anni consecutivi a Nice
 
 
 rm(list = ls())
@@ -18,8 +18,8 @@ folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Me
 # name = "W_EU"
 # year = 2005
 
-files = list.files(folder_out)
-years = substring(files, 27, 27+3)
+files = list.files(folder_out, pattern = "Nice_France")
+years = substring(files, 17, 17+3)
 
 n_c = 5 # numero di classi
 
@@ -49,7 +49,7 @@ ggplot(Sim_m_df, aes(x = t, y = value, color = variable))+
   scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_df$value)))+
   # ylim(1, max(Sim_m_x_df$value))+
   # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
-  labs(color = paste0("Abundances per classes (Montpellier)")) +
+  labs(color = paste0("Abundances per classes (Nice)")) +
   theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
 
 # other Eggs
@@ -70,8 +70,8 @@ Eggs_sim_df <- data.frame(date = Sim_x_df$date,
                           eggs = beta_approx_m_df$value*Sim_x_df$A, #"all eggs, diapaused or not"
                           type = "laid, simulated")
 
-Eggs_sim_23_24_df <- Eggs_sim_df %>%
-  filter(year > 2022)%>%
+Eggs_sim_08_24_df <- Eggs_sim_df %>%
+  filter(year > 2007)%>%
   mutate(norm_eggs = 100*eggs/max(eggs))%>%
   group_by(year) %>%
   mutate(DOY = DOS -min(DOS)+1)%>%
@@ -79,33 +79,11 @@ Eggs_sim_23_24_df <- Eggs_sim_df %>%
   ungroup() %>%
   select(-c("DOS"))
 
-egg_ratio = data_frame(DOY = 1:nrow(Sim),
-                       year = "ratio",
-                       norm_eggs = Eggs_sim_23_24_df$eggs[Eggs_sim_23_24_df$year == 2024]/
-                         (Eggs_sim_23_24_df$eggs[Eggs_sim_23_24_df$year == 2023][1:nrow(Sim)]))
-
-
-b <- 100/max(egg_ratio$norm_eggs, na.rm = T)
-a <- 0
-
-ggplot(Eggs_sim_23_24_df,
-       aes(x = DOY, y = norm_eggs,
-           color = year))+
-  ggtitle("Simulated daily laid eggs in Montpellier")+
-  geom_line(lwd = 1)+
-  geom_line(data = egg_ratio, aes(y = a + norm_eggs*b), color = "gray30", linetype = "dashed") +
-  scale_y_continuous("Normalized eggs", sec.axis = sec_axis(~ (. - a)/b, name = "Dotted line: ratio 2024/2023")) +
-  geom_hline(yintercept = b*1)+
-  # geom_point(data = Egg_comp_df %>% filter(type != "laid, simulated"))+
-  # guides(color = FALSE)+
-  # ylab("normalized abundance (%)")+
-  theme_test()
-
 #########################
 # load also 
 
 folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/"
-load(paste0(folder_obs, "Altopictus_Perols_2023_2024.RData"))
+load(paste0(folder_obs, "EID_Nice_2008_2023.RData"))
 
 Eggs_obs_df <- Eggs_tot_df %>%
   mutate("type" = "laid, obs") %>%
@@ -116,7 +94,7 @@ Eggs_obs_df <- Eggs_tot_df %>%
   select("date", "year", "eggs", "type", "norm_eggs", "DOY") 
 
 # join sims
-Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_23_24_df)
+Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_08_24_df)
 
 
 #plot 1
@@ -129,7 +107,7 @@ ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = type))+
 ggplot(Egg_comp_df,
        aes(x = DOY, y = norm_eggs,
            color = year))+
-  ggtitle("Daily laid eggs in Montpellier")+
+  ggtitle("Daily laid eggs in Nice")+
   geom_line(data = Egg_comp_df %>% filter(type != "laid, obs"))+
   geom_point(data = Egg_comp_df %>% filter(type == "laid, obs"))+
   # geom_point(data = Egg_comp_df %>% filter(type != "laid, simulated"))+
@@ -139,11 +117,10 @@ ggplot(Egg_comp_df,
 
 ##### plot classes E_d
 
-Sim_23_24_df <- Sim_x_df %>%
-  filter(date > as.Date("2022-12-31")) %>%
+Sim_08_24_df<- Sim_x_df %>%
+  filter(date > as.Date("2007-12-31")) %>%
   mutate(year = as.factor(year(date))) %>%
-  mutate(DOY = yday(date)) %>%
-  filter(DOY < 210)
+  mutate(DOY = yday(date)) 
 
 ggplot(Sim_23_24_df, aes(x = date, y = E+E_d))+
   geom_line()+
