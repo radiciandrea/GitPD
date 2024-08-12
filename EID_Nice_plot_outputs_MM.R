@@ -102,7 +102,9 @@ Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_08_23_df)
 ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = type))+
   geom_line(data = Egg_comp_df %>% filter(type != "laid, obs"))+
   geom_point(data = Egg_comp_df %>% filter(type == "laid, obs"))+
-  theme_test()
+  ylab("Nromalized laid aggs")+
+  theme_test()+
+  theme(legend.position = c(0.13, 0.85))
 
 #lo plotto nell'inkcscape
 
