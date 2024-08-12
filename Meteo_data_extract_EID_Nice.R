@@ -23,7 +23,7 @@ library(lubridate)
 path = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/MeteoFrance"
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/MeteoFrance_elab" 
 
-years <- 2007:2024
+years <- 2006:2024
 
 
 # change from Montpellier airport to Nice
