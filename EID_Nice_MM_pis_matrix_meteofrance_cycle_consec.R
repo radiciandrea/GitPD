@@ -20,13 +20,13 @@ name = "France"
 
 years = 2007:2024
 
-#load first EOBS to get lon lat
+#load first MeteoFrance to get lon lat
 folder_meteofrance = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/MeteoFrance_elab"
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/MeteoFrance_elab_consec"
 
 dir.create(folder_out)
 
-#Getting weather from EOBS
+#Getting weather from MeteoFrance
 load(paste0(folder_meteofrance, "/Nice_", years[1], "_", name, ".RData")) #Nice #France
 
 # distinct space
@@ -78,15 +78,15 @@ X_0 = c(E0, J0, I0, A0, E_d_0)
 
 for (year in years){
   
-  #getting weather from EOBS <- previous year
-  load(paste0(folder_meteofrance, "/Nice_", year-1, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+  #getting weather from MeteoFrance <- previous year
+  load(paste0(folder_meteofrance, "/Nice_", year-1, "_", name, ".RData")) #MeteoFrance W_EU #Occitanie #France
   
   #Extract only temp in December
   W_D_df <- W_tot_df %>%
     filter(DOY >= (max(DOY)-30))
   
-  #Getting weather from EOBS
-  load(paste0(folder_meteofrance, "/Nice_", year, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+  #Getting weather from MeteoFrance
+  load(paste0(folder_meteofrance, "/Nice_", year, "_", name, ".RData")) #MeteoFrance W_EU #Occitanie #France
   
   #Create a matrix over which integrate; each colums is a city, each row is a date
   DOS_y = unique(W_tot_df$DOS)
@@ -132,16 +132,16 @@ for (year in years){
   temp_min_DJF = apply(temp_DJF, 2, function(x){min(x)}) #min temp of last winter (daily or hours?)
   
   # #photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
-  # SunTimes_df<- getSunlightTimes(data = data.frame("date" = as.Date(W_tot_df$date), "lat"= rep(LAT, n_d), "lon" = rep(LON, n_d)))# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
-  # Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
-  # t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
-  
-  # Daylight model from SI Metelmann: faster
-  theta = 0.2163108 + 2*atan(0.9671396*tan(0.0086*(W_tot_df$DOY - 186))) 
-  phi = asin(0.39795 *cos(theta)) 
-  
-  Ph_P = 24-24/pi*acos(sin(pi*rep(LAT,n_d)/180)*sin(phi)/(cos(pi*rep(LAT,n_d)/180)*cos(phi)))
-  t_sr = 12/pi*acos(sin(pi*rep(LAT,n_d)/180)*sin(phi)/(cos(pi*rep(LAT,n_d)/180)*cos(phi))) 
+  SunTimes_df<- getSunlightTimes(data = data.frame("date" = as.Date(W_tot_df$date), "lat"= rep(LAT, n_d), "lon" = rep(LON, n_d)))# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
+  Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
+  t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
+
+  # # Daylight model from SI Metelmann: faster
+  # theta = 0.2163108 + 2*atan(0.9671396*tan(0.0086*(W_tot_df$DOY - 186))) 
+  # phi = asin(0.39795 *cos(theta)) 
+  # 
+  # Ph_P = 24-24/pi*acos(sin(pi*rep(LAT,n_d)/180)*sin(phi)/(cos(pi*rep(LAT,n_d)/180)*cos(phi)))
+  # t_sr = 12/pi*acos(sin(pi*rep(LAT,n_d)/180)*sin(phi)/(cos(pi*rep(LAT,n_d)/180)*cos(phi))) 
   
   Ph_P = matrix(Ph_P, nrow = n_d, byrow = T)
   t_sr = matrix(t_sr, nrow = n_d, byrow = T)
