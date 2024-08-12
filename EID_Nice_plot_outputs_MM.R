@@ -70,7 +70,7 @@ Eggs_sim_df <- data.frame(date = Sim_x_df$date,
                           eggs = beta_approx_m_df$value*Sim_x_df$A, #"all eggs, diapaused or not"
                           type = "laid, simulated")
 
-Eggs_sim_08_24_df <- Eggs_sim_df %>%
+Eggs_sim_08_23_df <- Eggs_sim_df %>%
   filter(year > 2007)%>%
   mutate(norm_eggs = 100*eggs/max(eggs))%>%
   group_by(year) %>%
@@ -89,12 +89,13 @@ Eggs_obs_df <- Eggs_tot_df %>%
   mutate("type" = "laid, obs") %>%
   mutate(date = as.Date((date))) %>%
   mutate(year = as.factor(year(date))) %>%
+  filter(!is.na(eggs))%>%
   mutate(norm_eggs = 100*eggs /max(eggs))%>%
   mutate(doy = yday(date))%>%
   select("date", "year", "eggs", "type", "norm_eggs", "DOY") 
 
 # join sims
-Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_08_24_df)
+Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_08_23_df)
 
 
 #plot 1
@@ -115,17 +116,3 @@ ggplot(Egg_comp_df,
   # ylab("normalized abundance (%)")+
   theme_test()
 
-##### plot classes E_d
-
-Sim_08_24_df<- Sim_x_df %>%
-  filter(date > as.Date("2007-12-31")) %>%
-  mutate(year = as.factor(year(date))) %>%
-  mutate(DOY = yday(date)) 
-
-ggplot(Sim_23_24_df, aes(x = date, y = E+E_d))+
-  geom_line()+
-  theme_test()
-
-ggplot(Sim_23_24_df, aes(x = DOY, y = E+E_d, color = year))+
-  geom_line()+
-  theme_test()
