@@ -104,6 +104,8 @@ ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = type))+
   geom_point(data = Egg_comp_df %>% filter(type == "laid, obs"))+
   theme_test()
 
+#lo plotto nell'inkcscape
+
 #plot 2
 ggplot(Egg_comp_df,
        aes(x = DOY, y = norm_eggs,
@@ -116,3 +118,9 @@ ggplot(Egg_comp_df,
   # ylab("normalized abundance (%)")+
   theme_test()
 
+# date_common
+date_common = Eggs_obs_df$date
+Eggs_sim_08_23_common_df <- Eggs_sim_08_23_df %>%
+  filter(date %in% date_common)
+
+cor(Eggs_sim_08_23_common_df$norm_eggs, Eggs_obs_df$norm_eggs)
