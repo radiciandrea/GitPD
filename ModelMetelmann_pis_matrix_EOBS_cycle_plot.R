@@ -258,3 +258,6 @@ ggplot()+
                    label.padding = 0.15)
   # geom_text(data = cities_df, aes(x = lon, y = lat, label = name), hjust=-0.1, vjust=-0.1)
 
+100*(sum(domain_indicators_FR$E0_recent>1, na.rm = T)/sum(domain_indicators_FR$E0_hist>1, na.rm = T)-1)
+
+#Export as: 800 * 600? 
