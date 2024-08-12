@@ -989,4 +989,4 @@ data_all_summ <- data_all %>%
   ungroup()
 
 ggplot(data_all_summ )+
-  geom_point(aes(x = date_detection, y = av_eggs_per_day))
+  geom_point(aes(x = date_detection, y = me_eggs_per_day))
