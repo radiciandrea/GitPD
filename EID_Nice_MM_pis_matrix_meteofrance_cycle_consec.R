@@ -18,7 +18,7 @@ library(sf)
 
 name = "France"
 
-years = 2007:2024
+years = 2007:2023
 
 #load first MeteoFrance to get lon lat
 folder_meteofrance = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/MeteoFrance_elab"
