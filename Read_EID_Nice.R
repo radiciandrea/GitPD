@@ -960,3 +960,33 @@ for(i in 1:n_dates){
 data_2023 = data
 
 #####
+
+library(ggplot2)
+
+# Aggregate everything
+
+data_all <- rbind(data_2008,
+                  data_2009,
+                  data_2010,
+                  data_2011,
+                  data_2012,
+                  data_2013,
+                  data_2014,
+                  data_2015,
+                  data_2016,
+                  data_2017,
+                  data_2018,
+                  data_2019,
+                  data_2020,
+                  data_2021,
+                  data_2022,
+                  data_2023)
+
+data_all_summ <- data_all %>%
+  group_by(date_detection, commune)%>%
+  dplyr::summarise(av_eggs_per_day = mean(eggs_per_day, na.rm = T),
+                   me_eggs_per_day = median(eggs_per_day, na.rm = T)) %>% 
+  ungroup()
+
+ggplot(data_all_summ )+
+  geom_point(aes(x = date_detection, y = av_eggs_per_day))
