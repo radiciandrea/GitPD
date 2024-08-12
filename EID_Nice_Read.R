@@ -475,6 +475,8 @@ data_2014 = data
 #####
 # 2015
 
+# I had to modify AI8 to 7/8/15 (it was 27/8/15)
+
 data_read <- read.xlsx2(file = paste0(folder_data, "/", name_file),
                         sheetName = "2015",
                         startRow = 3,
@@ -990,3 +992,20 @@ data_all_summ <- data_all %>%
 
 ggplot(data_all_summ )+
   geom_point(aes(x = date_detection, y = me_eggs_per_day))
+
+## save everything
+
+folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/"
+
+Eggs_tot_df <- data_all_summ %>%
+  rename(eggs = av_eggs_per_day)%>%
+  mutate(type = "observed") %>%
+  mutate(date = as.Date(date_detection)) %>%
+  mutate(region = "194") %>% #in France!
+  mutate(DOY = yday(date)) %>%
+  mutate(DOS = julian(as.Date(date), origin = as.Date(paste0('2007-12-31')))) %>%
+  ungroup()%>%
+  select(c("region", "DOS", "eggs","DOY", "date"))
+
+save(Eggs_tot_df, file = paste0(folder_out, "EID_Nice_2008_2023.RData"))
+
