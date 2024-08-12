@@ -1,5 +1,7 @@
 # Function buld by Paul to download data
 
+rm(list = ls())
+
 # modified to include path
 
 library(httr)
@@ -21,20 +23,13 @@ library(lubridate)
 path = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/MeteoFrance"
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/MeteoFrance_elab" 
 
-years <- 2010:2024
+years <- 2007:2024
 
-# httr::GET("https://object.files.data.gouv.fr/meteofrance/data/synchro_ftp/BASE/QUOT/Q_34_latest-2023-2024_RR-T-Vent.csv.gz",
-#           httr::write_disk(file.path(path,"dpt_34_2023_2024.csv.gz")),httr::progress(),config = list(maxredirs=-1))
-# 
-# # httr::GET("https://object.files.data.gouv.fr/meteofrance/data/synchro_ftp/BASE/QUOT/Q_34_latest-1950-2022_RR-T-Vent.csv.gz",
-# #           httr::write_disk(file.path(path,"dpt_34_1950-2022.csv.gz")),httr::progress(),config = list(maxredirs=-1))
-# 
-# # It doesn't work: I download them from https://meteo.data.gouv.fr/datasets/donnees-climatologiques-de-base-quotidiennes/
 
-#we start with PEROLS only
+# change from Montpellier airport to Nice
 
-df_meteofrance_2023_2024 <- read_delim(paste0(path, "/dpt_34_2023_2024.csv.gz"), delim = ";", na = "", show_col_types = FALSE) %>%
-  filter(NOM_USUEL %in% c("MONTPELLIER-AEROPORT")) %>%
+df_meteofrance_2023_2024 <- read_delim(paste0(path, "/Q_06_latest-2023-2024_RR-T-Vent.csv.gz"), delim = ";", na = "", show_col_types = FALSE) %>%
+  filter(NOM_USUEL %in% c("NICE")) %>%
   mutate(date = parse_date_time(AAAAMMJJ,"ymd"), year = year(date), month = month(date), week = week(date)) %>%
   group_by(NOM_USUEL,date,year,month,week) %>%
   summarise(RFD = sum(RR, na.rm = T),
@@ -45,8 +40,8 @@ df_meteofrance_2023_2024 <- read_delim(paste0(path, "/dpt_34_2023_2024.csv.gz"),
 
 #do the same also for previous years
 
-df_meteofrance_2010_2022 <- read_delim(paste0(path, "/Q_34_previous-1950-2022_RR-T-Vent.csv.gz"), delim = ";", na = "", show_col_types = FALSE) %>%
-  filter(NOM_USUEL %in% c("MONTPELLIER-AEROPORT")) %>%
+df_meteofrance_2007_2022 <- read_delim(paste0(path, "/Q_06_previous-1950-2022_RR-T-Vent.csv.gz"), delim = ";", na = "", show_col_types = FALSE) %>%
+  filter(NOM_USUEL %in% c("NICE")) %>%
   mutate(date = parse_date_time(AAAAMMJJ,"ymd"), year = year(date), month = month(date), week = week(date)) %>%
   group_by(NOM_USUEL,date,year,month,week) %>%
   summarise(RFD = sum(RR, na.rm = T),
@@ -56,14 +51,14 @@ df_meteofrance_2010_2022 <- read_delim(paste0(path, "/Q_34_previous-1950-2022_RR
   filter(year >= min(years)) %>%
   rename(nom_commune = NOM_USUEL)
 
-df_meteofrance <- rbind(df_meteofrance_2010_2022, df_meteofrance_2023_2024)
+df_meteofrance <- rbind(df_meteofrance_2007_2022, df_meteofrance_2023_2024)
 
 folder_shape = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/"
-name = "Occitanie"
+name = "France"
 domain = st_read(paste0(folder_shape, "/domain_sel_", name, ".shp"))
 
 Montp_cell <- domain %>%
-  filter(region == "93")
+  filter(region == "194")
 
 for(y in years){
   
@@ -84,5 +79,5 @@ for(y in years){
     ungroup()%>%
     select(-c("month", "week"))
   
-  save(W_tot_df, file = paste0(folder_out, "/Montpellier_", y, "_Occitanie.RData") )
+  save(W_tot_df, file = paste0(folder_out, "/Nice_", y, "_France.RData") )
 }
