@@ -1,5 +1,5 @@
 # I try to code the model by Metelmann 2019
-# Running on MeteoFrance
+# Running on MeteoFrance (Nice)
 # Here the model works with day-varying temperature 
 
 # Same settings of homonimous file
@@ -16,19 +16,18 @@ library(sf)
 
 #load T and P
 
-name = "Occitanie"
+name = "France"
 
-years = 2011:2024
+years = 2007:2024
 
 #load first EOBS to get lon lat
 folder_meteofrance = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/MeteoFrance_elab"
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/MeteoFrance_elab_consec"
-folder_GitPD = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codice/GitPD"
 
 dir.create(folder_out)
 
 #Getting weather from EOBS
-load(paste0(folder_meteofrance, "/Montpellier_", years[1], "_", name, ".RData")) #Montpellier W_EU #Occitanie #France
+load(paste0(folder_meteofrance, "/Nice_", years[1], "_", name, ".RData")) #Nice #France
 
 # distinct space
 regions_df <- W_tot_df %>% 
@@ -80,14 +79,14 @@ X_0 = c(E0, J0, I0, A0, E_d_0)
 for (year in years){
   
   #getting weather from EOBS <- previous year
-  load(paste0(folder_meteofrance, "/Montpellier_", year-1, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+  load(paste0(folder_meteofrance, "/Nice_", year-1, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
   
   #Extract only temp in December
   W_D_df <- W_tot_df %>%
     filter(DOY >= (max(DOY)-30))
   
   #Getting weather from EOBS
-  load(paste0(folder_meteofrance, "/Montpellier_", year, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+  load(paste0(folder_meteofrance, "/Nice_", year, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
   
   #Create a matrix over which integrate; each colums is a city, each row is a date
   DOS_y = unique(W_tot_df$DOS)
@@ -164,7 +163,7 @@ for (year in years){
                                          sapply(DOY_y, function(x){return(sum(alpha_evap^(x:1-1) * (alpha_dens*prec[1:x,y] + alpha_rain*H[x,y])))}))
   }) 
   
-  source(paste0(folder_GitPD,"/MM_integration_functions.R"))
+  source("MM_integration_functions.R")
   
   tic() #previous cycle
   parms = list(omega = omega,
@@ -220,13 +219,10 @@ for (year in years){
   # Compute beta_approx
   beta_approx = (33.2*exp(-0.5*((temp-70.3)/14.1)^2)*(38.8 - temp)^1.5)*(temp<= 38.8) #fertility rate
   
-  save(Sim, E0_v, beta_approx, file = paste0(folder_out, "/Sim_Montpellier_", name, "_", year, ".RData"))
+  save(Sim, E0_v, beta_approx, file = paste0(folder_out, "/Sim_Nice_", name, "_", year, ".RData"))
   
   E_d_0_y = pmax(1, Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
   X_0 = c(rep(0, n_r*4), E_d_0_y)
   
   toc()
 }
-
-
-
