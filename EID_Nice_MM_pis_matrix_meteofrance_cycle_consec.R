@@ -103,6 +103,11 @@ for (year in years){
   
   #exctract params
   temp = matrix(W_tot_df$T_av, nrow = n_d)
+  
+  #LITTLE CORRECTION (there's a NaN in temperatures)
+  id_temp_na <- which(is.na(temp))
+  temp[id_temp_na] = 0.5*(temp[id_temp_na-1]+temp[id_temp_na+1])
+  
   prec = matrix(W_tot_df$P, nrow = n_d)
   
   # we simplified the following, (max(DOY_y)-306), to 61 to reduce complexity with unfinished years
