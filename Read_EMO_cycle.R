@@ -36,7 +36,6 @@ lat_m = lat[1]-(lat[2]-lat[1])/2
 lat_M = tail(lat, 1)+(lat[2]-lat[1])/2
 lon_m = lon[1]-(lon[2]-lon[1])/2
 lon_M = tail(lon, 1)+(lon[2]-lon[1])/2
-time_0 = time[1]-1
 
 # # ADDED: create grid
 # # first create polygon bb
@@ -95,8 +94,9 @@ date = as.Date(time, origin=as.Date("1990-01-01"))
 year_rep = sapply(date, function(x){substr(x, 1, 4)})
 
 #let's consider dats only >= 2005
-years_sel = 2007:2008
-date_sel <- which(year_rep>=min(years_sel))
+years_sel = 2004:2023
+date_sel <- which(year_rep %in% years_sel)
+year_rep_sel = year_rep[date_sel]
 
 # rain - precipitation
 # long # lat # time
@@ -122,7 +122,7 @@ rm(tas, data_tas)
 tic()
 for(year in years_sel){
   
-  index_year = which(year_rep ==year)
+  index_year = which(year_rep_sel ==year)
   
   #extract weather in each location
   W_list <- vector(mode = "list", sum(is.na(tas_sel[,,1])==T))
