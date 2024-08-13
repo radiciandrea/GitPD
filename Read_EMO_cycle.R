@@ -38,55 +38,55 @@ lon_m = lon[1]-(lon[2]-lon[1])/2
 lon_M = tail(lon, 1)+(lon[2]-lon[1])/2
 time_0 = time[1]-1
 
-# ADDED: create grid
-# first create polygon bb
-sfc_bb = st_sfc(st_polygon(list(rbind(c(lon_m,lat_m), c(lon_M,lat_m),
-                                   c(lon_M,lat_M), c(lon_m,lat_M),
-                                   c(lon_m,lat_m)))),
-             crs=4326)
-
-#grid
-grid_Occitanie_EMO <- st_make_grid(
-  sfc_bb,
-  n = c(length(lon), length(lat)),
-)
-
-# st_write(grid_Occitanie_EMO, paste0(folder_sh, "grid_Occitanie_EMO.shp")) 
-#need to re-uplead to fix class
-domain <- st_read(paste0(folder_sh, "grid_Occitanie_EMO.shp"))
-
-# each cell contains 4 gpw_v4_population_count_rev11_2015_30_sec_crop data
-# apprently id is not important in the other shp grids (EOBS) so we'll do the same
-# there is not any col index or row index.
-
-# extract raster of population
-
-folder_r = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/GPW_4/"
-
-# load gpw-v4
-pop_gpw <- raster(paste0(folder_r, "gpw_v4_population_count_rev11_2015_30_sec.tif"))
-res(pop_gpw)
-
-#crop raster
-pop_gpw_crop <- raster::crop(pop_gpw, st_bbox(domain))
-
-# the "fact is the number of "sides per aggregatedside" or the sqrt(number of pixels in a aggregated pixel)
-pop_gpw_agg <- aggregate(pop_gpw_crop, fact=2, fun = sum)
-
-pop_gpw_agg[which(pop_gpw_agg==0)] = NA
-
-# #aggregate raster
-# writeRaster(pop_gpw_agg,paste0(folder_r, "gpw_v4_population_count_rev11_2015_01.tif"),options=c('TFW=YES'))
-
-#extract from centroids - fix crs
-pop_gpw_values <- extract(pop_gpw_agg, st_transform(st_centroid(domain), st_crs(pop_gpw_agg)))
-
-domain <- domain%>%
-  mutate(pop = pop_gpw_values) 
-
-domain$popkm2 <- domain$pop*10^6/as.numeric(st_area(domain))
-
-# st_write(domain, paste0(folder_sh, "grid_Occitanie_EMO+pop.shp"))
+# # ADDED: create grid
+# # first create polygon bb
+# sfc_bb = st_sfc(st_polygon(list(rbind(c(lon_m,lat_m), c(lon_M,lat_m),
+#                                    c(lon_M,lat_M), c(lon_m,lat_M),
+#                                    c(lon_m,lat_m)))),
+#              crs=4326)
+# 
+# #grid
+# grid_Occitanie_EMO <- st_make_grid(
+#   sfc_bb,
+#   n = c(length(lon), length(lat)),
+# )
+# 
+# # st_write(grid_Occitanie_EMO, paste0(folder_sh, "grid_Occitanie_EMO.shp")) 
+# #need to re-uplead to fix class
+# domain <- st_read(paste0(folder_sh, "grid_Occitanie_EMO.shp"))
+# 
+# # each cell contains 4 gpw_v4_population_count_rev11_2015_30_sec_crop data
+# # apprently id is not important in the other shp grids (EOBS) so we'll do the same
+# # there is not any col index or row index.
+# 
+# # extract raster of population
+# 
+# folder_r = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/GPW_4/"
+# 
+# # load gpw-v4
+# pop_gpw <- raster(paste0(folder_r, "gpw_v4_population_count_rev11_2015_30_sec.tif"))
+# res(pop_gpw)
+# 
+# #crop raster
+# pop_gpw_crop <- raster::crop(pop_gpw, st_bbox(domain))
+# 
+# # the "fact is the number of "sides per aggregatedside" or the sqrt(number of pixels in a aggregated pixel)
+# pop_gpw_agg <- aggregate(pop_gpw_crop, fact=2, fun = sum)
+# 
+# pop_gpw_agg[which(pop_gpw_agg==0)] = NA
+# 
+# # #aggregate raster
+# # writeRaster(pop_gpw_agg,paste0(folder_r, "gpw_v4_population_count_rev11_2015_01.tif"),options=c('TFW=YES'))
+# 
+# #extract from centroids - fix crs
+# pop_gpw_values <- extract(pop_gpw_agg, st_transform(st_centroid(domain), st_crs(pop_gpw_agg)))
+# 
+# domain <- domain%>%
+#   mutate(pop = pop_gpw_values) 
+# 
+# domain$popkm2 <- domain$pop*10^6/as.numeric(st_area(domain))
+# 
+# # st_write(domain, paste0(folder_sh, "grid_Occitanie_EMO+pop.shp"))
 domain <- st_read(paste0(folder_sh, "grid_Occitanie_EMO+pop.shp"))
 
 ####
@@ -95,8 +95,8 @@ date = as.Date(time, origin=as.Date("1990-01-01"))
 year_rep = sapply(date, function(x){substr(x, 1, 4)})
 
 #let's consider dats only >= 2005
-years_sel = 2005:2023
-date_sel <- which(year_rep>=2005)
+years_sel = 2007:2008
+date_sel <- which(year_rep>=min(years_sel))
 
 # rain - precipitation
 # long # lat # time
