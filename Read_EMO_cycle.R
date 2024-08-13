@@ -94,19 +94,20 @@ date = as.Date(time, origin=as.Date("1990-01-01"))
 year_rep = sapply(date, function(x){substr(x, 1, 4)})
 
 #let's consider dats only >= 2005
-years_sel = 2004:2023
-date_sel <- which(year_rep %in% years_sel)
-year_rep_sel = year_rep[date_sel]
+years_sel = 2004:2022
+index_date_sel <- which(year_rep %in% years_sel)
+year_rep_sel = year_rep[index_date_sel]
+date_sel = date[index_date_sel]
 
 # rain - precipitation
 # long # lat # time
 pr <- ncvar_get(data_pr, attributes(data_pr$var)$names[1])
-pr_sel <- pr[,,date_sel]
+pr_sel <- pr[,,index_date_sel]
 rm(pr, data_pr)
 
 # mean temperature
 tas <- ncvar_get(data_tas, attributes(data_tas$var)$names[1])
-tas_sel <- tas[,,date_sel]
+tas_sel <- tas[,,index_date_sel]
 rm(tas, data_tas)
 
 # #min temperature
@@ -139,13 +140,13 @@ for(year in years_sel){
           lat = lat[j],
           pop = domain$popkm2[i+(j-1)*length(lon)], # TO CHECK
           year = year,
-          DOS = as.numeric(strftime(date[index_year], format = "%j")),
-          date = date[index_year],
+          DOS = as.numeric(strftime(date_sel[index_year], format = "%j")),
+          date = date_sel[index_year],
           P = pr_sel[i,j,index_year],
           T_av = tas_sel[i,j,index_year],
           # T_M = tx_sel[i,j,index_year],
           # T_m = tn_sel[i,j,index_year],
-          DOY = as.numeric(strftime(date[index_year], format = "%j")))
+          DOY = as.numeric(strftime(date_sel[index_year], format = "%j")))
         
         W_list[[k]]<-W_df
         k = k+1
@@ -153,7 +154,8 @@ for(year in years_sel){
     }
   }
   
-  W_tot_df <- do.call("rbind", W_list)
+  # W_tot_df <- do.call("rbind", W_list)
+  W_tot_df <- rbindlist(W_list)
   
   #save
   save(W_tot_df,
