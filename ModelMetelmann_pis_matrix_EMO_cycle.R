@@ -18,7 +18,7 @@ library(sf)
 
 #load T and P
 
-years = 2006:2006
+years = 2006:2022
 
 #load first EMO to get lon lat
 if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codice/local.R")){
@@ -76,8 +76,8 @@ A0 = rep(0, n_r)
 E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
 
 #integration step
-is_1 = 1/2 #1/48
-is_2 = 1/4 #1/48
+is_1 = 1/48 #1/48
+is_2 = 1/72 #1/72
 
 for (year in years){
   
@@ -208,6 +208,6 @@ for (year in years){
   Sim = rbind(Sim_y_1, Sim_y_2)
   E0_v = pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0
   
-  save(Sim, E0_v, file = paste0(folder_out, "/Sim_EMO_", type, "_", name, "_", year, ".RData"))
+  save(Sim, E0_v, file = paste0(folder_out, "/Sim_Occitanie_EMO_", year, ".RData"))
   toc()
 }
