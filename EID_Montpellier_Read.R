@@ -504,7 +504,7 @@ Eggs_tot_df <- data_all_summ %>%
   mutate(DOY = yday(date)) %>%
   mutate(DOS = julian(as.Date(date), origin = as.Date(paste0('2015-12-31')))) %>%
   ungroup()%>%
-  select(c("region", "DOS", "eggs","DOY", "date"))
+  select(c("region", "DOS", "eggs","DOY", "date", "quartier"))
 
 save(Eggs_tot_df, file = paste0(folder_out, "EID_Montpellier_2016_2017.RData"))
 
