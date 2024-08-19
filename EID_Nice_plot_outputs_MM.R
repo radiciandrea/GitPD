@@ -95,16 +95,18 @@ Eggs_obs_df <- Eggs_tot_df %>%
   select("date", "year", "eggs", "type", "norm_eggs", "DOY") 
 
 # join sims
-Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_08_23_df)
+Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_08_23_df) %>%
+  rename(Type = type)
 
 
 #plot 1
-ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = type))+
-  geom_line(data = Egg_comp_df %>% filter(type != "laid, obs"))+
-  geom_point(data = Egg_comp_df %>% filter(type == "laid, obs"))+
-  ylab("Nromalized laid aggs")+
+ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = Type))+
+  geom_line(data = Egg_comp_df %>% filter(Type != "laid, obs"))+
+  geom_point(data = Egg_comp_df %>% filter(Type == "laid, obs"))+
+  ylab("Normalized laid eggs (%)")+
+  xlab("date (year)")+
   theme_test()+
-  theme(legend.position = c(0.13, 0.85))
+  theme(legend.position = c(0.09, 0.85))
 
 #lo plotto nell'inkcscape
 
