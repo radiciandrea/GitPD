@@ -195,7 +195,7 @@ ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = type))+
 
 ########## plot cycle
 
-###### plot specific cell in vectAbundance
+###### plot specific cell in VectAbundance
 
 folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/"
 
@@ -227,12 +227,13 @@ for(region_x in regions_availab){
   id_VA = VectDomain$IDVectAb[VectDomain$region == region_x]
   name_region = VectDomain$Name_app[VectDomain$region == region_x]
   
+  #max(c(1,eggs) little correction otherwise can't deal with only zeros 
   Eggs_obs_df <- Eggs_tot_df %>%
     filter(region == region_x) %>%
     mutate("type" = "laid, obs") %>%
     mutate(date = as.Date((date))) %>%
     select("eggs", "type", "date") %>%
-    mutate(norm_eggs = 100*eggs/max(eggs, na.rm = T))
+    mutate(norm_eggs = 100*eggs/max(c(1,eggs), na.rm = T)) 
   
   date_sel = Eggs_obs_df$date
   date_min = min(date_sel)
@@ -323,20 +324,31 @@ for(region_x in regions_availab){
     summarise(norm_eggs = mean(norm_eggs))%>%
     ungroup()
   
-  #cor_annual
-  cor_annual = cor(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)
-  
-  plot(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)
-  
-  #cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
-  cor_annual_p = cor.test(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)
-  
-  # Number of stars: https://faq.edqm.eu/pages/viewpage.action?pageId=1377305
-  #If a p-value is less than 0.05, it is flagged with one star (*). If a p-value is less than 0.01, it is flagged with 2 stars (**). If a p-value is less than 0.001, it is flagged with three stars (***).
-  cor_annual_stars = case_when(cor_annual_p$p.value < 0.001 ~ "***",
-                               cor_annual_p$p.value < 0.01 ~ "**",
-                               cor_annual_p$p.value < 0.05 ~ "*",
-                               .default = "")
+  #consider only data for which at least 4 summers are available
+  if(nrow(Eggs_obs_year_filtered_df)>=4){
+    #cor_annual
+    cor_annual = cor(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)
+    
+    #cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
+    cor_annual_p = cor.test(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)
+    
+    # Number of stars: https://faq.edqm.eu/pages/viewpage.action?pageId=1377305
+    #If a p-value is less than 0.05, it is flagged with one star (*). If a p-value is less than 0.01, it is flagged with 2 stars (**). If a p-value is less than 0.001, it is flagged with three stars (***).
+    cor_annual_stars = case_when(cor_annual_p$p.value < 0.001 ~ "***",
+                                 cor_annual_p$p.value < 0.01 ~ "**",
+                                 cor_annual_p$p.value < 0.05 ~ "*",
+                                 .default = "") 
+  } else {
+    #cor_annual
+    cor_annual = NA
+    
+    #cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
+    cor_annual_p = NA
+    
+    # Number of stars: https://faq.edqm.eu/pages/viewpage.action?pageId=1377305
+    #If a p-value is less than 0.05, it is flagged with one star (*). If a p-value is less than 0.01, it is flagged with 2 stars (**). If a p-value is less than 0.001, it is flagged with three stars (***).
+    cor_annual_stars = ""
+  }
   
   label_cor = paste0("r: ", round(cor_brut, 2), cor_brut_stars,
                      "; rmse = ", round(rmse_brut, 3), "; r (annual): ",
