@@ -110,17 +110,17 @@ ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = Type))+
 
 #lo plotto nell'inkcscape
 
-#plot 2
-ggplot(Egg_comp_df,
-       aes(x = DOY, y = norm_eggs,
-           color = year))+
-  ggtitle("Daily laid eggs in Nice")+
-  geom_line(data = Egg_comp_df %>% filter(Type != "laid, obs"))+
-  geom_point(data = Egg_comp_df %>% filter(Type == "laid, obs"))+
-  # geom_point(data = Egg_comp_df %>% filter(type != "laid, simulated"))+
-  # guides(color = FALSE)+
-  # ylab("normalized abundance (%)")+
-  theme_test()
+# #plot 2
+# ggplot(Egg_comp_df,
+#        aes(x = DOY, y = norm_eggs,
+#            color = year))+
+#   ggtitle("Daily laid eggs in Nice")+
+#   geom_line(data = Egg_comp_df %>% filter(Type != "laid, obs"))+
+#   geom_point(data = Egg_comp_df %>% filter(Type == "laid, obs"))+
+#   # geom_point(data = Egg_comp_df %>% filter(type != "laid, simulated"))+
+#   # guides(color = FALSE)+
+#   # ylab("normalized abundance (%)")+
+#   theme_test()
 
 # date_common
 date_common = Eggs_obs_df$date
@@ -130,6 +130,13 @@ Eggs_sim_08_23_common_df <- Eggs_sim_08_23_df %>%
 #cor
 cor(Eggs_sim_08_23_common_df$norm_eggs, Eggs_obs_df$norm_eggs)
 
+#cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
+cor.test(Eggs_sim_08_23_common_df$norm_eggs, Eggs_obs_df$norm_eggs)
+
 #rmse
 sqrt(mean((Eggs_sim_08_23_common_df$norm_eggs/100 - Eggs_obs_df$norm_eggs/100)^2))
 
+# date_common: 
+date_common = Eggs_obs_df$date
+Eggs_sim_08_23_common_df <- Eggs_sim_08_23_df %>%
+  filter(date %in% date_common)
