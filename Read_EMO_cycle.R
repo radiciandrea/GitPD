@@ -24,6 +24,8 @@ if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codi
 
 data_pr <- nc_open(paste0(folder_in, "pr_1d_19900101_20223112_EMO-1arcmin_Occitania.nc"))
 data_tas <- nc_open(paste0(folder_in, "tas_1d_19900101_20223112_EMO-1arcmin_Occitania.nc"))
+data_tn <- nc_open(paste0(folder_in, "tn_1d_19900101_20223112_EMO-1arcmin_Occitania.nc"))
+data_tx <- nc_open(paste0(folder_in, "tx_1d_19900101_20223112_EMO-1arcmin_Occitania.nc"))
 
 print(data_pr)
 
@@ -110,15 +112,15 @@ tas <- ncvar_get(data_tas, attributes(data_tas$var)$names[1])
 tas_sel <- tas[,,index_date_sel]
 rm(tas, data_tas)
 
-# #min temperature
-# tn <- ncvar_get(data_tn, attributes(data_tn$var)$names[1])
-# tn_sel <- tn[i_lon_sel, i_lat_sel, ]
-# rm(tn, data_tn)
-# 
-# #max temperature
-# tx <- ncvar_get(data_tx, attributes(data_tx$var)$names[1])
-# tx_sel <- tx[i_lon_sel, i_lat_sel,]
-# rm(tx, data_tx)
+#min temperature
+tn <- ncvar_get(data_tn, attributes(data_tn$var)$names[1])
+tn_sel <- tn[,,index_date_sel]
+rm(tn, data_tn)
+
+#max temperature
+tx <- ncvar_get(data_tx, attributes(data_tx$var)$names[1])
+tx_sel <- tx[,,index_date_sel]
+rm(tx, data_tx)
 
 tic()
 for(year in years_sel){
@@ -144,8 +146,8 @@ for(year in years_sel){
           date = date_sel[index_year],
           P = pr_sel[i,j,index_year],
           T_av = tas_sel[i,j,index_year],
-          # T_M = tx_sel[i,j,index_year],
-          # T_m = tn_sel[i,j,index_year],
+          T_M = tx_sel[i,j,index_year],
+          T_m = tn_sel[i,j,index_year],
           DOY = as.numeric(strftime(date_sel[index_year], format = "%j")))
         
         W_list[[k]]<-W_df
