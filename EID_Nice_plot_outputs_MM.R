@@ -99,6 +99,20 @@ Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_08_23_df) %>%
   rename(Type = type)
 
 
+# date_common
+date_common = Eggs_obs_df$date
+Eggs_sim_08_23_common_df <- Eggs_sim_08_23_df %>%
+  filter(date %in% date_common)
+
+#cor
+cor_brut = cor(Eggs_sim_08_23_common_df$norm_eggs, Eggs_obs_df$norm_eggs)
+
+#cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
+cor_brut_p = cor.test(Eggs_sim_08_23_common_df$norm_eggs, Eggs_obs_df$norm_eggs)
+
+#rmse
+rmse_brut = sqrt(mean((Eggs_sim_08_23_common_df$norm_eggs/100 - Eggs_obs_df$norm_eggs/100)^2))
+
 #plot 1
 ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = Type))+
   geom_line(data = Egg_comp_df %>% filter(Type != "laid, obs"))+
@@ -121,22 +135,3 @@ ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = Type))+
 #   # guides(color = FALSE)+
 #   # ylab("normalized abundance (%)")+
 #   theme_test()
-
-# date_common
-date_common = Eggs_obs_df$date
-Eggs_sim_08_23_common_df <- Eggs_sim_08_23_df %>%
-  filter(date %in% date_common)
-
-#cor
-cor(Eggs_sim_08_23_common_df$norm_eggs, Eggs_obs_df$norm_eggs)
-
-#cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
-cor.test(Eggs_sim_08_23_common_df$norm_eggs, Eggs_obs_df$norm_eggs)
-
-#rmse
-sqrt(mean((Eggs_sim_08_23_common_df$norm_eggs/100 - Eggs_obs_df$norm_eggs/100)^2))
-
-# date_common: 
-date_common = Eggs_obs_df$date
-Eggs_sim_08_23_common_df <- Eggs_sim_08_23_df %>%
-  filter(date %in% date_common)
