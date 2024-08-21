@@ -13,6 +13,7 @@ library(reshape2)
 library(dplyr)
 library(pracma)
 library(sf)
+library(lubridate)
 
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec"
 folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_plot"
@@ -210,6 +211,13 @@ Eggs_tot_df <- left_join(Eggs_tot_df, VectDomain) %>%
 
 regions_availab = sort(unique(Eggs_tot_df$region))
 
+VectDomain$r_gross = NA
+VectDomain$pv_r_gross = NA
+VectDomain$rmse_gross = NA
+VectDomain$r_year = NA
+VectDomain$pv_r_year = NA
+
+
 #Sim starts in 2005
 date = as.Date(DOS_sim, origin = first_day-1)
 
@@ -333,6 +341,12 @@ for(region_x in regions_availab){
   label_cor = paste0("r: ", round(cor_brut, 2), cor_brut_stars,
                      "; rmse = ", round(rmse_brut, 3), "; r (annual): ",
                      round(cor_annual, 2), cor_annual_stars)
+  
+  VectDomain$r_gross[VectDomain$region == region_x] = cor_brut
+  VectDomain$pv_r_gross[VectDomain$region == region_x] = cor_brut_p
+  VectDomain$rmse_gross[VectDomain$region == region_x] = rmse_brut
+  VectDomain$r_year[VectDomain$region == region_x] = cor_annual
+  VectDomain$pv_r_year[VectDomain$region == region_x] = cor_annual_p
   
   #####
   
