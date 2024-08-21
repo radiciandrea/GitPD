@@ -172,7 +172,7 @@ ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = Type))+
   ylab("Standardized eggs (%)")+
   xlab("date (year)")+
   theme_test()+
-  theme(legend.position = c(0.09, 0.85))+
+  theme(legend.position = c(0.08, 0.80))+
   annotate(geom="text", x= as.Date("2010-08-01"), y=100,
            label= label_cor, color="black")
 
