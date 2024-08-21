@@ -2,6 +2,8 @@
 # MM_pis_matrix_EOBS_cycle_consec_plot.R
 
 #per plottare anni consecutivi
+# compare with VectAbundance
+# and make some stats
 
 
 rm(list = ls())
@@ -139,7 +141,7 @@ folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eg
 
 load(paste0(folder_obs, "VectAbundance_025.RData"))
 #Eggs_tot_df
-#Eg Nice = 1597
+#Eg Nice = 1597 (actually: 1537)
 
 id_reg = 1597
 region_v = regions[id_reg]
@@ -180,11 +182,11 @@ Eggs_sim_df <- data.frame(date = Sim_x_df$date,
 # join sims
 Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_df) %>%
   group_by(type)%>%
-  mutate(relative_eggs_m = 100*eggs/mean(eggs, na.rm = T))%>%
-  mutate(relative_eggs_M = 100*eggs/max(eggs, na.rm = T))%>%
+  # mutate(norm_eggs = 100*eggs/mean(eggs, na.rm = T))%>%
+  mutate(norm_eggs = 100*eggs/max(eggs, na.rm = T))%>%
   ungroup()
 
-ggplot(Egg_comp_df, aes(x = date, y = relative_eggs_M, color = type))+
+ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = type))+
   geom_line(data = Egg_comp_df %>% filter(type != "observed"))+
   geom_point(data = Egg_comp_df %>% filter(type == "observed"))+
   theme_test()
@@ -196,23 +198,33 @@ ggplot(Egg_comp_df, aes(x = date, y = relative_eggs_M, color = type))+
 
 folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/"
 
+# load VectAbundance:Eggs_tot_df
 load(paste0(folder_obs, "VectAbundance_025.RData"))
+
+# load vectAbundance names
+VectDomain <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_W_EU_IDVectAb.shp") %>%
+  filter(!is.na(IDVectAb))
+
+Eggs_tot_df <- left_join(Eggs_tot_df, VectDomain) %>%
+  st_drop_geometry()
 
 regions_availab = sort(unique(Eggs_tot_df$region))
 
 #Sim starts in 2005
 date = as.Date(DOS_sim, origin = first_day-1)
 
-for(id_reg in regions_availab){
+for(region_x in regions_availab){
   
-  region_x = regions[id_reg]
+  # region_x = regions[id_reg]
+  id_VA = VectDomain$IDVectAb[VectDomain$region == region_x]
+  name_region = VectDomain$Name_app[VectDomain$region == region_x]
   
   Eggs_obs_df <- Eggs_tot_df %>%
     filter(region == region_x) %>%
     mutate("type" = "laid, obs") %>%
     mutate(date = as.Date((date))) %>%
     select("eggs", "type", "date") %>%
-    mutate(relative_eggs_M = 100*eggs/max(eggs, na.rm = T))
+    mutate(norm_eggs = 100*eggs/max(eggs, na.rm = T))
   
   date_sel = Eggs_obs_df$date
   date_min = min(date_sel)
@@ -244,20 +256,99 @@ for(id_reg in regions_availab){
   Eggs_sim_max_date_sel <- max(Eggs_sim_df$eggs[Eggs_sim_df$date %in% date_sel], na.rm = T)
   
   Eggs_sim_df <- Eggs_sim_df %>%
-    mutate(relative_eggs_M = 100*eggs/Eggs_sim_max_date_sel)
+    mutate(norm_eggs = 100*eggs/Eggs_sim_max_date_sel)
   
   # join sims
   Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_df) 
   
-  egg_plot <- ggplot(Egg_comp_df, aes(x = date, y = relative_eggs_M, color = type))+
-    ggtitle(paste0("Eggs abundance, VectAbundance (points) vs simulated, cell id ", region_x))+
+  #####
+  # stats (copied from EID_Nice_plot_outputs_MM)
+  
+  # date_common
+  date_common = Eggs_obs_df$date
+  Eggs_sim_common_df <- Eggs_sim_df %>%
+    filter(date %in% date_common)
+  
+  #cor
+  cor_brut = cor(Eggs_sim_common_df$norm_eggs, Eggs_obs_df$norm_eggs)
+  
+  #cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
+  # Pearson correlation test
+  cor_brut_p = cor.test(Eggs_sim_common_df$norm_eggs, Eggs_obs_df$norm_eggs)
+  
+  # Number of stars: https://faq.edqm.eu/pages/viewpage.action?pageId=1377305
+  #If a p-value is less than 0.05, it is flagged with one star (*). If a p-value is less than 0.01, it is flagged with 2 stars (**). If a p-value is less than 0.001, it is flagged with three stars (***).
+  cor_brut_stars = case_when(cor_brut_p$p.value < 0.001 ~ "***",
+                             cor_brut_p$p.value < 0.01 ~ "**",
+                             cor_brut_p$p.value < 0.05 ~ "*",
+                             .default = "")
+  #rmse
+  rmse_brut = sqrt(mean((Eggs_sim_common_df$norm_eggs/100 - Eggs_obs_df$norm_eggs/100)^2))
+  
+  #### corr_per_year
+  # at least 7 in summer
+  
+  Eggs_obs_filtered_df <- Eggs_obs_df %>%
+    mutate(month = month(date)) %>%
+    filter(month %in% c(6,7,8,9)) %>% #only summer days
+    mutate(year = year(date)) %>%
+    group_by(year) %>%
+    mutate(count = n()) %>%
+    ungroup() %>%
+    filter(count > 6)
+  
+  date_filter = Eggs_obs_filtered_df$date
+  
+  #computer yearly average
+  
+  Eggs_obs_year_filtered_df <- Eggs_obs_filtered_df %>%
+    group_by(year, type) %>%
+    summarise(norm_eggs = mean(norm_eggs))%>%
+    ungroup() 
+  
+  # date_filter
+  
+  Eggs_sim_year_filtered_df <- Eggs_sim_df %>%
+    mutate(year = year(date)) %>%
+    filter(date %in% date_filter) %>%
+    group_by(year, type) %>%
+    summarise(norm_eggs = mean(norm_eggs))%>%
+    ungroup()
+  
+  #cor_annual
+  cor_annual = cor(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)
+  
+  plot(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)
+  
+  #cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
+  cor_annual_p = cor.test(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)
+  
+  # Number of stars: https://faq.edqm.eu/pages/viewpage.action?pageId=1377305
+  #If a p-value is less than 0.05, it is flagged with one star (*). If a p-value is less than 0.01, it is flagged with 2 stars (**). If a p-value is less than 0.001, it is flagged with three stars (***).
+  cor_annual_stars = case_when(cor_annual_p$p.value < 0.001 ~ "***",
+                               cor_annual_p$p.value < 0.01 ~ "**",
+                               cor_annual_p$p.value < 0.05 ~ "*",
+                               .default = "")
+  
+  label_cor = paste0("r: ", round(cor_brut, 2), cor_brut_stars,
+                     "; rmse = ", round(rmse_brut, 3), "; r (annual): ",
+                     round(cor_annual, 2), cor_annual_stars)
+  
+  #####
+  
+  egg_plot <- ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = type))+
+    ggtitle(paste0("Eggs abundance, VectAbundance (points) vs simulated (line), cell id ",
+                   region_x, "VectAbundanceID ", id_VA, ", locality = ", name_region))+
     geom_line(data = Egg_comp_df %>% filter(type == "laid, simulated"))+
     geom_point(data = Egg_comp_df %>% filter(type != "laid, simulated"))+
     guides(color = FALSE)+
     ylab("normalized abundance (%)")+
-    theme_test()
+    theme_test()+
+    annotate(geom="text", x= min(Egg_comp_df$date)+(max(Egg_comp_df$date) - min(Egg_comp_df$date))*0.2, y=max(Egg_comp_df$norm_eggs),
+             label= label_cor, color="black")
   
   ggsave(paste0(folder_plot, "/egg_plot_cell_id_", region_x, ".png"), plot = egg_plot, dpi = 300)
+  
   
 }
 
