@@ -217,7 +217,6 @@ VectDomain$rmse_gross = NA
 VectDomain$r_year = NA
 VectDomain$pv_r_year = NA
 
-
 #Sim starts in 2005
 date = as.Date(DOS_sim, origin = first_day-1)
 
@@ -228,12 +227,20 @@ for(region_x in regions_availab){
   name_region = VectDomain$Name_app[VectDomain$region == region_x]
   
   #max(c(1,eggs) little correction otherwise can't deal with only zeros 
+  
+  #apparenlty in Ferrara (id VA 7258) there are same non-univocal values. which should I keep?
+  
   Eggs_obs_df <- Eggs_tot_df %>%
     filter(region == region_x) %>%
+    group_by(date)%>%
+    mutate(eggs = mean(eggs)) %>%
+    ungroup() %>%
+    dplyr::distinct(date, .keep_all = TRUE) %>%
     mutate("type" = "laid, obs") %>%
     mutate(date = as.Date((date))) %>%
     select("eggs", "type", "date") %>%
     mutate(norm_eggs = 100*eggs/max(c(1,eggs), na.rm = T)) 
+    
   
   date_sel = Eggs_obs_df$date
   date_min = min(date_sel)
@@ -283,13 +290,13 @@ for(region_x in regions_availab){
   
   #cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
   # Pearson correlation test
-  cor_brut_p = cor.test(Eggs_sim_common_df$norm_eggs, Eggs_obs_df$norm_eggs)
+  cor_brut_p = cor.test(Eggs_sim_common_df$norm_eggs, Eggs_obs_df$norm_eggs)$p.value
   
   # Number of stars: https://faq.edqm.eu/pages/viewpage.action?pageId=1377305
   #If a p-value is less than 0.05, it is flagged with one star (*). If a p-value is less than 0.01, it is flagged with 2 stars (**). If a p-value is less than 0.001, it is flagged with three stars (***).
-  cor_brut_stars = case_when(cor_brut_p$p.value < 0.001 ~ "***",
-                             cor_brut_p$p.value < 0.01 ~ "**",
-                             cor_brut_p$p.value < 0.05 ~ "*",
+  cor_brut_stars = case_when(cor_brut_p < 0.001 ~ "***",
+                             cor_brut_p < 0.01 ~ "**",
+                             cor_brut_p < 0.05 ~ "*",
                              .default = "")
   #rmse
   rmse_brut = sqrt(mean((Eggs_sim_common_df$norm_eggs/100 - Eggs_obs_df$norm_eggs/100)^2))
@@ -304,7 +311,7 @@ for(region_x in regions_availab){
     group_by(year) %>%
     mutate(count = n()) %>%
     ungroup() %>%
-    filter(count > 6)
+    filter(count > 8)
   
   date_filter = Eggs_obs_filtered_df$date
   
@@ -324,19 +331,19 @@ for(region_x in regions_availab){
     summarise(norm_eggs = mean(norm_eggs))%>%
     ungroup()
   
-  #consider only data for which at least 4 summers are available
-  if(nrow(Eggs_obs_year_filtered_df)>=4){
+  #consider only data for which at least 3 summers are available
+  if(nrow(Eggs_obs_year_filtered_df)>=3){
     #cor_annual
     cor_annual = cor(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)
     
     #cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
-    cor_annual_p = cor.test(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)
+    cor_annual_p = cor.test(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)$p.value
     
     # Number of stars: https://faq.edqm.eu/pages/viewpage.action?pageId=1377305
     #If a p-value is less than 0.05, it is flagged with one star (*). If a p-value is less than 0.01, it is flagged with 2 stars (**). If a p-value is less than 0.001, it is flagged with three stars (***).
-    cor_annual_stars = case_when(cor_annual_p$p.value < 0.001 ~ "***",
-                                 cor_annual_p$p.value < 0.01 ~ "**",
-                                 cor_annual_p$p.value < 0.05 ~ "*",
+    cor_annual_stars = case_when(cor_annual_p < 0.001 ~ "***",
+                                 cor_annual_p < 0.01 ~ "**",
+                                 cor_annual_p < 0.05 ~ "*",
                                  .default = "") 
   } else {
     #cor_annual
@@ -363,18 +370,23 @@ for(region_x in regions_availab){
   #####
   
   egg_plot <- ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = type))+
-    ggtitle(paste0("Eggs abundance, VectAbundance (points) vs simulated (line), cell id ",
-                   region_x, "VectAbundanceID ", id_VA, ", locality = ", name_region))+
+    ggtitle(paste0("standardized Eggs abundance, VA (points) vs simulated (line), cell id: ",
+                   region_x, ", ID VA: ", id_VA, ", locality: ", name_region))+
     geom_line(data = Egg_comp_df %>% filter(type == "laid, simulated"))+
     geom_point(data = Egg_comp_df %>% filter(type != "laid, simulated"))+
     guides(color = FALSE)+
     ylab("normalized abundance (%)")+
     theme_test()+
-    annotate(geom="text", x= min(Egg_comp_df$date)+(max(Egg_comp_df$date) - min(Egg_comp_df$date))*0.2, y=max(Egg_comp_df$norm_eggs),
+    annotate(geom="text", x= min(Egg_comp_df$date)+(max(Egg_comp_df$date) - min(Egg_comp_df$date))*0.13, y=max(Egg_comp_df$norm_eggs),
              label= label_cor, color="black")
-  
-  ggsave(paste0(folder_plot, "/egg_plot_cell_id_", region_x, ".png"), plot = egg_plot, dpi = 300)
+
+  ggsave(paste0(folder_plot, "/egg_plot_cell_id_", region_x, ".png"), plot = egg_plot,
+         width = 3000,
+         height = 1500,
+         units = "px",
+         dpi = 300)
   
   
 }
 
+save(VectDomain, file = paste0(folder_plot, "/VectDomainStat.RData"))
