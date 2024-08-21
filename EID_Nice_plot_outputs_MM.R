@@ -108,19 +108,73 @@ Eggs_sim_08_23_common_df <- Eggs_sim_08_23_df %>%
 cor_brut = cor(Eggs_sim_08_23_common_df$norm_eggs, Eggs_obs_df$norm_eggs)
 
 #cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
+# Pearson correlation test
 cor_brut_p = cor.test(Eggs_sim_08_23_common_df$norm_eggs, Eggs_obs_df$norm_eggs)
 
+# Number of stars: https://faq.edqm.eu/pages/viewpage.action?pageId=1377305
+#If a p-value is less than 0.05, it is flagged with one star (*). If a p-value is less than 0.01, it is flagged with 2 stars (**). If a p-value is less than 0.001, it is flagged with three stars (***).
+cor_brut_stars = case_when(cor_brut_p$p.value < 0.001 ~ "***",
+                           cor_brut_p$p.value < 0.01 ~ "**",
+                           cor_brut_p$p.value < 0.05 ~ "*")
 #rmse
 rmse_brut = sqrt(mean((Eggs_sim_08_23_common_df$norm_eggs/100 - Eggs_obs_df$norm_eggs/100)^2))
+
+#### corr_per_year
+# at least 7 in summer
+
+Eggs_obs_filtered_df <- Eggs_obs_df %>%
+  mutate(month = month(date)) %>%
+  filter(month %in% c(6,7,8,9)) %>% #only summer days
+  group_by(year) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  filter(count > 6)
+
+date_filter = Eggs_obs_filtered_df$date
+
+#computer yearly average
+
+Eggs_obs_year_filtered_df <- Eggs_obs_filtered_df %>%
+  group_by(year, type) %>%
+  summarise(norm_eggs = mean(norm_eggs))%>%
+  ungroup() 
+
+# date_filter
+
+Eggs_sim_year_filtered_df <- Eggs_sim_08_23_df %>%
+  filter(date %in% date_filter) %>%
+  group_by(year, type) %>%
+  summarise(norm_eggs = mean(norm_eggs))%>%
+  ungroup()
+
+#cor_annual
+cor_annual = cor(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)
+
+plot(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)
+
+#cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
+cor_annual_p = cor.test(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)
+
+# Number of stars: https://faq.edqm.eu/pages/viewpage.action?pageId=1377305
+#If a p-value is less than 0.05, it is flagged with one star (*). If a p-value is less than 0.01, it is flagged with 2 stars (**). If a p-value is less than 0.001, it is flagged with three stars (***).
+cor_annual_stars = case_when(cor_annual_p$p.value < 0.001 ~ "***",
+                             cor_annual_p$p.value < 0.01 ~ "**",
+                             cor_annual_p$p.value < 0.05 ~ "*")
+
+label_cor = paste0("r: ", round(cor_brut, 2), cor_brut_stars,
+                   "; rmse = ", round(rmse_brut, 3), "; r (annual): ",
+                   round(cor_annual, 2), cor_annual_stars)
 
 #plot 1
 ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = Type))+
   geom_line(data = Egg_comp_df %>% filter(Type != "laid, obs"))+
   geom_point(data = Egg_comp_df %>% filter(Type == "laid, obs"))+
-  ylab("Normalized laid eggs (%)")+
+  ylab("Standardized eggs (%)")+
   xlab("date (year)")+
   theme_test()+
-  theme(legend.position = c(0.09, 0.85))
+  theme(legend.position = c(0.09, 0.85))+
+  annotate(geom="text", x= as.Date("2010-08-01"), y=100,
+           label= label_cor, color="black")
 
 #lo plotto nell'inkcscape
 
