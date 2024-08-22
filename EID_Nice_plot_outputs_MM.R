@@ -176,6 +176,20 @@ ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = Type))+
   annotate(geom="text", x= as.Date("2010-08-01"), y=100,
            label= label_cor, color="black")
 
+#plot 1 for conference
+
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/07_Exposome_sep_2024/images/"
+
+g1 <- ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = Type))+
+  geom_line(data = Egg_comp_df %>% filter(Type != "laid, obs"), color = "gray70")+
+  geom_point(data = Egg_comp_df %>% filter(Type == "laid, obs"))+
+  ylab("")+
+  xlab("")+
+  theme_bw()+
+  theme(legend.position = "none")
+
+ggsave(file= paste0(folder_plot, "Nice_traj.svg"), plot= g1 , width=8, height=3)
+
 #lo plotto nell'inkcscape
 
 # #plot 2
