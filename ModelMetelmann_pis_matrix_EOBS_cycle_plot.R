@@ -140,6 +140,7 @@ ggplot()+
 
 
 ## New areas with R0 > 1 (Risk of establishment)
+### processing for EMERGENCE conference
 
 col_br_sint= c("#384AB4", "#8EB0FE", "#F29878", "#B00026")
 levels_sint= c("Historically suitable", "Recently suitable", "Recently unsuitable", "Historically unsuitable")
@@ -170,6 +171,8 @@ library(ggspatial)
 library(prettymapr)
 library(ggrepel)
 library(RJSONIO)
+
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/07_Exposome_sep_2024/images/"
 
 regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
 
@@ -213,50 +216,52 @@ cities_sf <- st_sf('city' = cities_df$name, 'geometry' = points_sf)
 
 #plot 1
 
-ggplot()+
-  #annotation_map_tile(zoom = 6, cachedir = system.file("rosm.cache", package = "ggspatial")) +
+g1 <- ggplot()+
   geom_sf(data = domain_years_sel_FR, aes(fill = E0_1_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
-  geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
-  # geom_sf(data = obs_GBIF, alpha = 1, colour = "green", size=0.3)+
-  # geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow", size=0.8)+
+  geom_sf(data = regions_sh, alpha = 0, colour = "white")+
   geom_sf(data = points_sf)+
   ggtitle(bquote(E[0]~~(period~2007-2014)))+
-  theme_test()+
+  theme_minimal()+
   guides(fill=guide_legend(title=bquote(E[0])))+
   geom_sf(data = cities_sf) +
-  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name))
+  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
+                   label.padding = 0.25, size = 6)
+
+ggsave(file= paste0(folder_plot, "E0_1_level.svg"), plot= g1 , width=10, height=8)
 
 #plot 2
 
-ggplot()+
-  #annotation_map_tile(zoom = 6, cachedir = system.file("rosm.cache", package = "ggspatial")) +
+g2 <- ggplot()+
   geom_sf(data = domain_years_sel_FR, aes(fill = E0_2_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
-  geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
-  # geom_sf(data = obs_GBIF, alpha = 1, colour = "green", size=0.3)+
-  # geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow", size=0.8)+
+  geom_sf(data = regions_sh, alpha = 0, colour = "white")+
   ggtitle(bquote(E[0]~~(period~2015-2022)))+
-  theme_test()+
+  theme_minimal() +
   guides(fill=guide_legend(title=bquote(E[0])))+
   geom_sf(data = cities_sf) +
-  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name))
+  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
+                   label.padding = 0.25, size = 6)
+
+ggsave(file= paste0(folder_plot, "E0_2_level.svg"), plot= g2 , width=10, height=8)
 
 # plot 3
 
 col_br_sint_FR<- c("#384AB4",  "#F29878", "#B00026") #"#8EB0FE",
 
-ggplot()+
+gvar <- ggplot()+
   geom_sf(data = domain_indicators_FR, aes(fill = Risk_zone), colour = NA)+
   scale_fill_manual(values = rev(col_br_sint_FR))+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
   ggtitle(bquote(E[0]~qualitative~variation))+
-  theme_test()+
+  theme_minimal() +
   guides(fill=guide_legend(title="Change"))+
   geom_sf(data = cities_sf) +
   geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
-                   label.padding = 0.15)
+                   label.padding = 0.25, size = 6)
   # geom_text(data = cities_df, aes(x = lon, y = lat, label = name), hjust=-0.1, vjust=-0.1)
+
+ggsave(file= paste0(folder_plot, "E0_var_level.svg"), plot= gvar , width=10, height=8)
 
 100*(sum(domain_indicators_FR$E0_recent>1, na.rm = T)/sum(domain_indicators_FR$E0_hist>1, na.rm = T)-1)
 
