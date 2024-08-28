@@ -143,9 +143,21 @@ library(pROC)
 category = domain_years_sel_p_a$status[which(!is.na(domain_years_sel_p_a$status))]
 prediction = domain_years_sel_p_a$E0_2015_2023[which(!is.na(domain_years_sel_p_a$status))]
 
+category = category[which(!is.na(prediction))]
+prediction = prediction[which(!is.na(prediction))]
+
+thr = 1
+prediction_th = 1*(prediction>thr)
+sensitivity_th = sum((prediction_th+category)==2, na.rm = T)/sum(category)
+specificity_th = sum((prediction_th+category)==0, na.rm = T)/(sum(category==0))
+
+
 par(pty = "s")
 #roc(obese, glm.fit$fitted.values, plot = TRUE)
-roc(category , prediction, plot = TRUE, col = "#377eb8", lwd = 3)
+roc(category , prediction, plot = TRUE, col = "#377eb8", lwd = 3, print.thres=TRUE)
+points(y = sensitivity_th, x = specificity_th , col = "red")
+text(y = sensitivity_th -0.03, x = specificity_th -0.32, paste0("biological threshold: 1 (",
+                                                          round(specificity_th ,3), ",", round(sensitivity_th,3), ")"))
 
 # x = (1- specificity) = false positive %
 # y = (sensitivity) = true positive %
