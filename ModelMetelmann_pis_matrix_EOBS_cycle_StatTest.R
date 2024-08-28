@@ -1,8 +1,7 @@
 # plot del cycle
 # ModelMetelmann_pis_matrix_EOBS_cycle.R
 
-#per plottare anni indipendenti
-
+# to vaildate with data of presence and absence
 
 rm(list = ls())
 
