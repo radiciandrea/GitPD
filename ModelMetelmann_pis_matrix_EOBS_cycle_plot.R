@@ -182,8 +182,19 @@ domain_years_sel_FR <- domain_years_sel %>%
 domain_indicators_FR <- domain_indicators %>%
   filter(!is.na(Country))
 
-# net increase suitable area in France
+# relative increase suitable area in France over historic
 100*(sum(domain_indicators_FR$E0_recent>1, na.rm = T)/sum(domain_indicators_FR$E0_hist>1, na.rm = T)-1)
+
+# relative increase suitable area in France
+#historic
+100*(sum(domain_indicators_FR$E0_hist>1, na.rm = T)/nrow(domain_indicators_FR))
+#recent
+100*(sum(domain_indicators_FR$E0_recent>1, na.rm = T)/nrow(domain_indicators_FR))
+#recent-historic
+100*((sum(domain_indicators_FR$E0_recent>1, na.rm = T) - sum(domain_indicators_FR$E0_hist>1, na.rm = T))/nrow(domain_indicators_FR))
+#unsuitable
+100*(sum(domain_indicators_FR$E0_recent<1, na.rm = T)/nrow(domain_indicators_FR))
+
 
 # plot cities (from)
 
