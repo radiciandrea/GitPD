@@ -145,6 +145,8 @@ library(prettymapr)
 library(ggrepel)
 library(RJSONIO)
 
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/08_Emergence_sep_2024/images/"
+
 regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp") %>%
   filter(Region == "Languedoc-Roussillon et Midi-P")
 
@@ -183,7 +185,7 @@ cities_sf <- st_sf('city' = cities_df$name, 'geometry' = points_sf)
 
 #plot 1
 
-ggplot()+
+g1 <- ggplot()+
   #annotation_map_tile(zoom = 6, cachedir = system.file("rosm.cache", package = "ggspatial")) +
   geom_sf(data = domain_years_sel, aes(fill = E0_1_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
@@ -197,9 +199,12 @@ ggplot()+
   geom_sf(data = cities_sf) +
   geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name))
 
+ggsave(file= paste0(folder_plot, "E0_1_Oc_level.svg"), plot= g1 , width=7, height=10)
+
+
 #plot 2
 
-ggplot()+
+g2 <- ggplot()+
   #annotation_map_tile(zoom = 6, cachedir = system.file("rosm.cache", package = "ggspatial")) +
   geom_sf(data = domain_years_sel, aes(fill = E0_2_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
@@ -212,11 +217,13 @@ ggplot()+
   geom_sf(data = cities_sf) +
   geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name))
 
+ggsave(file= paste0(folder_plot, "E0_2_Oc_level.svg"), plot= g2 , width=7, height=10)
+
 # plot 3
 
 col_br_sint_Oc= c("#384AB4", "#8EB0FE", "#F29878", "#B00026") #"#8EB0FE",
 
-ggplot()+
+g3 <- ggplot()+
   geom_sf(data = domain_indicators, aes(fill = Risk_zone), colour = NA)+
   scale_fill_manual(values = rev(col_br_sint_Oc))+
   geom_sf(data = deps_oc_sh, alpha = 0, colour = "grey90")+
@@ -226,8 +233,19 @@ ggplot()+
   geom_sf(data = cities_sf) +
   geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
                    label.padding = 0.15)
+
+ggsave(file= paste0(folder_plot, "E0_c_Oc_level.svg"), plot= g3 , width=7, height=10)
 # geom_text(data = cities_df, aes(x = lon, y = lat, label = name), hjust=-0.1, vjust=-0.1)
 
-100*(sum(domain_indicators$E0_recent>1, na.rm = T)/sum(domain_indicators$E0_hist>1, na.rm = T)-1)
+# relative increase suitable area in France
+#historic
+100*(sum(domain_indicators$E0_hist>1, na.rm = T)/nrow(domain_indicators))
+#recent
+100*(sum(domain_indicators$E0_recent>1, na.rm = T)/nrow(domain_indicators))
+#recent-historic
+100*((sum(domain_indicators$E0_recent>1, na.rm = T) - sum(domain_indicators$E0_hist>1, na.rm = T))/nrow(domain_indicators))
+#unsuitable
+100*(sum(domain_indicators$E0_recent<1, na.rm = T)/nrow(domain_indicators))
+
 
 #Export as: 800 * 600? 
