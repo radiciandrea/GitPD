@@ -39,7 +39,7 @@ if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codi
 
 dir.create(folder_out)
 
-filter_region = 1
+filter_region = 0
 
 #Getting weather from EOBS
 load(paste0(folder_eobs, "/EOBS_sel_", years[1], "_", name, ".RData")) #EOBS W_EU #Occitanie #France
@@ -92,9 +92,9 @@ E0 = rep(0, n_r)
 J0 = rep(0, n_r)
 I0 = rep(0, n_r)
 A0 = rep(0, n_r)
-# E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
+E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
 # load new initial condition
-load(paste0(folder_in, "/X0_E0_consec_", name, ".RData"))
+#load(paste0(folder_in, "/X0_E0_consec_", name, ".RData"))
 
 #integration step
 is_1 = 1/60
@@ -239,9 +239,14 @@ for (year in years){
   # Compute beta_approx
   beta_approx = (33.2*exp(-0.5*((temp-70.3)/14.1)^2)*(38.8 - temp)^1.5)*(temp<= 38.8) #fertility rate
   
-  R0 = 
+  #R0 as in Zardini et al DA CONTROLLARE
+  Adults = Sim[, 1+(n_r*3+1):(n_r*4)]*100 #per km2
+  EIP = 0.11*temp^2 - 7.13*temp +121.17
+  B = pmax(0,-0.0043*temp^2 + 0.2593*temp - 3.2705)
+  omega_H = 1/5
+  R0 = (1/3*0.9)^2*(Adults/H)*B/(omega_H*mu_A)/(1+mu_A*EIP)
   
-  save(Sim, E0_v, beta_approx, file = paste0(folder_out, "/Sim_EOBS_", name, "_", year, ".RData"))
+  save(Sim, E0_v, beta_approx, R0, file = paste0(folder_out, "/Sim_EOBS_R0_", name, "_", year, ".RData"))
   
   #values <1 are set to 1
   E_d_0_y = pmax(1, Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
