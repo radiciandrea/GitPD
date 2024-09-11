@@ -14,7 +14,7 @@ library(lubridate)
 
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_R0"
 
-files = list.files(folder_out)
+files = list.files(folder_out, pattern = ".RData")
 
 name = substring(files[1], 13, 16)
 years = substring(files, 18, 21)
