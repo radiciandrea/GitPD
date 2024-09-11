@@ -92,9 +92,9 @@ E0 = rep(0, n_r)
 J0 = rep(0, n_r)
 I0 = rep(0, n_r)
 A0 = rep(0, n_r)
-E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
+# E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
 # load new initial condition
-#load(paste0(folder_in, "/X0_E0_consec_", name, ".RData"))
+load(paste0(folder_in, "/X0_E0_consec_", name, ".RData"))
 
 #integration step
 is_1 = 1/60
@@ -241,12 +241,20 @@ for (year in years){
   
   #R0 as in Zardini et al DA CONTROLLARE
   Adults = Sim[, 1+(n_r*3+1):(n_r*4)]*100 #per km2
-  EIP = 0.11*temp^2 - 7.13*temp +121.17
-  B = pmax(0,-0.0043*temp^2 + 0.2593*temp - 3.2705)
-  omega_H = 1/5
-  R0 = (1/3*0.9)^2*(Adults/H)*B/(omega_H*mu_A)/(1+mu_A*EIP)
+  m = Adults/H # adult female osquito to human ration
   
-  save(Sim, E0_v, beta_approx, R0, file = paste0(folder_out, "/Sim_EOBS_R0_", name, "_", year, ".RData"))
+  
+  EIP = 0.11*temp^2 - 7.13*temp +121.17 #Benkimoun 2021
+  # B = pmax(0,-0.0043*temp^2 + 0.2593*temp - 3.2705) #Benkimoun 2021
+  b_v2H = 0.5 # b Blagrove 2020
+  b_H2v = 0.0665 # beta Blagrove 2020
+  omega_H = 1/5 #Benkimoun 2021
+  a = (0.0043*temp + 0.0943)/2  #biting rate (Zanardini et al., Caminade 2016, Blagrove 2020)
+  phi_a = 0.9 #human biting preference
+  VC = (a*phi_a)^2*m*exp(-mu_A*EIP)/mu_A #Vector capacity as RossMcDonald
+  R0 = (a*phi_a)^2*m*b_v2H*b_H2v/(omega_H*mu_A)/(1+mu_A*EIP) # as Zanardini et al.
+  
+  save(Vc, R0, file = paste0(folder_out, "/Sim_EOBS_R0_", name, "_", year, ".RData"))
   
   #values <1 are set to 1
   E_d_0_y = pmax(1, Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
