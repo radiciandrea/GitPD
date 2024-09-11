@@ -254,7 +254,7 @@ for (year in years){
   VC = (a*phi_a)^2*m*exp(-mu_A*EIP)/mu_A #Vector capacity as RossMcDonald
   R0 = (a*phi_a)^2*m*b_v2H*b_H2v/(omega_H*mu_A)/(1+mu_A*EIP) # as Zanardini et al.
   
-  save(Vc, R0, file = paste0(folder_out, "/Sim_EOBS_R0_", name, "_", year, ".RData"))
+  save(VC, R0, file = paste0(folder_out, "/Sim_EOBS_R0_", name, "_", year, ".RData"))
   
   #values <1 are set to 1
   E_d_0_y = pmax(1, Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
