@@ -1,10 +1,7 @@
 # plot del cycle
-# MM_pis_matrix_EOBS_cycle_consec_plot.R
+# MM_pis_matrix_EOBS_cycle_consec_R0.R
 
-#per plottare anni consecutivi
-# compare with VectAbundance
-# and make some stats
-
+#per plottare R0 
 
 rm(list = ls())
 
@@ -15,16 +12,12 @@ library(pracma)
 library(sf)
 library(lubridate)
 
-folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec"
-folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_plot"
-
-# name = "W_EU"
-# year = 2005
+folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_R0"
 
 files = list.files(folder_out)
 
-name = substring(files[1], 10, 13)
-years = substring(files, 15, 18)
+name = substring(files[1], 13, 16)
+years = substring(files, 18, 21)
 
 first_day = as.Date(paste0(min(years), "-01-01"))
 last_day = as.Date(paste0(max(years), "-12-31"))
@@ -37,356 +30,108 @@ n_d = length(DOS_sim)
 load(paste0(folder_out, "/", files[1]))
 
 n_c = 5 # numero di classi
-n_r = (ncol(Sim)-1)/n_c #numero di regioni
+n_r = ncol(R0) #numero di regioni
 regions = 1:n_r
 
-n_d_i = nrow(Sim)
-Sim_tot = matrix(NA, ncol = n_c*n_r+1, nrow = n_d) 
-Sim_tot[1:n_d_i,]=Sim
+n_d_i = nrow(R0)
+R0_tot = matrix(NA, ncol = n_r, nrow = n_d) 
+R0_tot[1:n_d_i,]=R0
 
-#same for beta
-beta_approx_tot = matrix(NA, ncol = n_r, nrow = n_d) 
-beta_approx_tot[1:n_d_i,]=beta_approx
+# sum R_0 >1
+R0_m = matrix(NA, ncol = n_r, nrow = length(files))
+R0_m[1,] = colSums(R0>0)
 
 k = n_d_i
 for (i in 2:length(files)){
   file = files[i]
   load(paste0(folder_out, "/", file))
-  n_d_i = nrow(Sim)
-  Sim_tot[k + 1:n_d_i,]=Sim
-  beta_approx_tot[k + 1:n_d_i,]=beta_approx
+  n_d_i = nrow(R0)
+  R0_tot[k + 1:n_d_i,]=R0
   k = k + n_d_i
+  R0_m[i,] = colSums(R0>0)
 }
 
 
 #########################
-#plot pop
-Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*max(DOS_sim)),
-                      "region" = rep(rep(regions, each = max(DOS_sim)), n_c),
-                      "t" = rep(DOS_sim, n_r*n_c),
-                      "value" = c(Sim_tot[, 2:(1+n_c*n_r)])) #5 classes
+#plot
 
-beta_approx_m_df = data.frame("variable" = "beta",
+R0_m_df = data.frame("variable" = "R0",
                               "region" = rep(regions, each = max(DOS_sim)),
                               "t" = rep(DOS_sim, n_r),
-                              "value" = c(beta_approx_tot)) #5 classes
-
-# st_write(domain_sel, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/res_sim_2011_", name, ".shp"))
-#plot
+                              "value" = c(R0_tot)) #5 classes
 
 #210
 
-id_reg = 1092 #
+id_reg = 1597 #
 
 #Roma: 1091, 1992
 #Nizza: 1597 e un'altra
 
 region_x = id_reg #regions[id_reg]
 
-Sim_m_x_df <- Sim_m_df %>%
+R0_m_x_df <- R0_m_df %>%
   filter(region == region_x)
 
-Sim_x_df<- dcast(Sim_m_x_df, t ~ variable)
+R0_x_df<- dcast(R0_m_x_df, t ~ variable)
 
-ggplot(Sim_m_x_df, aes(x = t, y = value, color = variable))+
+ggplot(R0_m_x_df, aes(x = t, y = value, color = variable))+
   geom_line()+
-  scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
-  # ylim(1, max(Sim_m_x_df$value))+
+  scale_y_continuous(trans='log2', limits = c(1, max(R0_m_x_df$value)))+
+  # ylim(1, max(R0_m_x_df$value))+
   # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
   labs(color = paste0("Abundances per classes (", region_x, ")")) +
   theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
 
-#plot eg only adults
+#### Geo plot 
 
-Sim_A_x_df <- Sim_m_x_df %>% 
-  filter(variable == "A") %>%
-  mutate(date = date_sim) 
+years_sel_1 = 2007:2014 # # 2006:2016
+R0_sel_1 = colMeans(R0_m[which(years %in% years_sel_1),])
 
-ggplot(Sim_A_x_df, aes(x = date, y = value))+
-  geom_line()+
-  # scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
-  # ylim(1, max(Sim_m_x_df$value))+
-  # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
-  labs(color = paste0("Abundances per classes, adult")) +
-  theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
+years_sel_2 = 2015:2022 # 2017:2023 
+R0_sel_2 = colMeans(R0_m[which(years %in% years_sel_2),])
 
-#only mean_by_day
-Sim_A_x_average_df <- Sim_m_x_df %>% 
-  filter(variable == "A") %>%
-  mutate(date = date_sim) %>%
-  mutate(date_dj = as.Date(substr(date, 6, 10), format = "%m-%d")) %>%
-  mutate(year = as.numeric(substr(date_sim, 1, 4)))  %>%
-  filter(year > 2009) %>%
-  filter(year < 2020) %>%
-  # group_by(date)%>%
-  # mutate(DOY = julian(date, origin = as.Date(paste0(as.numeric(year)-1, "-12-31"))))%>%
-  # ungroup()%>%
-  group_by(date_dj)%>%
-  summarize(adults_2010s = mean(value))%>%
-  ungroup()
+# to plot
+br = c(-1, 0, 31, 62, 123, 224)
+col_br <- c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724")
 
-ggplot(Sim_A_x_average_df, aes(x = date_dj, y = adults_2010s))+
-  geom_line()+
-  # scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
-  # ylim(1, max(Sim_m_x_df$value))+
-  # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
-  labs(color = paste0("Abundances per classes, adult")) +
-  theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
+domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_W_EU.shp")) 
 
+domain_years_sel <- domain_sel%>%
+  arrange(region) %>%
+  mutate(R0_1 = R0_sel_1)%>%
+  mutate(R0_1_level=cut(R0_1, breaks=br,
+                        labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
+  mutate(R0_1_level=factor(as.character(R0_1_level), levels=rev(levels(R0_1_level)))) %>%
+  mutate(R0_2 = R0_sel_2)%>%
+  mutate(R0_2_level=cut(R0_2, breaks=br,
+                        labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
+  mutate(R0_2_level=factor(as.character(R0_2_level), levels=rev(levels(R0_2_level))))
 
-# compute laid eggs: change into integration function #beta should be calculatedd hour by hour
-
-###### plot specific cell in vectAbundance
-
-folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/"
-
-load(paste0(folder_obs, "VectAbundance_025.RData"))
-#Eggs_tot_df
-#Eg Nice = 1597 (actually: 1537)
-
-id_reg = 1597
-region_v = regions[id_reg]
-
-# other sources
-# load(paste0(folder_obs, "Eggs_Weather_Nice_200811.RData"))
-# region_v = "NICE"
-
-Eggs_obs_df <- Eggs_tot_df %>%
-  filter(region == region_v) %>%
-  mutate("type" = "laid, obs") %>%
-  mutate(date = as.Date((date))) %>%
-  select("eggs", "type", "date") 
-
-date_sel = Eggs_obs_df$date
-
-#Sim starts in 2005
-date = as.Date(DOS_sim, origin = first_day-1)
-
-Sim_m_x_df <- Sim_m_df %>%
-  filter(region == region_x) %>%
-  mutate(date = rep(date, n_c)) %>%
-  filter(date %in% date_sel)
-
-Sim_x_df<- dcast(Sim_m_x_df, date ~ variable)
-
-#accidenti, dovevo salvare anche beta!
-
-beta_approx_x_df = beta_approx_m_df %>%
-  filter(region == region_x) %>%
-  mutate(date = date) %>%
-  filter(date %in% date_sel)
-
-Eggs_sim_df <- data.frame(date = Sim_x_df$date,
-                          eggs = beta_approx_x_df$value*Sim_x_df$A, #"all eggs, diapaused or not"
-                          type = "laid, simulated")
-
-# join sims
-Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_df) %>%
-  group_by(type)%>%
-  # mutate(norm_eggs = 100*eggs/mean(eggs, na.rm = T))%>%
-  mutate(norm_eggs = 100*eggs/max(eggs, na.rm = T))%>%
-  ungroup()
-
-ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = type))+
-  geom_line(data = Egg_comp_df %>% filter(type != "observed"))+
-  geom_point(data = Egg_comp_df %>% filter(type == "observed"))+
-  theme_test()
-
-
-########## plot cycle
-
-###### plot specific cell in VectAbundance
-
-folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/"
-
-# load VectAbundance:Eggs_tot_df
-load(paste0(folder_obs, "VectAbundance_025.RData"))
-
-# load vectAbundance names
-VectDomain <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_W_EU_IDVectAb.shp") %>%
-  filter(!is.na(IDVectAb))
-
-Eggs_tot_df <- left_join(Eggs_tot_df, VectDomain) %>%
-  st_drop_geometry()
-
-regions_availab = sort(unique(Eggs_tot_df$region))
-
-VectDomain$r_gross = NA
-VectDomain$pv_r_gross = NA
-VectDomain$rmse_gross = NA
-VectDomain$r_year = NA
-VectDomain$pv_r_year = NA
-
-#Sim starts in 2005
-date = as.Date(DOS_sim, origin = first_day-1)
-
-for(region_x in regions_availab){
-  
-  # region_x = regions[id_reg]
-  id_VA = VectDomain$IDVectAb[VectDomain$region == region_x]
-  name_region = VectDomain$Name_app[VectDomain$region == region_x]
-  
-  #max(c(1,eggs) little correction otherwise can't deal with only zeros 
-  
-  #apparenlty in Ferrara (id VA 7258) there are same non-univocal values. which should I keep?
-  
-  Eggs_obs_df <- Eggs_tot_df %>%
-    filter(region == region_x) %>%
-    group_by(date)%>%
-    mutate(eggs = mean(eggs)) %>%
-    ungroup() %>%
-    dplyr::distinct(date, .keep_all = TRUE) %>%
-    mutate("type" = "laid, obs") %>%
-    mutate(date = as.Date((date))) %>%
-    select("eggs", "type", "date") %>%
-    mutate(norm_eggs = 100*eggs/max(c(1,eggs), na.rm = T)) 
-  
-  
-  date_sel = Eggs_obs_df$date
-  date_min = min(date_sel)
-  date_max = max(date_sel)
-  
-  Sim_m_x_df <- Sim_m_df %>%
-    filter(region == region_x) %>%
-    mutate(date = rep(date, n_c)) %>%
-    filter(date >= date_min) %>%
-    filter(date <= date_max)
-  
-  Sim_x_df<- dcast(Sim_m_x_df, date ~ variable)
-  
-  #accidenti, dovevo salvare anche beta!
-  
-  beta_approx_x_df = beta_approx_m_df %>%
-    filter(region == region_x) %>%
-    mutate(date = date) %>%
-    filter(date >= date_min) %>%
-    filter(date <= date_max)
-  
-  Eggs_sim_df <- data.frame(date = Sim_x_df$date,
-                            eggs = beta_approx_x_df$value*Sim_x_df$A, #"all eggs, diapaused or not"
-                            type = "laid, simulated")
-  
-  
-  #alcolo il max solo relativo al date_sel per il plot
-  
-  Eggs_sim_max_date_sel <- max(Eggs_sim_df$eggs[Eggs_sim_df$date %in% date_sel], na.rm = T)
-  
-  Eggs_sim_df <- Eggs_sim_df %>%
-    mutate(norm_eggs = 100*eggs/Eggs_sim_max_date_sel)
-  
-  # join sims
-  Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_df) 
-  
-  #####
-  # stats (copied from EID_Nice_plot_outputs_MM)
-  
-  # date_common
-  date_common = Eggs_obs_df$date
-  Eggs_sim_common_df <- Eggs_sim_df %>%
-    filter(date %in% date_common)
-  
-  #cor
-  cor_brut = cor(Eggs_sim_common_df$norm_eggs, Eggs_obs_df$norm_eggs)
-  
-  #cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
-  # Pearson correlation test
-  cor_brut_p = cor.test(Eggs_sim_common_df$norm_eggs, Eggs_obs_df$norm_eggs)$p.value
-  
-  # Number of stars: https://faq.edqm.eu/pages/viewpage.action?pageId=1377305
-  #If a p-value is less than 0.05, it is flagged with one star (*). If a p-value is less than 0.01, it is flagged with 2 stars (**). If a p-value is less than 0.001, it is flagged with three stars (***).
-  cor_brut_stars = case_when(cor_brut_p < 0.001 ~ "***",
-                             cor_brut_p < 0.01 ~ "**",
-                             cor_brut_p < 0.05 ~ "*",
-                             .default = "")
-  #rmse
-  rmse_brut = sqrt(mean((Eggs_sim_common_df$norm_eggs/100 - Eggs_obs_df$norm_eggs/100)^2))
-  
-  #### corr_per_year
-  # at least 7 in summer
-  
-  Eggs_obs_filtered_df <- Eggs_obs_df %>%
-    mutate(month = month(date)) %>%
-    filter(month %in% c(6,7,8,9)) %>% #only summer days
-    mutate(year = year(date)) %>%
-    group_by(year) %>%
-    mutate(count = n()) %>%
-    ungroup() %>%
-    filter(count > 8)
-  
-  date_filter = Eggs_obs_filtered_df$date
-  
-  #computer yearly average
-  
-  Eggs_obs_year_filtered_df <- Eggs_obs_filtered_df %>%
-    group_by(year, type) %>%
-    summarise(norm_eggs = mean(norm_eggs))%>%
-    ungroup() 
-  
-  # date_filter
-  
-  Eggs_sim_year_filtered_df <- Eggs_sim_df %>%
-    mutate(year = year(date)) %>%
-    filter(date %in% date_filter) %>%
-    group_by(year, type) %>%
-    summarise(norm_eggs = mean(norm_eggs))%>%
-    ungroup()
-  
-  #consider only data for which at least 3 summers are available
-  if(nrow(Eggs_obs_year_filtered_df)>=3){
-    #cor_annual
-    cor_annual = cor(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)
-    
-    #cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
-    cor_annual_p = cor.test(Eggs_obs_year_filtered_df$norm_eggs, Eggs_sim_year_filtered_df$norm_eggs)$p.value
-    
-    # Number of stars: https://faq.edqm.eu/pages/viewpage.action?pageId=1377305
-    #If a p-value is less than 0.05, it is flagged with one star (*). If a p-value is less than 0.01, it is flagged with 2 stars (**). If a p-value is less than 0.001, it is flagged with three stars (***).
-    cor_annual_stars = case_when(cor_annual_p < 0.001 ~ "***",
-                                 cor_annual_p < 0.01 ~ "**",
-                                 cor_annual_p < 0.05 ~ "*",
-                                 .default = "") 
-  } else {
-    #cor_annual
-    cor_annual = NA
-    
-    #cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
-    cor_annual_p = NA
-    
-    # Number of stars: https://faq.edqm.eu/pages/viewpage.action?pageId=1377305
-    #If a p-value is less than 0.05, it is flagged with one star (*). If a p-value is less than 0.01, it is flagged with 2 stars (**). If a p-value is less than 0.001, it is flagged with three stars (***).
-    cor_annual_stars = ""
-  }
-  
-  label_cor = paste0("r: ", round(cor_brut, 2), cor_brut_stars,
-                     "; rmse = ", round(rmse_brut, 3), "; r (annual): ",
-                     round(cor_annual, 2), cor_annual_stars)
-  
-  VectDomain$r_gross[VectDomain$region == region_x] = cor_brut
-  VectDomain$pv_r_gross[VectDomain$region == region_x] = cor_brut_p
-  VectDomain$rmse_gross[VectDomain$region == region_x] = rmse_brut
-  VectDomain$r_year[VectDomain$region == region_x] = cor_annual
-  VectDomain$pv_r_year[VectDomain$region == region_x] = cor_annual_p
-  
-  #####
-  
-  egg_plot <- ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = type))+
-    ggtitle(paste0("standardized Eggs abundance, VA (points) vs simulated (line), cell id: ",
-                   region_x, ", ID VA: ", id_VA, ", locality: ", name_region))+
-    geom_line(data = Egg_comp_df %>% filter(type == "laid, simulated"))+
-    geom_point(data = Egg_comp_df %>% filter(type != "laid, simulated"))+
-    guides(color = FALSE)+
-    ylab("normalized abundance (%)")+
-    theme_test()+
-    annotate(geom="text", x= min(Egg_comp_df$date)+(max(Egg_comp_df$date) - min(Egg_comp_df$date))*0.13, y=max(Egg_comp_df$norm_eggs),
-             label= label_cor, color="black")
-  
-  ggsave(paste0(folder_plot, "/egg_plot_cell_id_", region_x, ".png"), plot = egg_plot,
-         width = 3000,
-         height = 1500,
-         units = "px",
-         dpi = 300)
-  
-  
+if (name == "France") {
+  regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
+} else if (name == "Occitanie") {
+  regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
+  regions_sh <- regions_sh %>%
+    filter(Region == "Languedoc-Roussillon et Midi-P")
+} else if (name == "W_EU") {
+  regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/W_EU_s.shp")
 }
 
-save(VectDomain, file = paste0(folder_plot, "/VectDomainStat.RData"))
+# Plots: 2010 and 2020s
+
+ggplot()+
+  geom_sf(data = domain_years_sel, aes(fill = R0_1_level), colour = NA)+ #
+  scale_fill_manual(values = rev(col_br))+
+  # geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
+  # geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow", size=0.8)+
+  ggtitle(paste0("R0 Dengue, period = ", min(years_sel_1), "-", max(years_sel_1)))
+# + scale_fill_gradient(trans = "log")
+
+ggplot()+
+  geom_sf(data = domain_years_sel, aes(fill = R0_2_level), colour = NA)+ #
+  scale_fill_manual(values = rev(col_br))+
+  geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
+  # geom_sf(data = obs_GBIF, alpha = 1, colour = "green", size=0.3)+
+  # geom_sf(data = obs_Kramer, alpha = 1, colour = "yellow", size=0.8)+
+  ggtitle(paste0("R0 Dengue, period = ", min(years_sel_2), "-", max(years_sel_2)))
+# + scale_fill_gradient(trans = "log")
