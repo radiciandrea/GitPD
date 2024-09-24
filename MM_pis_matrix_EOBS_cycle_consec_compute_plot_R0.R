@@ -1,4 +1,227 @@
 # plot del cycle
 # MM_pis_matrix_EOBS_cycle_consec.R
 
-#per plottare anni consecutivi + caloclare R0
+#per plottare anni consecutivi + calcolare R0
+
+rm(list = ls())
+
+library(ggplot2)
+library(reshape2) 
+library(dplyr)
+library(pracma)
+library(sf)
+library(lubridate)
+
+folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec"
+folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab"
+
+files = list.files(folder_out, pattern = ".RData")
+
+name = substring(files[1], 10, 13)
+years = substring(files, 15, 18)
+
+first_day = as.Date(paste0(min(years), "-01-01"))
+last_day = as.Date(paste0(max(years), "-12-31"))
+
+date_sim = seq(from = first_day, to = last_day, by = 'day')
+DOS_sim = 1:length(date_sim)
+n_d = length(DOS_sim)
+
+#carichiamo 1 per le dimensioni
+load(paste0(folder_out, "/", files[1]))
+
+n_c = 5 # numero di classi
+n_r = (ncol(Sim)-1)/n_c #numero di regioni
+regions = 1:n_r
+
+#carichiamo 1 per la popolazion
+load(paste0(folder_eobs, "/EOBS_sel_", years[1], "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+
+# human hosts
+H_v <- W_tot_df %>% 
+  distinct(region, .keep_all = TRUE) %>%
+  pull("pop")
+
+# R0s Zika
+R0_tot = matrix(NA, ncol = n_r, nrow = n_d) 
+R0_m = matrix(NA, ncol = n_r, nrow = length(files))
+
+k = 0
+for (i in 1:length(files)){
+  file = files[i]
+  year = years[i]
+  
+  load(paste0(folder_out, "/", file))
+  n_d_i = nrow(Sim)
+  
+  #Getting weather from EOBS
+  load(paste0(folder_eobs, "/EOBS_sel_", year, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+  temp = matrix(W_tot_df$T_av, nrow = n_d_i)
+  
+  #bio
+  Adults = Sim[, 1+(n_r*3+1):(n_r*4)]*100 #per km2
+  H_m =   matrix(rep(H_v , n_d_i), nrow = n_d_i, byrow = T )
+  m = Adults/H_m # adult female osquito to human ration
+  
+  #parameters
+  mu_A = -log(0.677 * exp(-0.5*((temp-20.9)/13.2)^6)*temp^0.1) # adult mortality rate
+  mu_A[which(temp<=0)] = -log(0.677 * exp(-0.5*((temp[which(temp<=0)]-20.9)/13.2)^6))  #correct the problems due to negative values from SI
+  
+  #EIP
+  EIP_DN_Bnk = 0.11*temp^2 - 7.13*temp +121.17 #Benkimoun 2021
+  EIP_DN_Mtl = 1.03*(4*exp(5.15 - 0.123*temp)) #Metelmann 2021
+  EIP_ZK_Cmn = 1.03*(4*exp(5.15 - 0.123*temp)) #Caminade 2016 ("the Dengue one")
+  
+  # B = pmax(0,-0.0043*temp^2 + 0.2593*temp - 3.2705) #Benkimoun 2021
+  b_v2H = 0.5 # b Blagrove 2020
+  
+  #to check this:
+  b_H2v_ZK_Blg = 0.0665 # beta Blagrove 2020 
+  b_H2v_ZK_Cmn = 0.033 # beta Caminade 2016
+  b_H2v_DG_Mtl = 0.31 # beta Mtl 2021
+  
+  omega_H = 1/5 #Benkimoun 2021, 
+  a = (0.0043*temp + 0.0943)/2  #biting rate (Zanardini et al., Caminade 2016, Blagrove 2020)
+  
+  #host preference
+  phi_a_U = 0.9 #human biting preference (urban)
+  phi_a_R = 0.5 #human biting preference (rural) #Caminade 2016
+  
+  
+  #choose
+  phi_a = phi_a_R
+  EIP = EIP_ZK_Cmn
+  
+  VC = (a*phi_a)^2*m*exp(-mu_A*EIP)/mu_A #Vector capacity as RossMcDonald
+  R0 = (a*phi_a)^2*m*b_v2H*b_H2v_ZK_Cmn/(omega_H*mu_A)/(1+mu_A*EIP) # as Zanardini et al.
+  
+  n_d_i = nrow(R0)
+  R0_tot[k + 1:n_d_i,]=R0
+  k = k + n_d_i
+  R0_m[i,] = colSums(R0>1)
+}
+
+
+
+#########################
+#plot
+
+R0_m_df = data.frame("variable" = "R0",
+                     "region" = rep(regions, each = max(DOS_sim)),
+                     "t" = rep(DOS_sim, n_r),
+                     "value" = c(R0_tot)) #5 classes
+
+#210
+
+id_reg = 1597 #
+
+#Roma: 1091, 1992
+#Nizza: 1597 e un'altra
+
+region_x = id_reg #regions[id_reg]
+
+R0_m_x_df <- R0_m_df %>%
+  filter(region == region_x)
+
+R0_x_df<- dcast(R0_m_x_df, t ~ variable)
+
+ggplot(R0_m_x_df, aes(x = t, y = value, color = variable))+
+  geom_line()+
+  scale_y_continuous(trans='log2', limits = c(1, max(R0_m_x_df$value)))+
+  # ylim(1, max(R0_m_x_df$value))+
+  # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
+  labs(color = paste0("Abundances per classes (", region_x, ")")) +
+  theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
+
+#### Geo plot 
+
+years_sel_1 = 2007:2014 # # 2006:2016
+R0_1 = colMeans(R0_m[which(years %in% years_sel_1),], na.rm = T)
+
+years_sel_2 = 2015:2022 # 2017:2023 
+R0_2 = colMeans(R0_m[which(years %in% years_sel_2),], na.rm = T)
+
+
+# to plot
+domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_W_EU.shp")) %>%
+  arrange(region)
+
+x = c(63, 21, 7, 0, 0)
+x_lab = c(">9 w", ">3 w", ">1 w", ">1 d", "<1 d")
+col_x <- rev(c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724"))
+
+
+# domain_sel <- domain_sel%>%
+#   arrange(region) %>%
+#   mutate(R0_1 = R0_sel_1)%>%
+#   mutate(R0_1_level=cut(R0_1, breaks=br,
+#                         labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
+#   mutate(R0_1_level=factor(as.character(R0_1_level), levels=rev(levels(R0_1_level)))) %>%
+#   mutate(R0_2 = R0_sel_2)%>%
+#   mutate(R0_2_level=cut(R0_2, breaks=br,
+#                         labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
+#   mutate(R0_2_level=factor(as.character(R0_2_level), levels=rev(levels(R0_2_level))))
+
+R0_1_level <- case_when(R0_1 > x[1] ~ x_lab[1],
+                        R0_1 > x[2] ~ x_lab[2],
+                        R0_1 > x[3] ~ x_lab[3],
+                        R0_1 > x[4] ~ x_lab[4],
+                        R0_1 == x[5] ~ x_lab[5])
+
+R0_2_level <- case_when(R0_2 > x[1] ~ x_lab[1],
+                        R0_2 > x[2] ~ x_lab[2],
+                        R0_2 > x[3] ~ x_lab[3],
+                        R0_2 > x[4] ~ x_lab[4],
+                        R0_2 == x[5] ~ x_lab[5])
+
+Risk_zone <-  case_when((R0_1 < 1) & (R0_2 < 1) ~ "Not p. endemic",
+                        (R0_1 > 1) & (R0_2 > 1) ~ "Hist. p. endemic",
+                        (R0_1 < 1) & (R0_2 > 1) ~ "New p. endemic")
+
+### plot for CC RIO conference
+
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/08bis_CC_RIO_SOOI_Sep_2024/Images/"
+
+countries_sh <-  st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/european-countries.shp")
+
+#plot 1
+
+g1 <- ggplot()+
+  geom_sf(data = domain_sel, aes(fill = R0_1_level), colour = NA)+ #
+  scale_fill_manual(values = rev(col_x))+
+  geom_sf(data = countries_sh, alpha = 0, colour = "white")+
+  coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
+  ggtitle(bquote(R[0]~~(period~2007-2014)))+
+  theme_minimal()+
+  guides(fill=guide_legend(title=bquote(R[0])))
+
+# ggsave(file= paste0(folder_plot, "R0_1_level.png"), plot= g1 , units="in", width=5.5, height=7, dpi=300)
+
+#plot 2
+
+g2 <- ggplot()+
+  geom_sf(data = domain_sel, aes(fill = R0_2_level), colour = NA)+ #
+  scale_fill_manual(values = rev(col_x))+
+  geom_sf(data = countries_sh, alpha = 0, colour = "white")+
+  coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
+  ggtitle(bquote(R[0]~~(period~2015-2022)))+
+  theme_minimal() +
+  guides(fill=guide_legend(title=bquote(R[0])))
+
+# ggsave(file= paste0(folder_plot, "R0_2_level.png"),  plot= g2 , units="in", width=5.5, height=7, dpi=300)
+
+# plot 3
+
+col_x_sint_FR<- c("#384AB4",  "#F29878", "#B00026") #"#8EB0FE",
+
+gvar <- ggplot()+
+  geom_sf(data = domain_sel, aes(fill = Risk_zone), colour = NA)+
+  scale_fill_manual(values = rev(col_x_sint_FR))+
+  geom_sf(data = countries_sh, alpha = 0, colour = "grey90")+
+  coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
+  ggtitle(bquote(R[0]~qualitative~variation))+
+  theme_minimal() +
+  guides(fill=guide_legend(title="Change"))
+
+# ggsave(file= paste0(folder_plot, "R0_var_level.png"), plot= gvar , units="in", width=5.5, height=7, dpi=300)
+
