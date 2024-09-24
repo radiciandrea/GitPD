@@ -89,7 +89,7 @@ for (i in 1:length(files)){
   
   
   #choose
-  phi_a = phi_a_R
+  phi_a = phi_a_U*(H_m>100)+phi_a_R*(H_m<=100)
   EIP = EIP_ZK_Cmn
   
   VC = (a*phi_a)^2*m*exp(-mu_A*EIP)/mu_A #Vector capacity as RossMcDonald
