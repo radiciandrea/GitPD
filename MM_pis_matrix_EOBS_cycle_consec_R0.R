@@ -247,7 +247,7 @@ for (year in years){
   EIP = 0.11*temp^2 - 7.13*temp +121.17 #Benkimoun 2021
   # B = pmax(0,-0.0043*temp^2 + 0.2593*temp - 3.2705) #Benkimoun 2021
   b_v2H = 0.5 # b Blagrove 2020
-  b_H2v = 0.0665 # beta Blagrove 2020
+  b_H2v = 0.0665 # beta Blagrove 2020 for Zika
   omega_H = 1/5 #Benkimoun 2021
   a = (0.0043*temp + 0.0943)/2  #biting rate (Zanardini et al., Caminade 2016, Blagrove 2020)
   phi_a = 0.9 #human biting preference
