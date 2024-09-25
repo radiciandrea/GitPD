@@ -100,7 +100,7 @@ for (i in 1:length(files)){
   # VC = (a*phi_a)^2*m*exp(-mu_A*EIP)/mu_A #Vector capacity as RossMcDonald
   R0_DG = (a*phi_a)^2*m/(mu_A+mu_A^2*EIP_DG)*b_v2H*b_H2v_DG*IIP_DG # as Zanardini et al.
   
-  n_d_i = nrow(R0_ZK)
+  n_d_i = nrow(R0_DG)
   R0_DG_tot[k + 1:n_d_i,]=R0_DG
   k = k + n_d_i
   R0_DG_m[i,] = colSums(R0_DG>1)
@@ -109,3 +109,79 @@ for (i in 1:length(files)){
 R0_tot = R0_DG_tot
 R0_m = R0_DG_m
 
+years_sel = 2010:2023 # as ECDC
+R0_l = colMeans(R0_m[which(years %in% years_sel),], na.rm = T)
+
+# to plot
+domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_W_EU.shp")) %>%
+  select(region) %>%
+  arrange(region) %>%
+  mutate(R0_l = R0_l)
+
+# ggplot()+
+#   geom_sf(data = domain_sel, aes(fill = log(R0_l)), colour = NA)
+
+#load presence data
+#https://www.ecdc.europa.eu/en/all-topics-z/dengue/surveillance-and-disease-data/autochthonous-transmission-dengue-virus-eueea
+
+#and remove not included locations
+ECDC_Dengue <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/ECDC/Dengue_from_site_cleaned.shp") %>%
+  filter(Infection != "Not inc")
+
+sf::sf_use_s2(FALSE)
+ECDC_Dengue <- sf::st_make_valid(ECDC_Dengue)
+
+domain_Dengue <- st_intersection(ECDC_Dengue, domain_sel)%>%
+  st_drop_geometry()%>%
+  mutate(status = case_when(Infection == "Yes" ~ 1,
+                   .default = 0)) %>%
+  group_by(region)%>%
+  dplyr::summarise(status = 1*sum(status)>0) %>%
+  ungroup()
+
+domain_Dengue <- left_join(domain_Dengue, domain_sel)
+
+
+library(pROC)
+
+category = domain_Dengue$status
+prediction = domain_Dengue$R0_l
+
+category = category[which(!is.na(prediction))]
+prediction = prediction[which(!is.na(prediction))]
+
+par(pty = "s")
+
+roc(category , prediction, plot = TRUE, col = "#377eb8", lwd = 3, print.thres=TRUE)
+
+# x = (1- specificity) = 1 - true negative %
+# y = (sensitivity) = true positive %
+
+thr_v = 0.107
+
+#other values?
+
+thr = 10 # days
+prediction_th = 1*(prediction>thr)
+sensitivity_th = sum((prediction_th+category)==2, na.rm = T)/sum(category)
+specificity_th = sum((prediction_th+category)==0, na.rm = T)/(sum(category==0))
+
+roc(category , prediction, plot = TRUE, col = "#377eb8", lwd = 3, print.thres=TRUE)
+points(y = sensitivity_th, x = specificity_th , col = "red")
+text(y = sensitivity_th -0.03, x = specificity_th -0.03, paste0(thr, " day(s) (",
+                                                                round(specificity_th ,3), ",", round(sensitivity_th,3), ")"))
+
+
+#plots
+
+ggplot()+
+  geom_sf(data = domain_sel, aes(fill = R0_l), colour = NA)+
+  geom_sf(data = ECDC_Dengue, alpha = 0, color = "gray90", lwd = 0.1)+ 
+  geom_sf(data = ECDC_Dengue %>% filter(Infection == "Yes"), fill = "red", alpha = 0.4, color = NA)+
+  coord_sf(xlim = c(-15, 18), ylim = c(36, 60))
+
+ggplot()+
+  geom_sf(data = domain_sel, aes(fill = R0_l), colour = NA)+
+  geom_sf(data = ECDC_Dengue, alpha = 0, color = "gray90", lwd = 0.1)+ 
+  geom_sf(data = domain_sel %>% filter(R0_l > thr_v), fill = "orange", alpha = 0.4, color = NA)+
+  coord_sf(xlim = c(-15, 18), ylim = c(36, 60))
