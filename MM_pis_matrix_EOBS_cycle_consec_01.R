@@ -7,6 +7,7 @@
 # small correction: if E_0 <1 -> E_0 = 1 (to reduce impact of nan)
 
 #Here we run with resolution 01
+#beginning: E_d_0 = 10^3 eggs/ha
 
 rm(list = ls())
 
@@ -32,7 +33,7 @@ if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codi
   folder_in = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Data_sim"
 } else {
   folder_eobs = "EOBS_elab"
-  folder_out = "EOBS_sim_consec"
+  folder_out = "EOBS_sim_consec_01"
   folder_in = "Data_sim"
 }
 
@@ -43,7 +44,7 @@ type = "01"
 filter_region = 0
 
 #Getting weather from EOBS
-load(paste0(folder_eobs, "/EOBS_sel_", years[1], "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+load(paste0(folder_eobs, "/EOBS_sel_", type, "_", years[1], "_", name, ".RData")) #EOBS W_EU #Occitanie #France
 
 if(filter_region == 1){
   W_tot_df <- W_tot_df %>%
@@ -91,9 +92,9 @@ E0 = rep(0, n_r)
 J0 = rep(0, n_r)
 I0 = rep(0, n_r)
 A0 = rep(0, n_r)
-# E_d_0 = 1*rep(1, n_r) # at 1st of January (10^6)
+E_d_0 = (10^3)*rep(1, n_r) # at 1st of January (10^6)
 # load new initial condition
-load(paste0(folder_in, "/X0_E0_consec_", name, ".RData"))
+# load(paste0(folder_in, "/X0_E0_consec_", name, ".RData"))
 
 #integration step
 is_1 = 1/60
@@ -105,7 +106,7 @@ X_0 = c(E0, J0, I0, A0, E_d_0)
 for (year in years){
   
   #getting weather from EOBS <- previous year
-  load(paste0(folder_eobs, "/EOBS_sel_", year-1, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+  load(paste0(folder_eobs, "/EOBS_sel_", type, "_", year-1, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
   
   if(filter_region == 1){
     W_tot_df <- W_tot_df %>%
@@ -117,7 +118,7 @@ for (year in years){
     filter(DOY >= (max(DOY)-30))
   
   #Getting weather from EOBS
-  load(paste0(folder_eobs, "/EOBS_sel_", year, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+  load(paste0(folder_eobs, "/EOBS_sel_", type, "_", year, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
   
   if(filter_region == 1){
     W_tot_df <- W_tot_df %>%
