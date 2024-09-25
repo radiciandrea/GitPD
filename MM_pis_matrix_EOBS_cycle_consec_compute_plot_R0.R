@@ -42,9 +42,12 @@ H_v <- W_tot_df %>%
   distinct(region, .keep_all = TRUE) %>%
   pull("pop")
 
-# R0s Zika
-R0_tot = matrix(NA, ncol = n_r, nrow = n_d) 
-R0_m = matrix(NA, ncol = n_r, nrow = length(files))
+# R0s Zika & Dengue
+R0_ZK_tot = matrix(NA, ncol = n_r, nrow = n_d) 
+R0_ZK_m = matrix(NA, ncol = n_r, nrow = length(files))
+
+R0_DG_tot = matrix(NA, ncol = n_r, nrow = n_d) 
+R0_DG_m = matrix(NA, ncol = n_r, nrow = length(files))
 
 k = 0
 for (i in 1:length(files)){
@@ -72,15 +75,26 @@ for (i in 1:length(files)){
   EIP_DN_Mtl = 1.03*(4*exp(5.15 - 0.123*temp)) #Metelmann 2021
   EIP_ZK_Cmn = 1.03*(4*exp(5.15 - 0.123*temp)) #Caminade 2016 ("the Dengue one")
   
-  # B = pmax(0,-0.0043*temp^2 + 0.2593*temp - 3.2705) #Benkimoun 2021
+  #choice EIP
+  EIP_ZK = EIP_ZK_Cmn
+  EIP_DG = EIP_DN_Mtl
+  
+  #Vectorial competence
+  B = pmax(0,-0.0043*temp^2 + 0.2593*temp - 3.2705) #Benkimoun 2021
   b_v2H = 0.5 # b Blagrove 2020
   
   #to check this:
-  b_H2v_ZK_Blg = 0.0665 # beta Blagrove 2020 
+  b_H2v_ZK_Blg = 0.0665 # beta Blagrove 2020 - cites study in Europe: preferred
   b_H2v_ZK_Cmn = 0.033 # beta Caminade 2016
   b_H2v_DG_Mtl = 0.31 # beta Mtl 2021
   
-  omega_H = 1/5 #Benkimoun 2021, 
+  #ch
+  b_H2v_ZK = b_H2v_ZK_Blg
+  b_H2v_DG = b_H2v_DG_Mtl
+  
+  IIP_DG = 5 #Benkimoun 2021, 
+  IIP_ZK= 7 #Caminade 2016 
+  
   a = (0.0043*temp + 0.0943)/2  #biting rate (Zanardini et al., Caminade 2016, Blagrove 2020)
   
   #host preference
@@ -89,16 +103,20 @@ for (i in 1:length(files)){
   
   
   #choose
-  phi_a = phi_a_U*(H_m>100)+phi_a_R*(H_m<=100)
+  R_th = 50 #defines density over km2 below which an area is "rural", with little phi
+  phi_a = phi_a_U*(H_m>R_th)+phi_a_R*(H_m<=R_th)
   EIP = EIP_ZK_Cmn
   
-  VC = (a*phi_a)^2*m*exp(-mu_A*EIP)/mu_A #Vector capacity as RossMcDonald
-  R0 = (a*phi_a)^2*m*b_v2H*b_H2v_ZK_Cmn/(omega_H*mu_A)/(1+mu_A*EIP) # as Zanardini et al.
+  # VC = (a*phi_a)^2*m*exp(-mu_A*EIP)/mu_A #Vector capacity as RossMcDonald
+  R0_ZK = (a*phi_a)^2*m/(mu_A+mu_A^2*EIP)*b_v2H*b_H2v_ZK*IIP_ZK # as Zanardini et al.
+  R0_DG = (a*phi_a)^2*m/(mu_A+mu_A^2*EIP)*b_v2H*b_H2v_DG*IIP_DG # as Zanardini et al.
   
   n_d_i = nrow(R0)
-  R0_tot[k + 1:n_d_i,]=R0
+  R0_ZK_tot[k + 1:n_d_i,]=R0_ZK
+  R0_DG_tot[k + 1:n_d_i,]=R0_DG
   k = k + n_d_i
-  R0_m[i,] = colSums(R0>1)
+  R0_ZK_m[i,] = colSums(R0_ZK>1)
+  R0_DG_m[i,] = colSums(R0_DG>1)
 }
 
 
@@ -111,27 +129,27 @@ R0_m_df = data.frame("variable" = "R0",
                      "t" = rep(DOS_sim, n_r),
                      "value" = c(R0_tot)) #5 classes
 
-#210
-
-id_reg = 1597 #
-
-#Roma: 1091, 1992
-#Nizza: 1597 e un'altra
-
-region_x = id_reg #regions[id_reg]
-
-R0_m_x_df <- R0_m_df %>%
-  filter(region == region_x)
-
-R0_x_df<- dcast(R0_m_x_df, t ~ variable)
-
-ggplot(R0_m_x_df, aes(x = t, y = value, color = variable))+
-  geom_line()+
-  scale_y_continuous(trans='log2', limits = c(1, max(R0_m_x_df$value)))+
-  # ylim(1, max(R0_m_x_df$value))+
-  # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
-  labs(color = paste0("Abundances per classes (", region_x, ")")) +
-  theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
+# #210
+# 
+# id_reg = 1597 #
+# 
+# #Roma: 1091, 1992
+# #Nizza: 1597 e un'altra
+# 
+# region_x = id_reg #regions[id_reg]
+# 
+# R0_m_x_df <- R0_m_df %>%
+#   filter(region == region_x)
+# 
+# R0_x_df<- dcast(R0_m_x_df, t ~ variable)
+# 
+# ggplot(R0_m_x_df, aes(x = t, y = value, color = variable))+
+#   geom_line()+
+#   scale_y_continuous(trans='log2', limits = c(1, max(R0_m_x_df$value)))+
+#   # ylim(1, max(R0_m_x_df$value))+
+#   # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
+#   labs(color = paste0("Abundances per classes (", region_x, ")")) +
+#   theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
 
 #### Geo plot 
 
