@@ -88,7 +88,7 @@ for (i in 1:length(files)){
   b_H2v_ZK_Cmn = 0.033 # beta Caminade 2016
   b_H2v_DG_Mtl = 0.31 # beta Mtl 2021
   
-  #ch
+  #chose
   b_H2v_ZK = b_H2v_ZK_Blg
   b_H2v_DG = b_H2v_DG_Mtl
   
@@ -105,13 +105,12 @@ for (i in 1:length(files)){
   #choose
   R_th = 50 #defines density over km2 below which an area is "rural", with little phi
   phi_a = phi_a_U*(H_m>R_th)+phi_a_R*(H_m<=R_th)
-  EIP = EIP_ZK_Cmn
-  
+
   # VC = (a*phi_a)^2*m*exp(-mu_A*EIP)/mu_A #Vector capacity as RossMcDonald
-  R0_ZK = (a*phi_a)^2*m/(mu_A+mu_A^2*EIP)*b_v2H*b_H2v_ZK*IIP_ZK # as Zanardini et al.
-  R0_DG = (a*phi_a)^2*m/(mu_A+mu_A^2*EIP)*b_v2H*b_H2v_DG*IIP_DG # as Zanardini et al.
+  R0_ZK = (a*phi_a)^2*m/(mu_A+mu_A^2*EIP_ZK)*b_v2H*b_H2v_ZK*IIP_ZK # as Zanardini et al.
+  R0_DG = (a*phi_a)^2*m/(mu_A+mu_A^2*EIP_DG)*b_v2H*b_H2v_DG*IIP_DG # as Zanardini et al.
   
-  n_d_i = nrow(R0)
+  n_d_i = nrow(R0_ZK)
   R0_ZK_tot[k + 1:n_d_i,]=R0_ZK
   R0_DG_tot[k + 1:n_d_i,]=R0_DG
   k = k + n_d_i
@@ -119,16 +118,27 @@ for (i in 1:length(files)){
   R0_DG_m[i,] = colSums(R0_DG>1)
 }
 
+#Choose here what to plot
+
+disease = "Dengue" 
+
+if (disease == "Zika"){
+  R0_tot = R0_ZK_tot
+  R0_m = R0_ZK_m
+} else if (disease == "Dengue") {
+  R0_tot = R0_DG_tot
+  R0_m = R0_DG_m
+}
 
 
-#########################
-#plot
-
-R0_m_df = data.frame("variable" = "R0",
-                     "region" = rep(regions, each = max(DOS_sim)),
-                     "t" = rep(DOS_sim, n_r),
-                     "value" = c(R0_tot)) #5 classes
-
+# #########################
+# #plot
+# 
+# R0_m_df = data.frame("variable" = "R0",
+#                      "region" = rep(regions, each = max(DOS_sim)),
+#                      "t" = rep(DOS_sim, n_r),
+#                      "value" = c(R0_tot)) #5 classes
+# 
 # #210
 # 
 # id_reg = 1597 #
@@ -164,8 +174,8 @@ R0_2 = colMeans(R0_m[which(years %in% years_sel_2),], na.rm = T)
 domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_W_EU.shp")) %>%
   arrange(region)
 
-x = c(63, 21, 7, 0, 0)
-x_lab = c(">9 w", ">3 w", ">1 w", ">1 d", "<1 d")
+x = c(61, 21, 7, 0, 0)
+x_lab = c("e) >9", "d) 3-8", "c) 1-2", "b) < 1", "a) 0")
 col_x <- rev(c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724"))
 
 
@@ -192,9 +202,10 @@ R0_2_level <- case_when(R0_2 > x[1] ~ x_lab[1],
                         R0_2 > x[4] ~ x_lab[4],
                         R0_2 == x[5] ~ x_lab[5])
 
-Risk_zone <-  case_when((R0_1 < 1) & (R0_2 < 1) ~ "Not p. endemic",
-                        (R0_1 > 1) & (R0_2 > 1) ~ "Hist. p. endemic",
-                        (R0_1 < 1) & (R0_2 > 1) ~ "New p. endemic")
+Risk_zone <-  case_when((R0_1 < 1) & (R0_2 < 1) ~ "No p. spread",
+                        (R0_1 > 1) & (R0_2 > 1) ~ "Hist. p. spread",
+                        (R0_1 < 1) & (R0_2 > 1) ~ "New p. spread",
+                        (R0_1 > 1) & (R0_2 < 1) ~ "Prev. p. spread")
 
 ### plot for CC RIO conference
 
@@ -209,11 +220,11 @@ g1 <- ggplot()+
   scale_fill_manual(values = rev(col_x))+
   geom_sf(data = countries_sh, alpha = 0, colour = "white")+
   coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
-  ggtitle(bquote(R[0]~~(period~2007-2014)))+
+  ggtitle(paste0("Possible spread of ", disease, " (period~2007-2014)"))+
   theme_minimal()+
-  guides(fill=guide_legend(title=bquote(R[0])))
+  guides(fill=guide_legend(title=bquote(R[0]~gt~1~(weeks))))
 
-# ggsave(file= paste0(folder_plot, "R0_1_level.png"), plot= g1 , units="in", width=5.5, height=7, dpi=300)
+ggsave(file= paste0(folder_plot, "R0_", disease,"_1_level.png"), plot= g1 , units="in", width=5.5, height=7, dpi=300)
 
 #plot 2
 
@@ -222,24 +233,24 @@ g2 <- ggplot()+
   scale_fill_manual(values = rev(col_x))+
   geom_sf(data = countries_sh, alpha = 0, colour = "white")+
   coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
-  ggtitle(bquote(R[0]~~(period~2015-2022)))+
+  ggtitle(paste0("Possible spread of ", disease, " (period~2015-2022)"))+
   theme_minimal() +
-  guides(fill=guide_legend(title=bquote(R[0])))
+  guides(fill=guide_legend(title=bquote(R[0]~gt~1~(weeks))))
 
-# ggsave(file= paste0(folder_plot, "R0_2_level.png"),  plot= g2 , units="in", width=5.5, height=7, dpi=300)
+ggsave(file= paste0(folder_plot, "R0_", disease,"_level.png"),  plot= g2 , units="in", width=5.5, height=7, dpi=300)
 
 # plot 3
 
-col_x_sint_FR<- c("#384AB4",  "#F29878", "#B00026") #"#8EB0FE",
+col_x_sint_FR<- c("#384AB4", "#8EB0FE", "#F29878", "#B00026") 
 
 gvar <- ggplot()+
   geom_sf(data = domain_sel, aes(fill = Risk_zone), colour = NA)+
   scale_fill_manual(values = rev(col_x_sint_FR))+
   geom_sf(data = countries_sh, alpha = 0, colour = "grey90")+
   coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
-  ggtitle(bquote(R[0]~qualitative~variation))+
+  ggtitle(paste0("Variation in the spread pattern of ", disease))+
   theme_minimal() +
-  guides(fill=guide_legend(title="Change"))
+  guides(fill=guide_legend(title=bquote(R[0]~variation)))
 
-# ggsave(file= paste0(folder_plot, "R0_var_level.png"), plot= gvar , units="in", width=5.5, height=7, dpi=300)
+ggsave(file= paste0(folder_plot, "R0_", disease,"_var_level.png"), plot= gvar , units="in", width=5.5, height=7, dpi=300)
 
