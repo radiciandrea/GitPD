@@ -84,7 +84,7 @@ toc()
 #install.packages("psych")
 library(psych)
 
-years_eval = 2006:2023
+years_eval = 2006:2008
 
 delay = 2 # 1:10
 
@@ -92,29 +92,16 @@ delay = 2 # 1:10
 domain_presence_intersect_df <- domain_presence_intersect %>%
   st_drop_geometry()
 
-CK = data.frame(year = rep(years_eval, each =length(delays)),
-                delay = rep(delays, length(years_eval)),
+rm(domain_presence_intersect)
+
+CK = data.frame(year = rep(years_eval, each =length(delay)),
+                delay = rep(delay, length(years_eval)),
                 K = NA)
 
 domain_df <- domain_df %>%
   mutate(s_2006 = NA) %>%
   mutate(s_2007 = NA) %>%
-  mutate(s_2008 = NA) %>%
-  mutate(s_2009 = NA) %>%
-  mutate(s_2010 = NA) %>%
-  mutate(s_2011 = NA) %>%
-  mutate(s_2012 = NA) %>%
-  mutate(s_2013 = NA) %>%
-  mutate(s_2014 = NA) %>%
-  mutate(s_2015 = NA) %>%
-  mutate(s_2016 = NA) %>%
-  mutate(s_2017 = NA) %>%
-  mutate(s_2018 = NA) %>%
-  mutate(s_2019 = NA) %>%
-  mutate(s_2020 = NA) %>%
-  mutate(s_2021 = NA) %>%
-  mutate(s_2022 = NA) %>%
-  mutate(s_2023 = NA) 
+  mutate(s_2008 = NA) 
 
 # for(delay in delays){
 for (year in years_eval){
@@ -176,7 +163,7 @@ domain_df_m <- left_join(domain_df_m, domain_sel)
 domain_sf_m <- st_as_sf(domain_df_m)
 
 plot1 <- ggplot()+
-  geom_sf(data = domain_sf_m , aes(fill = score), color = NA)+ 
+  geom_sf(data = domain_sf_m  , aes(fill = score), color = NA)+ 
   scale_fill_manual(breaks = c("true positive", "true negative", "false positive", "false negative"),
                     values=c("#B0986CFF", "#009474FF", "#EFDDCFFF","#72E1E1FF"))
 
@@ -185,7 +172,15 @@ graph1.animation = plot1 +
   labs(subtitle = "Year: {frame_time}") +
   shadow_wake(wake_length = 0.1)
 
-x <- animate(graph1.animation, height = 500, width = 800, fps = 30, duration = 10,
-        end_pause = 60, res = 100)
+x <- animate(graph1.animation, height = 700, width = 400, fps = 5, duration = 10,
+             end_pause = 60, res = 100)
 
 anim_save("gapminder graph.gif", animation = x)
+
+
+ggplot()+
+  geom_sf(data = domain_sf_m  , aes(fill = score), color = NA)+ 
+  scale_fill_manual(breaks = c("true positive", "true negative", "false positive", "false negative"),
+                    values=c("#B0986CFF", "#009474FF", "#EFDDCFFF","#72E1E1FF")) +
+  transition_time(year)
+
