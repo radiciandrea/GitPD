@@ -84,7 +84,7 @@ toc()
 #install.packages("psych")
 library(psych)
 
-years_eval = 2006:2008
+years_eval = 2006:2023
 
 delay = 2 # 1:10
 
@@ -97,11 +97,6 @@ rm(domain_presence_intersect)
 CK = data.frame(year = rep(years_eval, each =length(delay)),
                 delay = rep(delay, length(years_eval)),
                 K = NA)
-
-domain_df <- domain_df %>%
-  mutate(s_2006 = NA) %>%
-  mutate(s_2007 = NA) %>%
-  mutate(s_2008 = NA) 
 
 # for(delay in delays){
 for (year in years_eval){
@@ -151,36 +146,65 @@ ggplot(CK, aes(x = year, y = K)) +
 s <-summary(lm(K ~ year, CK))
 
 # plot year by year 
-library(gganimate)
+# https://bookdown.org/ededeban/ConsBioMap/GIF.html
+# https://www.r-bloggers.com/2021/05/animated-graph-gif-with-gganimate-ggplot/
 
-domain_df_m <- melt(domain_df, id.vars = c("region")) %>%
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/02_ClimaImpact_nov_2024/Images/"
+  
+library(gganimate)
+library(magick)
+
+domain_df_m <- reshape2::melt(domain_df, id.vars = c("region")) %>%
   rename(year = variable) %>%
   mutate(year = as.numeric(substr(year, 3, 6))) %>%
   rename(score = value)
 
 domain_df_m <- left_join(domain_df_m, domain_sel)
 
-domain_sf_m <- st_as_sf(domain_df_m)
+domain_sf_m <- st_as_sf(domain_df_m) 
 
-plot1 <- ggplot()+
-  geom_sf(data = domain_sf_m  , aes(fill = score), color = NA)+ 
-  scale_fill_manual(breaks = c("true positive", "true negative", "false positive", "false negative"),
-                    values=c("#B0986CFF", "#009474FF", "#EFDDCFFF","#72E1E1FF"))
-
-graph1.animation = plot1 +
-  transition_time(year) +
-  labs(subtitle = "Year: {frame_time}") +
-  shadow_wake(wake_length = 0.1)
-
-x <- animate(graph1.animation, height = 700, width = 400, fps = 5, duration = 10,
-             end_pause = 60, res = 100)
-
-anim_save("gapminder graph.gif", animation = x)
+for(y in years_eval){
+  p1 <- ggplot()+
+    geom_sf(data = domain_sf_m %>% filter(year == y) , aes(fill = score), color = NA)+ 
+    scale_fill_manual(breaks = c("true positive", "true negative", "false positive", "false negative"),
+                      values=c("#B0986CFF", "#009474FF", "#EFDDCFFF","#72E1E1FF"))+
+    theme_minimal()
+  
+  ggsave(file= paste0(folder_plot, "Plot_invasion_", y,".png"), plot= p1, units="in", width=7, height=5.5, dpi=300)
+}
 
 
-ggplot()+
-  geom_sf(data = domain_sf_m  , aes(fill = score), color = NA)+ 
-  scale_fill_manual(breaks = c("true positive", "true negative", "false positive", "false negative"),
-                    values=c("#B0986CFF", "#009474FF", "#EFDDCFFF","#72E1E1FF")) +
-  transition_time(year)
+# graph1.animation = plot1 +
+#   transition_time(year) +
+#   labs(subtitle = "Year: {frame_time}") +
+#   shadow_wake(wake_length = 0.1)
+# 
+# x <- animate(graph1.animation, height = 700, width = 400, fps = 5, duration = 10,
+#              end_pause = 60, res = 100)
+# 
+# anim_save("gapminder graph.gif", animation = x)
+# 
+# 
+# ggplot()+
+#   geom_sf(data = domain_sf_m  , aes(fill = score), color = NA)+ 
+#   scale_fill_manual(breaks = c("true positive", "true negative", "false positive", "false negative"),
+#                     values=c("#B0986CFF", "#009474FF", "#EFDDCFFF","#72E1E1FF")) +
+#   transition_time(domain_sf_myear)
 
+imgs <- list.files(folder_plot, full.names = TRUE)
+img_list <- lapply(imgs, image_read)
+
+## join the images together
+img_joined <- image_join(img_list)
+
+## animate at X frames per second
+img_animated <- image_animate(img_joined, fps = 10)
+
+# ## view animated image
+# img_animated
+
+## save to disk
+image_write(image = img_animated,
+            path = paste0(folder_plot, "/Prova.gif"))
+
+            
