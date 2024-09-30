@@ -86,12 +86,12 @@ load(paste0(folder_out, "/LE_Adults.RData"))
 
 Adult_m[which(is.na(Adult_m))] =0
 
-Adult_RM_m <- t(sapply(1:n_d,
+Adult_RM_m <- t(sapply(2:n_d,
                        function(x){return(colMeans(Adult_m[max(1,(x-7)):min(365,(x+7)),]))}))
 
 LE_m[which(is.na(LE_m))] =0
 
-LE_RM_m <- t(sapply(1:n_d,
+LE_RM_m <- t(sapply(2:n_d,
                     function(x){return(colMeans(LE_m[max(1,(x-7)):min(365,(x+7)),]))}))
 
 #summer "MJJAS" - mean abundances
