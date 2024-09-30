@@ -12,8 +12,8 @@ library(pracma)
 library(sf)
 library(lubridate)
 
-folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec"
-folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab"
+folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_01" # EOBS_sim_consec
+folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab_01" # "EOBS_elab"
 
 files = list.files(folder_out, pattern = ".RData")
 
@@ -35,7 +35,7 @@ n_r = (ncol(Sim)-1)/n_c #numero di regioni
 regions = 1:n_r
 
 #carichiamo 1 per la popolazion
-load(paste0(folder_eobs, "/EOBS_sel_", years[1], "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+load(paste0(folder_eobs, "/EOBS_sel_01_", years[1], "_", name, ".RData")) #EOBS W_EU #Occitanie #France
 
 # human hosts
 H_v <- W_tot_df %>% 
@@ -58,7 +58,7 @@ for (i in 1:length(files)){
   n_d_i = nrow(Sim)
   
   #Getting weather from EOBS
-  load(paste0(folder_eobs, "/EOBS_sel_", year, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
+  load(paste0(folder_eobs, "/EOBS_sel_01_", year, "_", name, ".RData")) #EOBS W_EU #Occitanie #France
   temp = matrix(W_tot_df$T_av, nrow = n_d_i)
   
   #bio
