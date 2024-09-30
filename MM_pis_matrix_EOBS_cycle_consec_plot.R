@@ -390,3 +390,83 @@ for(region_x in regions_availab){
 }
 
 save(VectDomain, file = paste0(folder_plot, "/VectDomainStat.RData"))
+
+### Elab_a posteriori
+countries_sh <-  st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/european-countries.shp")
+
+load(paste0(folder_plot, "/VectDomainStat.RData"))
+
+# Replace Nice with EID data
+load(paste0(folder_plot, "/VectDomainStat_Nice.RData"))
+
+VectDomain$r_gross[VectDomain$Name_app == "Nice"] = VectDomain_Nice$r_gross
+VectDomain$pv_r_gros[VectDomain$Name_app == "Nice"] = VectDomain_Nice$pv_r_gros
+VectDomain$rmse_gross[VectDomain$Name_app == "Nice"] = VectDomain_Nice$rmse_gross
+VectDomain$r_year[VectDomain$Name_app == "Nice"] = VectDomain_Nice$r_year
+VectDomain$pv_r_year[VectDomain$Name_app == "Nice"] = VectDomain_Nice$pv_r_year
+VectDomain$Name_app[VectDomain$Name_app == "Nice"] = VectDomain_Nice$Name_app
+
+###
+
+summary(VectDomain$r_gross)
+summary(VectDomain$pv_r_gross)
+
+#plot map 
+ggplot()+
+  geom_sf(data = countries_sh, alpha = 1, colour = "white")+
+  geom_sf(data = VectDomain, aes(fill = r_gross))+
+  coord_sf(xlim = c(7, 17), ylim = c(37, 47))+
+  scale_fill_gradient2(
+    name = waiver(),
+    low = "red",
+    mid = "grey90",
+    high = "blue",
+    midpoint = 0)+
+  ggtitle('Linear correlation')+
+  theme_minimal()
+
+
+ggplot()+
+  geom_sf(data = countries_sh, alpha = 1, colour = "white")+
+  geom_sf(data = VectDomain, fill = "black")+
+  geom_sf(data = VectDomain %>% filter(r_gross>0), aes(fill = pv_r_gross))+
+  coord_sf(xlim = c(7, 17), ylim = c(37, 47))+
+  scale_fill_gradient2(
+    name = waiver(),
+    low = "blue",
+    mid = "grey90",
+    high = "red",
+    midpoint = 0.2)+
+  ggtitle('p-value linear corr')+
+  theme_minimal()
+
+sum(VectDomain %>% filter(r_gross>0) %>% pull(pv_r_gross) <0.1, na.rm = T)  
+
+ggplot()+
+  geom_sf(data = countries_sh, alpha = 1, colour = "white")+
+  geom_sf(data = VectDomain, aes(fill = r_year))+
+  coord_sf(xlim = c(7, 17), ylim = c(37, 47))+
+  scale_fill_gradient2(
+    name = waiver(),
+    low = "red",
+    mid = "grey90",
+    high = "blue",
+    midpoint = 0)+
+  ggtitle('Linear correlation (yearly average)')+
+  theme_minimal()
+
+ggplot()+
+  geom_sf(data = countries_sh, alpha = 1, colour = "white")+
+  geom_sf(data = VectDomain, fill = "black")+
+  geom_sf(data = VectDomain %>% filter(r_year > 0), aes(fill = pv_r_year))+
+  coord_sf(xlim = c(7, 17), ylim = c(37, 47))+
+  scale_fill_gradient2(
+    name = waiver(),
+    low = "blue",
+    mid = "grey90",
+    high = "red",
+    midpoint = 0.2)+
+  ggtitle('p-value linear corr (yearly average)')+
+  theme_minimal()
+
+sum(VectDomain %>% filter(r_year>0) %>% pull(pv_r_year) <0.1, na.rm = T)
