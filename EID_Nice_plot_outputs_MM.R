@@ -190,6 +190,18 @@ g1 <- ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = Type))+
 
 ggsave(file= paste0(folder_plot, "Nice_traj.svg"), plot= g1 , width=8, height=3)
 
+# Save with VectDomain (vectabundance)
+
+VectDomain_Nice = data.frame(Name_app = "Nice (EID)",
+                             r_gross = cor_brut, 
+                             pv_r_gross = cor_brut_p$p.value,
+                             rmse_gross = rmse_brut,
+                             r_year = cor_annual,
+                             pv_r_year = cor_annual_p$p.value)
+
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_plot"
+save(VectDomain_Nice, file = paste0(folder_plot, "/VectDomainStat_Nice.RData"))
+
 #lo plotto nell'inkcscape
 
 # #plot 2
