@@ -98,6 +98,26 @@ CK = data.frame(year = rep(years_eval, each =length(delay)),
                 delay = rep(delay, length(years_eval)),
                 K = NA)
 
+domain_df <- domain_df %>%
+  mutate(s_2006 = NA) %>%
+  mutate(s_2007 = NA) %>%
+  mutate(s_2008 = NA) %>%
+  mutate(s_2009 = NA) %>%
+  mutate(s_2010 = NA) %>%
+  mutate(s_2011 = NA) %>%
+  mutate(s_2012 = NA) %>%
+  mutate(s_2013 = NA) %>%
+  mutate(s_2014 = NA) %>%
+  mutate(s_2015 = NA) %>%
+  mutate(s_2016 = NA) %>%
+  mutate(s_2017 = NA) %>%
+  mutate(s_2018 = NA) %>%
+  mutate(s_2019 = NA) %>%
+  mutate(s_2020 = NA) %>%
+  mutate(s_2021 = NA) %>%
+  mutate(s_2022 = NA) %>%
+  mutate(s_2023 = NA) 
+
 # for(delay in delays){
 for (year in years_eval){
   years_sel = (year-delay):(year) 
