@@ -86,7 +86,7 @@ library(psych)
 
 years_eval = 2006:2023
 
-delay = 2 # 1:10
+delays = 6 #1:8
 
 # remove sf just to accelerate the following
 domain_presence_intersect_df <- domain_presence_intersect %>%
@@ -94,11 +94,11 @@ domain_presence_intersect_df <- domain_presence_intersect %>%
 
 rm(domain_presence_intersect)
 
-CK = data.frame(year = rep(years_eval, each =length(delay)),
-                delay = rep(delay, length(years_eval)),
+CK = data.frame(year = rep(years_eval, each =length(delays)),
+                delay = rep(delays, length(years_eval)),
                 K = NA)
 
-domain_df <- domain_df %>%
+domain_df_year <- domain_df %>%
   mutate(s_2006 = NA) %>%
   mutate(s_2007 = NA) %>%
   mutate(s_2008 = NA) %>%
@@ -119,6 +119,7 @@ domain_df <- domain_df %>%
   mutate(s_2023 = NA) 
 
 # for(delay in delays){
+delay = delays
 for (year in years_eval){
   years_sel = (year-delay):(year) 
   E0_m_c_sel <- apply(E0_m[which(years %in% years_sel),], 2,
@@ -130,26 +131,29 @@ for (year in years_eval){
   domain_years_sel <- domain_df%>%
     mutate(E0 = E0_sel[domain_sel$region])
   
-  domain_presence_intersect_sel <- left_join(domain_presence_intersect_df, domain_years_sel)
+  domain_presence_intersect_years <- domain_presence_intersect_df %>%
+          mutate(presence = case_when((presence == 1) & (year_col <= year) ~ 1,
+                                .default = 0))
+    
+  domain_presence_intersect_years_sel <- left_join(domain_presence_intersect_years, domain_years_sel)
   
-  domain_prs_abs <-   domain_presence_intersect_sel %>%
+  domain_prs_abs <-   domain_presence_intersect_years_sel %>%
     select(c("region", "presence", "E0"))%>%
     group_by(region)%>%
     # dplyr::summarise(presence = 1*(sum(presence)>0)) %>%
-    dplyr::summarise(pres_obs = 1*(sum(presence)>0), pres_pred = 1*(mean(E0)>1)) %>%
+    dplyr::summarise(pres_obs = 1*(sum(presence)>0), pres_pred = 1*(exp(mean(log(E0)))>1)) %>%
     ungroup() %>%
     mutate(score = case_when((pres_obs == 1)&(pres_pred == 1) ~ "true positive",
                              (pres_obs == 0)&(pres_pred == 0) ~ "true negative",
                              (pres_obs == 0)&(pres_pred == 1) ~ "false positive",
                              (pres_obs == 1)&(pres_pred == 0) ~ "false negative"))
   
-  domain_df[,which(substr(names(domain_df), 3, 6)==year)] <- domain_prs_abs$score
+  domain_df_year[,which(substr(names(domain_df_year), 3, 6)==year)] <- domain_prs_abs$score
   
   CK$K[which((CK$year == year) & (CK$delay == delay))] = 
     cohen.kappa(x = cbind(domain_prs_abs$pres_obs, domain_prs_abs$pres_pred))$kappa
   
 }
-
 # }
 
 # ggplot()+
@@ -174,7 +178,7 @@ folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiCo
 library(gganimate)
 library(magick)
 
-domain_df_m <- reshape2::melt(domain_df, id.vars = c("region")) %>%
+domain_df_m <- reshape2::melt(domain_df_year, id.vars = c("region")) %>%
   rename(year = variable) %>%
   mutate(year = as.numeric(substr(year, 3, 6))) %>%
   rename(score = value)
@@ -184,10 +188,14 @@ domain_df_m <- left_join(domain_df_m, domain_sel)
 domain_sf_m <- st_as_sf(domain_df_m) 
 
 for(y in years_eval){
+  
+  K = CK %>% filter(year == y) %>% pull(K)
+  
   p1 <- ggplot()+
     geom_sf(data = domain_sf_m %>% filter(year == y) , aes(fill = score), color = NA)+ 
     scale_fill_manual(breaks = c("true positive", "true negative", "false positive", "false negative"),
                       values=c("#B0986CFF", "#009474FF", "#EFDDCFFF","#72E1E1FF"))+
+    ggtitle(paste0("Year: ", y," - Accuracy (K): ", round(K, 2)))+
     theme_minimal()
   
   ggsave(file= paste0(folder_plot, "Plot_invasion_", y,".png"), plot= p1, units="in", width=7, height=5.5, dpi=300)
@@ -218,13 +226,13 @@ img_list <- lapply(imgs, image_read)
 img_joined <- image_join(img_list)
 
 ## animate at X frames per second
-img_animated <- image_animate(img_joined, fps = 10)
+img_animated <- image_animate(img_joined, fps = 2)
 
 # ## view animated image
 # img_animated
 
 ## save to disk
 image_write(image = img_animated,
-            path = paste0(folder_plot, "/Prova.gif"))
+            path = paste0(folder_plot, "/Animation.gif"))
 
             
