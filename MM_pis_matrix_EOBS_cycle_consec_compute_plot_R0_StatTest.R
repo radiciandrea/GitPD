@@ -118,7 +118,7 @@ years_sel = 2010:2023 # as ECDC
 R0_l = colMeans(R0_m[which(years %in% years_sel),], na.rm = T)
 
 # to plot
-domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_W_EU.shp")) %>%
+domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_01_W_EU.shp")) %>%
   select(region) %>%
   arrange(region) %>%
   mutate(R0_l = R0_l)
@@ -162,7 +162,7 @@ roc(category , prediction, plot = TRUE, col = "#377eb8", lwd = 3, print.thres=TR
 # x = (1- specificity) = 1 - true negative %
 # y = (sensitivity) = true positive %
 
-thr_v = 0.107
+thr_v = 0.321 #0.107
 
 #other values?
 
@@ -189,4 +189,5 @@ ggplot()+
   geom_sf(data = domain_sel, aes(fill = R0_l), colour = NA)+
   geom_sf(data = ECDC_Dengue, alpha = 0, color = "gray90", lwd = 0.1)+ 
   geom_sf(data = domain_sel %>% filter(R0_l > thr_v), fill = "orange", alpha = 0.4, color = NA)+
+  geom_sf(data = ECDC_Dengue %>% filter(Infection == "Yes"), fill = "red", alpha = 0.4, color = NA)+
   coord_sf(xlim = c(-15, 18), ylim = c(36, 60))
