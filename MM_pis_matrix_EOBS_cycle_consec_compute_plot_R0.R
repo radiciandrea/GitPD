@@ -120,12 +120,12 @@ for (i in 1:length(files)){
 
 #Choose here what to plot
 
-disease = "Dengue" 
+disease = "Zika" 
 
 if (disease == "Zika"){
   R0_tot = R0_ZK_tot
   R0_m = R0_ZK_m
-} else if (disease == "Dengue") {
+} else if (disease == "dengue") {
   R0_tot = R0_DG_tot
   R0_m = R0_DG_m
 }
@@ -171,7 +171,7 @@ R0_2 = colMeans(R0_m[which(years %in% years_sel_2),], na.rm = T)
 
 
 # to plot
-domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_W_EU.shp")) %>%
+domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_01_W_EU.shp")) %>%
   arrange(region)
 
 x = c(61, 21, 7, 0, 0)
@@ -209,7 +209,7 @@ Risk_zone <-  case_when((R0_1 < 1) & (R0_2 < 1) ~ "No p. spread",
 
 ### plot for CC RIO conference
 
-folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/08bis_CC_RIO_SOOI_Sep_2024/Images/"
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Outputs/R0/"
 
 countries_sh <-  st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/european-countries.shp")
 
@@ -220,11 +220,11 @@ g1 <- ggplot()+
   scale_fill_manual(values = rev(col_x))+
   geom_sf(data = countries_sh, alpha = 0, colour = "white")+
   coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
-  ggtitle(paste0("Possible spread of ", disease, " (period~2007-2014)"))+
+  ggtitle(paste0("Possible spread of ", disease, " (period 2007-2014)"))+
   theme_minimal()+
   guides(fill=guide_legend(title=bquote(R[0]~gt~1~(weeks))))
 
-ggsave(file= paste0(folder_plot, "R0_", disease,"_1_level.png"), plot= g1 , units="in", width=5.5, height=7, dpi=300)
+ggsave(file= paste0(folder_plot, "R0_", disease,"_1_level_01.png"), plot= g1 , units="in", width=5.5, height=7, dpi=300)
 
 #plot 2
 
@@ -233,11 +233,11 @@ g2 <- ggplot()+
   scale_fill_manual(values = rev(col_x))+
   geom_sf(data = countries_sh, alpha = 0, colour = "white")+
   coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
-  ggtitle(paste0("Possible spread of ", disease, " (period~2015-2022)"))+
+  ggtitle(paste0("Possible spread of ", disease, " (period 2015-2022)"))+
   theme_minimal() +
   guides(fill=guide_legend(title=bquote(R[0]~gt~1~(weeks))))
 
-ggsave(file= paste0(folder_plot, "R0_", disease,"_level.png"),  plot= g2 , units="in", width=5.5, height=7, dpi=300)
+ggsave(file= paste0(folder_plot, "R0_", disease,"_2_level_01.png"),  plot= g2 , units="in", width=5.5, height=7, dpi=300)
 
 # plot 3
 
@@ -252,5 +252,5 @@ gvar <- ggplot()+
   theme_minimal() +
   guides(fill=guide_legend(title=bquote(R[0]~variation)))
 
-ggsave(file= paste0(folder_plot, "R0_", disease,"_var_level.png"), plot= gvar , units="in", width=5.5, height=7, dpi=300)
+ggsave(file= paste0(folder_plot, "R0_", disease,"_var_level_01.png"), plot= gvar , units="in", width=5.5, height=7, dpi=300)
 
