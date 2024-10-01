@@ -84,7 +84,7 @@ load(paste0(folder_out, "/LE_Adults.RData"))
 
 # Recompute n_c, n_r
 n_c = 5 # numero di classi
-n_r = (ncol(Adults_m)-1)/n_c #numero di regioni
+n_r = (ncol(Adults_m)) #numero di regioni
 regions = 1:n_r
 n_y = length(years)
 
@@ -98,8 +98,8 @@ Adults_m[which(Adults_m > 10^8)] = 0
 #                        function(x){return(colMeans(Adults_m[max(1,(x-7)):min(n_d,(x+7)),]))}))
 
 LE_m[which(is.na(LE_m))] = 0
-Adults_m[which(LE_m < 0)] = 0
-Adults_m[which(LE_m > 10^8)] = 0
+LE_m[which(LE_m < 0)] = 0
+LE_m[which(LE_m > 10^8)] = 0
 
 # LE_RM_m <- t(sapply(2:n_d,
 #                     function(x){return(colMeans(LE_m[max(1,(x-7)):min(n_d,(x+7)),]))}))
@@ -122,19 +122,23 @@ for (y in years){
 
 # compute statistics for 2 periods
 
-LE_av_s_2010_v =  Ab_s_df %>% group_by(region) %>% summarise(LE_av = mean(LE)) %>% ungroup() %>% pull(LE_av)
+LE_av_s_2010_v =  Ab_s_df %>% filter(year < 2015) %>% group_by(region) %>% summarise(LE_av = mean(LE)) %>% ungroup() %>% pull(LE_av)
+LE_av_s_2020_v =  Ab_s_df %>% filter(year >= 2015) %>% group_by(region) %>% summarise(LE_av = mean(LE)) %>% ungroup() %>% pull(LE_av)
+Adults_av_s_2010_v =  Ab_s_df %>% filter(year < 2015) %>% group_by(region) %>% summarise(Adults_av = mean(Adults)) %>% ungroup() %>% pull(Adults_av)
+Adults_av_s_2020_v =  Ab_s_df %>% filter(year >= 2015) %>% group_by(region) %>% summarise(Adults_av = mean(Adults)) %>% ungroup() %>% pull(Adults_av)
 
 #summer "MJJAS" - mean abundances
 
 # load shp to compare
 folder_sh = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/"
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/MM_pis_matrix_EOBS_cycle_consec_01_plot/"
 
 domain <- st_read(paste0(folder_sh, "domain_sel_01_W_EU.shp")) %>%
   arrange(region)
 
 countries_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/european-countries.shp")
 
-# abundance in mjjas (EGGS)
+# abundance in mjjas: # 4 times (EGGS 2010)
 
 LE_av_s_2010_f <- case_when(LE_av_s_2010_v  > 10^4 ~ "a) > 10^4",
                             LE_av_s_2010_v > 10^3 ~ "b) > 10^3",
@@ -151,26 +155,110 @@ LE_av_s_2010_gg <- ggplot()+
   guides(fill=guide_legend(title="eggs/ha"))+
   theme_minimal()
 
-ggsave("LE_av_ssn_gg.png", LE_av_ssn_gg, units="in", width=7, height=5.5, dpi=300)
+ggsave(paste0(folder_plot, "LE_av_s_2010_gg.png"), LE_av_s_2010_gg, units="in", width=7, height=5.5, dpi=300)
 
-# abundance in mjjas (Adults)
+# abundance in mjjas: # 4 times (EGGS 2010)
 
-Adult_av_ssn_f <- case_when(Adult_av_ssn_v  > 10^3 ~ "a) > 1000",
-                            Adult_av_ssn_v > 10^2 ~ "b) > 100",
-                            Adult_av_ssn_v  > 10 ~ "c) > 10",
-                            Adult_av_ssn_v  > 1 ~ "d) > 1",
-                            Adult_av_ssn_v  < 1 ~ "e) < 1")
+LE_av_s_2010_f <- case_when(LE_av_s_2010_v  > 10^4 ~ "a) > 10^4",
+                            LE_av_s_2010_v > 10^3 ~ "b) > 10^3",
+                            LE_av_s_2010_v  > 10^2 ~ "c) > 10^2",
+                            LE_av_s_2010_v  > 10 ~ "d) > 10",
+                            LE_av_s_2010_v  < 10 ~ "e) < 10")
 
-Adult_av_ssn <- ggplot()+
-  geom_sf(data = domain, aes(fill = Adult_av_ssn_f), color = NA)+
+LE_av_s_2010_gg <- ggplot()+
+  geom_sf(data = domain, aes(fill = LE_av_s_2010_f), color = NA)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
-  coord_sf(xlim = c(1.5, 19.5), ylim = c(40.5, 48.5)) +
+  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
   scale_fill_viridis_d()+
-  ggtitle(paste0("Average adult per ha between May and September"))+
-  guides(fill=guide_legend(title="adult/ha"))+
+  ggtitle(paste0("Average daily laid eggs per ha between May and September"))+
+  guides(fill=guide_legend(title="eggs/ha"))+
   theme_minimal()
 
-ggsave("Adult_av_ssn.png", Adult_av_ssn, units="in", width=7, height=5.5, dpi=300)
+ggsave(paste0(folder_plot, "LE_av_s_2010_gg.png"), LE_av_s_2010_gg, units="in", width=7, height=5.5, dpi=300)
+
+# abundance in mjjas: # 4 times (EGGS 2010)
+
+LE_av_s_2010_f <- case_when(LE_av_s_2010_v  > 10^4 ~ "a) > 10^4",
+                            LE_av_s_2010_v > 10^3 ~ "b) > 10^3",
+                            LE_av_s_2010_v  > 10^2 ~ "c) > 10^2",
+                            LE_av_s_2010_v  > 10 ~ "d) > 10",
+                            LE_av_s_2010_v  < 10 ~ "e) < 10")
+
+LE_av_s_2010_gg <- ggplot()+
+  geom_sf(data = domain, aes(fill = LE_av_s_2010_f), color = NA)+
+  geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
+  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
+  scale_fill_viridis_d()+
+  ggtitle(paste0("Average daily laid eggs per ha between May and September"))+
+  guides(fill=guide_legend(title="eggs/ha"))+
+  theme_minimal()
+
+ggsave(paste0(folder_plot, "LE_av_s_2010_gg.png"), LE_av_s_2010_gg, units="in", width=7, height=5.5, dpi=300)
+
+# abundance in mjjas: # 6 times (EGGS 2010)
+
+LE_av_s_2010_f <- case_when(LE_av_s_2010_v  > 10^4 ~ "a) > 10^4",
+                            LE_av_s_2010_v > 10^3 ~ "b) > 10^3",
+                            LE_av_s_2010_v  > 10^2 ~ "c) > 10^2",
+                            LE_av_s_2010_v  > 10 ~ "d) > 10",
+                            LE_av_s_2010_v  < 10 ~ "e) < 10")
+
+LE_av_s_2010_gg <- ggplot()+
+  geom_sf(data = domain, aes(fill = LE_av_s_2010_f), color = NA)+
+  geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
+  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
+  scale_fill_viridis_d()+
+  ggtitle(paste0("Average daily laid eggs per ha between May and September"))+
+  guides(fill=guide_legend(title="eggs/ha"))+
+  theme_minimal()
+
+ggsave(paste0(folder_plot, "LE_av_s_2010_gg.png"), LE_av_s_2010_gg, units="in", width=7, height=5.5, dpi=300)
+
+# abundance in mjjas: # 6 times (EGGS 2020)
+
+LE_av_s_2020_f <- case_when(LE_av_s_2020_v  > 10^4 ~ "a) > 10^4",
+                            LE_av_s_2020_v > 10^3 ~ "b) > 10^3",
+                            LE_av_s_2020_v  > 10^2 ~ "c) > 10^2",
+                            LE_av_s_2020_v  > 10 ~ "d) > 10",
+                            LE_av_s_2020_v  < 10 ~ "e) < 10")
+
+LE_av_s_2020_gg <- ggplot()+
+  geom_sf(data = domain, aes(fill = LE_av_s_2020_f), color = NA)+
+  geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
+  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
+  scale_fill_viridis_d()+
+  ggtitle(paste0("Average daily laid eggs per ha between May and September"))+
+  guides(fill=guide_legend(title="eggs/ha"))+
+  theme_minimal()
+
+ggsave(paste0(folder_plot, "LE_av_s_2020_gg.png"), LE_av_s_2020_gg, units="in", width=7, height=5.5, dpi=300)
+
+# abundance in mjjas: # 6 times (difference EGGS 2020)
+
+LE_av_s_diff_v <- LE_av_s_2020_v - LE_av_s_2010_v
+
+LE_av_s_diff_f <- case_when(LE_av_s_diff_v > 0 ~"a) increase",
+                            LE_av_s_diff_v < 0 ~"b) decrease",
+                            .default = "NA")
+
+LE_av_s_diff_gg <- ggplot()+
+  geom_sf(data = domain, aes(fill = LE_av_s_diff_f), color = NA)+
+  geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
+  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
+  scale_fill_viridis_d()+
+  ggtitle(paste0("Diff"))+
+  guides(fill=guide_legend(title="eggs/ha"))+
+  theme_minimal()
+
+ggsave(paste0(folder_plot, "LE_av_s_diff_gg.png"), LE_av_s_2020_gg, units="in", width=7, height=5.5, dpi=300)
+
+
+
+
+
+
+
+
 
 #  standardyze dynamics over 2 weeks
 thr = 0.05
