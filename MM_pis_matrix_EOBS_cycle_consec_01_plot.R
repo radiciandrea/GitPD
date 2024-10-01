@@ -22,7 +22,9 @@ folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/E
 files = list.files(folder_out, pattern = "Sim_EOBS")
 
 name = substring(files[1], 10, 13)
-years = substring(files, 15, 18)
+#years = substring(files, 15, 18)
+
+years = 2005:2022
 
 first_day = as.Date(paste0(min(years), "-01-01"))
 last_day = as.Date(paste0(max(years), "-12-31"))
@@ -138,45 +140,10 @@ domain <- st_read(paste0(folder_sh, "domain_sel_01_W_EU.shp")) %>%
 
 countries_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/european-countries.shp")
 
-# abundance in mjjas: # 4 times (EGGS 2010)
-
-LE_av_s_2010_f <- case_when(LE_av_s_2010_v  > 10^4 ~ "a) > 10^4",
-                            LE_av_s_2010_v > 10^3 ~ "b) > 10^3",
-                            LE_av_s_2010_v  > 10^2 ~ "c) > 10^2",
-                            LE_av_s_2010_v  > 10 ~ "d) > 10",
-                            LE_av_s_2010_v  < 10 ~ "e) < 10")
-
-LE_av_s_2010_gg <- ggplot()+
-  geom_sf(data = domain, aes(fill = LE_av_s_2010_f), color = NA)+
-  geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
-  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
-  scale_fill_viridis_d()+
-  ggtitle(paste0("Average daily laid eggs per ha between May and September"))+
-  guides(fill=guide_legend(title="eggs/ha"))+
-  theme_minimal()
-
-ggsave(paste0(folder_plot, "LE_av_s_2010_gg.png"), LE_av_s_2010_gg, units="in", width=7, height=5.5, dpi=300)
-
 #palette 1
 palette1= c("#384AB4", "#5570DF", "#8EB0FE", "#C5D7F3", "#F2CDBB", "#F29878", "#D04B45", "#B00026")
 palette_simp= c("#384AB4", "#8EB0FE", "gray90", "#F29878",  "#B00026")
 
-# abundance in mjjas: # 4 times (EGGS 2010)
-
-LE_av_s_2010_f <- case_when(LE_av_s_2010_v  > 10^4 ~ "a) > 10^4",
-                            LE_av_s_2010_v > 10^3 ~ "b) > 10^3",
-                            LE_av_s_2010_v  > 10^2 ~ "c) > 10^2",
-                            LE_av_s_2010_v  > 10 ~ "d) > 10",
-                            LE_av_s_2010_v  < 10 ~ "e) < 10")
-
-LE_av_s_2010_gg <- ggplot()+
-  geom_sf(data = domain, aes(fill = LE_av_s_2010_f), color = NA)+
-  geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
-  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
-  scale_fill_viridis_d()+
-  ggtitle(paste0("Average daily laid eggs per ha between May and September"))+
-  guides(fill=guide_legend(title="eggs/ha"))+
-  theme_minimal()
 
 # my_breaks = c(10^(c(4:0)), 0)
 # 
@@ -192,15 +159,15 @@ LE_av_s_2010_gg <- ggplot()+
 #   ggtitle(paste0("Average daily laid eggs per ha between May and September"))+
 #   guides(fill=guide_legend(title="eggs/ha"))+
 #   theme_minimal()
-
-ggsave(paste0(folder_plot, "LE_av_s_2010_gg.png"), LE_av_s_2010_gg, units="in", width=7, height=5.5, dpi=300)
+# 
+# ggsave(paste0(folder_plot, "LE_av_s_2010_gg.png"), LE_av_s_2010_gg, units="in", width=7, height=5.5, dpi=300)
 
 # abundance in mjjas: # 1/6 times (EGGS 2010)
 
 LE_av_s_2010_f <- case_when(LE_av_s_2010_v  > 10^4 ~ "a) > 10^4",
                             LE_av_s_2010_v > 10^3 ~ "b) > 10^3",
                             LE_av_s_2010_v  > 10^2 ~ "c) > 10^2",
-                            LE_av_s_2010_v  > 10 ~ "d) > 10",
+                            LE_av_s_2010_v  >= 10 ~ "d) > 10",
                             LE_av_s_2010_v  < 10 ~ "e) < 10")
 
 LE_av_s_2010_gg <- ggplot()+
@@ -219,7 +186,7 @@ ggsave(paste0(folder_plot, "LE_av_s_2010_gg.png"), LE_av_s_2010_gg, units="in", 
 LE_av_s_2020_f <- case_when(LE_av_s_2020_v  > 10^4 ~ "a) > 10^4",
                             LE_av_s_2020_v > 10^3 ~ "b) > 10^3",
                             LE_av_s_2020_v  > 10^2 ~ "c) > 10^2",
-                            LE_av_s_2020_v  > 10 ~ "d) > 10",
+                            LE_av_s_2020_v  >= 10 ~ "d) > 10",
                             LE_av_s_2020_v  < 10 ~ "e) < 10")
 
 LE_av_s_2020_gg <- ggplot()+
@@ -240,7 +207,7 @@ LE_av_s_diff_v <- LE_av_s_2020_v - LE_av_s_2010_v
 LE_av_s_diff_f <- case_when(LE_av_s_diff_v > 10^3 ~"a) strong increase (>+1000)",
                             LE_av_s_diff_v > 10 ~"b) increase (+10 to 1000)",
                             LE_av_s_diff_v > -10 ~"c) stable (-10 to +10)",
-                            LE_av_s_diff_v > -10^3 ~"d) decrease (-10 to 1000)",
+                            LE_av_s_diff_v >= -10^3 ~"d) decrease (-10 to 1000)",
                             LE_av_s_diff_v < -10^3 ~"e) strong decrease (<-1000)",
                             .default = "NA")
 
@@ -253,14 +220,14 @@ LE_av_s_diff_gg <- ggplot()+
   guides(fill=guide_legend(title="eggs/ha"))+
   theme_minimal()
 
-ggsave(paste0(folder_plot, "LE_av_s_diff_gg.png"), LE_av_s_2020_gg, units="in", width=7, height=5.5, dpi=300)
+ggsave(paste0(folder_plot, "LE_av_s_diff_gg.png"), LE_av_s_diff_gg, units="in", width=7, height=5.5, dpi=300)
 
 # abundance in mjjas: # 4/6 times (Adults 2010)
 
 Adults_av_s_2010_f <- case_when(Adults_av_s_2010_v  > 10^4 ~ "a) > 10^4",
                             Adults_av_s_2010_v > 10^3 ~ "b) > 10^3",
                             Adults_av_s_2010_v  > 10^2 ~ "c) > 10^2",
-                            Adults_av_s_2010_v  > 10 ~ "d) > 10",
+                            Adults_av_s_2010_v  >= 10 ~ "d) > 10",
                             Adults_av_s_2010_v  < 10 ~ "e) < 10")
 
 Adults_av_s_2010_gg <- ggplot()+
@@ -279,7 +246,7 @@ ggsave(paste0(folder_plot, "Adults_av_s_2010_gg.png"), Adults_av_s_2010_gg, unit
 Adults_av_s_2020_f <- case_when(Adults_av_s_2020_v  > 10^4 ~ "a) > 10^4",
                             Adults_av_s_2020_v > 10^3 ~ "b) > 10^3",
                             Adults_av_s_2020_v  > 10^2 ~ "c) > 10^2",
-                            Adults_av_s_2020_v  > 10 ~ "d) > 10",
+                            Adults_av_s_2020_v  >= 10 ~ "d) > 10",
                             Adults_av_s_2020_v  < 10 ~ "e) < 10")
 
 Adults_av_s_2020_gg <- ggplot()+
@@ -293,14 +260,14 @@ Adults_av_s_2020_gg <- ggplot()+
 
 ggsave(paste0(folder_plot, "Adults_av_s_2020_gg.png"), Adults_av_s_2020_gg, units="in", width=7, height=5.5, dpi=300)
 
-# abundance in mjjas: # /66 times (difference Adults 2020)
+# abundance in mjjas: # 6/6 times (difference Adults 2020)
 
 Adults_av_s_diff_v <- Adults_av_s_2020_v - Adults_av_s_2010_v
 
 Adults_av_s_diff_f <- case_when(Adults_av_s_diff_v > 10^3 ~"a) strong increase (>+1000)",
                             Adults_av_s_diff_v > 10 ~"b) increase (+10 to 1000)",
                             Adults_av_s_diff_v > -10 ~"c) stabAdults (-10 to +10)",
-                            Adults_av_s_diff_v > -10^3 ~"d) decrease (-10 to 1000)",
+                            Adults_av_s_diff_v >= -10^3 ~"d) decrease (-10 to 1000)",
                             Adults_av_s_diff_v < -10^3 ~"e) strong decrease (<-1000)",
                             .default = "NA")
 
@@ -313,259 +280,105 @@ Adults_av_s_diff_gg <- ggplot()+
   guides(fill=guide_legend(title="Adults/ha"))+
   theme_minimal()
 
-ggsave(paste0(folder_plot, "Adults_av_s_diff_gg.png"), Adults_av_s_2020_gg, units="in", width=7, height=5.5, dpi=300)
+ggsave(paste0(folder_plot, "Adults_av_s_diff_gg.png"), Adults_av_s_diff_gg, units="in", width=7, height=5.5, dpi=300)
 
+# Continua da qui
 
-#  standardyze dynamics over 2 weeks
-thr = 0.05
+#  standardyze dynamics over 2 weeks (eggs)
 
-max_Adult_RM = max(Adult_RM_m)
-thr_Adult_RM = thr*max_Adult_RM
+LE_RM_m <- t(sapply(2:n_d,
+                    function(x){return(colMeans(LE_m[max(1,(x-7)):min(n_d,(x+7)),]))}))
 
-Adult_st_m = Adult_RM_m/max_Adult_RM #normalizd
-Adult_ssn_v = colSums(Adult_st_m>thr) #Adultnght
-Adult_b_ssn_v = as.Date(apply(Adult_st_m, 2, function(x){which(x>thr)[1]}), origin = "2022-12-31") #beginning
-Adult_e_ssn_v = as.Date(apply(Adult_st_m, 2, function(x){max(which(x>thr))}), origin = "2022-12-31") #end
-Adult_e_ssn_v[which(Adult_e_ssn_v<0)] = NA
+thr = 0.001
 
 max_LE_RM = max(LE_RM_m)
 thr_LE_RM = thr*max_LE_RM
 
-LE_st_m = LE_RM_m/max_LE_RM #normalized
-LE_ssn_v = colSums(LE_st_m>thr) #lenght
-LE_b_ssn_v = as.Date(apply(LE_st_m, 2, function(x){which(x>thr)[1]}), origin = "2022-12-31") #beginning
-LE_e_ssn_v = as.Date(apply(LE_st_m, 2, function(x){max(which(x>thr))}), origin = "2022-12-31") #end
-LE_e_ssn_v[which(LE_e_ssn_v<0)] = NA
+# assume that season starts and and when there is 1 le per 10 mq
 
-# plots of interests 
-palette_x <- c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724")
+thr_LE_RM = 1000 #about 0.0001* of the max
 
-# length of the season (EGGS)
+# compute season lenght per year
+Ab_s_df$le_LE = NA
 
-x = c("a) > 12 w", "b) < 12 w", "c) < 7 w", "d) < 3 w", "e) - 0 w")
+for (y in years){
+  
+  index_y = which(date_sim %in% seq(as.Date(paste0(y, "-01-01")), as.Date(paste0(y, "-12-31")), 1))
+  origin_y =  as.Date(paste0(as.numeric(y)-1, "-12-31"))
+  
+  LE_RM_m_y = LE_RM_m[index_y,]
+  
+  LE_b_y = as.Date(apply(LE_RM_m_y, 2, function(x){which(x>thr_LE_RM)[1]}), origin = origin_y) #beginning
+  LE_e_y = as.Date(apply(LE_RM_m_y, 2, function(x){max(which(x>thr_LE_RM))}), origin = origin_y) #end
+  LE_e_y[which(LE_e_y<0)] = NA
+  
+  
+  Ab_s_df$le_LE[which(Ab_s_df$year == y)] = pmax(LE_e_y - LE_b_y, 0, na.rm = T)
+}
 
-LE_ssn_f <- case_when(LE_ssn_v > 84 ~ x[1],
-                      LE_ssn_v > 49 ~ x[2],
-                      LE_ssn_v > 21 ~ x[3],
-                      LE_ssn_v > 0 ~ x[4],
-                      LE_ssn_v == 0 ~ x[5])
+LE_le_s_2010_v =  Ab_s_df %>% filter(year < 2015) %>% group_by(region) %>% summarise(le_LE_av = mean(le_LE, na.rm = T)) %>% ungroup() %>% pull(le_LE_av)
+LE_le_s_2020_v =  Ab_s_df %>% filter(year >= 2015) %>% group_by(region) %>% summarise(le_LE_av = mean(le_LE, na.rm = T)) %>% ungroup() %>% pull(le_LE_av)
 
-LE_ssn_gg <- ggplot()+
-  geom_sf(data = domain, aes(fill = LE_ssn_f), color = NA)+
+# PLOTS
+
+# season lenght: # 1/6 times (EGGS 2010)
+x = c("a) > 14 w", "b) < 14 w", "c) < 7 w", "d) < 3 w", "e) - 0 w")
+
+LE_le_s_2010_f <- case_when(LE_le_s_2010_v > 98 ~ x[1],
+                      LE_le_s_2010_v > 49 ~ x[2],
+                      LE_le_s_2010_v > 21 ~ x[3],
+                      LE_le_s_2010_v > 0 ~ x[4],
+                      LE_le_s_2010_v == 0 ~ x[5])
+
+
+LE_le_s_2010_gg <- ggplot()+
+  geom_sf(data = domain, aes(fill = LE_le_s_2010_f), color = NA)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
-  coord_sf(xlim = c(1.5, 19.5), ylim = c(40.5, 48.5)) +
+  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
   scale_fill_viridis_d()+
-  ggtitle(paste0("Lenght of the season based on laid eggs, threshold = ", thr,
-                 ",\nequivalent to ", round(thr_LE_RM), " daily laid eggs per ha"))+
+  ggtitle(paste0("Lenght of the season based on laid eggs, threshold = ", thr_LE_RM, " laid eggs/(ha*d)"))+
   guides(fill=guide_legend(title="L season"))+
   theme_minimal()
 
-ggsave("LE_ssn_gg.png", LE_ssn_gg, units="in", width=7, height=5.5, dpi=300)
+ggsave(paste0(folder_plot, "LE_le_s_2010_gg.png"), LE_le_s_2010_gg, units="in", width=7, height=5.5, dpi=300)
 
-# length of the season (Adults)
+# season lenght: # 2/6 times (EGGS 2020)
 
-Adult_ssn_f <- case_when(Adult_ssn_v > 84 ~ x[1],
-                         Adult_ssn_v > 49 ~ x[2],
-                         Adult_ssn_v > 21 ~ x[3],
-                         Adult_ssn_v > 0 ~ x[4],
-                         Adult_ssn_v == 0 ~ x[5])
+LE_le_s_2020_f <- case_when(LE_le_s_2020_v > 98 ~ x[1],
+                            LE_le_s_2020_v > 49 ~ x[2],
+                            LE_le_s_2020_v > 21 ~ x[3],
+                            LE_le_s_2020_v > 0 ~ x[4],
+                            LE_le_s_2020_v == 0 ~ x[5])
 
-Adult_ssn_gg <- ggplot()+
-  geom_sf(data = domain, aes(fill = Adult_ssn_f), color = NA)+
+LE_le_s_2020_gg <- ggplot()+
+  geom_sf(data = domain, aes(fill = LE_le_s_2020_f), color = NA)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
-  coord_sf(xlim = c(1.5, 19.5), ylim = c(40.5, 48.5)) +
+  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
   scale_fill_viridis_d()+
-  ggtitle(paste0("Lenght of the season based on adult density, threshold = ", thr,
-                 ",\nequivalent to ", round(thr_Adult_RM), " adults per ha"))+
+  ggtitle(paste0("Lenght of the season based on laid eggs, threshold = ", thr_LE_RM, " laid eggs/(ha*d)"))+
   guides(fill=guide_legend(title="L season"))+
   theme_minimal()
 
-ggsave("Adult_ssn_gg.png", Adult_ssn_gg,  units="in", width=7, height=5.5, dpi=300)
+ggsave(paste0(folder_plot, "LE_le_s_2020_gg.png"), LE_le_s_2020_gg, units="in", width=7, height=5.5, dpi=300)
 
-# beginning of the season (EGGS)
-x <- c("a) April or earlier", "b) May", "c) June","d) July", "e) August or later")
+# season lenght: # 3/6 times (difference EGGS 2020)
 
-LE_b_ssn_f <- case_when(LE_b_ssn_v < "2023-05-01"~ x[1],
-                        LE_b_ssn_v < "2023-06-01"~ x[2],
-                        LE_b_ssn_v < "2023-07-01"~ x[3],
-                        LE_b_ssn_v < "2023-08-01"~ x[4],
-                        LE_b_ssn_v >= "2023-08-01"~ x[5])
+LE_le_s_diff_v <- LE_le_s_2020_v - LE_le_s_2010_v
 
-LE_b_ssn_gg <- ggplot()+
-  geom_sf(data = domain, aes(fill = LE_b_ssn_f), color = NA)+
+LE_le_s_diff_f <- case_when(LE_le_s_diff_v > 14 ~"a) strong increase (> 2 w)",
+                            LE_le_s_diff_v >  0 ~"b) increase (< 2 w)",
+                            LE_le_s_diff_v > -1 ~"c) stable ",
+                            LE_le_s_diff_v >= -14 ~"d) decrease (< 2 w)",
+                            LE_le_s_diff_v < -14 ~"e) strong decrease (> 2 w)",
+                            .default = "NA")
+
+LE_le_s_diff_gg <- ggplot()+
+  geom_sf(data = domain, aes(fill = LE_le_s_diff_f), color = NA)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
-  coord_sf(xlim = c(1.5, 19.5), ylim = c(40.5, 48.5)) +
-  scale_fill_manual(breaks = x, values = palette_x)+
-  ggtitle(paste0("Beginning of the season based on laid eggs, threshold = ", thr,
-                 ",\nequivalent to ", round(thr_LE_RM), " daily laid eggs per ha"))+
-  guides(fill=guide_legend(title="L season"))+
+  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
+  scale_fill_manual(values = rev(palette_simp))+
+  ggtitle(paste0("Difference in the length of th season"))+
+  guides(fill=guide_legend(title="days"))+
   theme_minimal()
 
-ggsave("LE_b_ssn_gg.png", LE_b_ssn_gg, units="in", width=7, height=5.5, dpi=300)
-
-# beginning of the season (Adults)
-
-Adult_b_ssn_f <- case_when(Adult_b_ssn_v < "2023-05-01"~ x[1],
-                           Adult_b_ssn_v < "2023-06-01"~ x[2],
-                           Adult_b_ssn_v < "2023-07-01"~ x[3],
-                           Adult_b_ssn_v < "2023-08-01"~ x[4],
-                           Adult_b_ssn_v >= "2023-08-01"~ x[5])
-
-Adult_b_ssn_gg <- ggplot()+
-  geom_sf(data = domain, aes(fill = Adult_b_ssn_f), color = NA)+
-  geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
-  coord_sf(xlim = c(1.5, 19.5), ylim = c(40.5, 48.5)) +
-  scale_fill_manual(breaks = x, values = palette_x)+
-  ggtitle(paste0("Beginning of the season based on adult density, threshold = ", thr,
-                 ",\nequivalent to ", round(thr_Adult_RM), " adults per ha"))+
-  guides(fill=guide_legend(title="L season"))+
-  theme_minimal()
-
-ggsave("Adult_b_ssn_gg.png", Adult_b_ssn_gg, units="in", width=7, height=5.5, dpi=300)
-
-# end of the season (EGGS)
-
-x <- c("a) August or earlier", "b) September", "c) October", "d) November", "e) December")
-
-LE_e_ssn_f <- case_when(LE_e_ssn_v < "2023-09-01"~ x[1],
-                        LE_e_ssn_v < "2023-10-01"~ x[2],
-                        LE_e_ssn_v < "2023-11-01"~ x[3],
-                        LE_e_ssn_v < "2023-12-01"~ x[4],
-                        LE_e_ssn_v >= "2023-12-01"~ x[5])
-
-LE_e_ssn_gg <- ggplot()+
-  geom_sf(data = domain, aes(fill = LE_e_ssn_f), color = NA)+
-  geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
-  coord_sf(xlim = c(1.5, 19.5), ylim = c(40.5, 48.5)) +
-  scale_fill_viridis_d()+
-  ggtitle(paste0("End of the season based on laid eggs, threshold = ", thr,
-                 ",\nequivalent to ", round(thr_LE_RM), " daily laid eggs per ha"))+
-  guides(fill=guide_legend(title="L season"))+
-  theme_minimal()
-
-ggsave("LE_e_ssn_gg.png", LE_e_ssn_gg, units="in", width=7, height=5.5, dpi=300)
-
-# end of the season (Adults)
-
-Adult_e_ssn_f <- case_when(Adult_e_ssn_v < "2023-09-01"~ x[1],
-                           Adult_e_ssn_v < "2023-10-01"~ x[2],
-                           Adult_e_ssn_v < "2023-11-01"~ x[3],
-                           Adult_e_ssn_v < "2023-12-01"~ x[4],
-                           Adult_e_ssn_v >= "2023-12-01"~ x[5])
-
-Adult_e_ssn_gg <- ggplot()+
-  geom_sf(data = domain, aes(fill = Adult_e_ssn_f), color = NA)+
-  geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
-  coord_sf(xlim = c(1.5, 19.5), ylim = c(40.5, 48.5)) +
-  scale_fill_viridis_d()+
-  ggtitle(paste0("End of the season based on adult density, threshold = ", thr,
-                 ",\nequivalent to ", round(thr_Adult_RM), " adults per ha"))+
-  guides(fill=guide_legend(title="L season"))+
-  theme_minimal()
-
-ggsave("Adult_e_ssn_gg.png", Adult_e_ssn_gg, units="in", width=7, height=5.5, dpi=300)
-
-# 
-# ggplot()+
-#   geom_sf(data = domain, aes(fill = Adult_ssn), color = NA)
-# sd(Adult_ssn_v)/mean(Adult_ssn_v)
-# 
-# ggplot()+
-#   geom_sf(data = domain, aes(fill = LE_ssn), color = NA)
-# sd(LE_ssn_v)/mean(LE_ssn_v)
-
-# I follow code temp_ncdf
-
-library(ncdf4)
-
-# geo_file
-
-grid_centr = st_centroid(grid)
-
-grid_centr <- grid_centr %>%
-  mutate(lats = round(st_coordinates(grid_centr)[,2],1))%>%
-  mutate(lons = round(st_coordinates(grid_centr)[,1],1))%>%
-  select(c("FID", "lons", "lats"))%>%
-  st_drop_geometry()
-
-FIDs = grid_centr$FID
-n_FIDs = length(FIDs)
-
-# time is DOS_sim
-
-#arrange adult matrices over FID 
-
-#create "fake" matric of adults with NAs
-Adult_m_FID = matrix(NA, nrow = 365, ncol = n_FIDs)
-fid_index = domain %>% arrange(region) %>% pull(FID)
-Adult_m_FID[,fid_index] = Adult_m
-
-Adult_df = data.frame(FID = rep(FIDs, each = n_d),
-                      time = rep(DOS_sim, times = n_FIDs),
-                      values = c(Adult_m_FID))
-
-# Adults_dfd <- dcast(Adults_df, time ~ FID)
-# 
-# Adults_dfdm = data.matrix(Adults_dfd[, 1+1:n_FIDs])
-
-# the same with LE
-#create "fake" matric of adults with NAs
-LE_m_FID = matrix(NA, nrow = 365, ncol = n_FIDs)
-LE_m_FID[,fid_index] = LE_m
-
-LE_df = data.frame(FID = rep(FIDs, each = n_d),
-                   time = rep(DOS_sim, times = n_FIDs),
-                   values = c(LE_m_FID))
-
-
-#join and sort in preferred order
-
-Adult_j_df = left_join(Adult_df, grid_centr) %>%
-  select(-c("FID")) %>%
-  arrange(lons)%>%
-  arrange(lats)%>%
-  arrange(time)
-
-LE_j_df = left_join(LE_df, grid_centr) %>%
-  select(-c("FID")) %>%
-  arrange(lons)%>%
-  arrange(lats)%>%
-  arrange(time)
-
-# convert into array
-
-tic()
-array_Adult <- xtabs(values ~ lons + lats + time, data = Adult_j_df)
-array_LE <- xtabs(values ~ lons + lats + time, data = LE_j_df)
-toc()
-
-#https://pjbartlein.github.io/REarthSysSci/netCDF.html#create-and-write-a-netcdf-file
-
-lon <- unique(LE_j_df$lons)
-lat <- unique(LE_j_df$lats)
-time <- unique(LE_j_df$time)
-
-nlon<-length(lon)
-nlat<-length(lat)
-nt<-length(time)
-
-# and chatchpt
-
-# Define the dimensions in the NetCDF file
-dim_lat <- ncdim_def(name = "latitude", units = "degrees_north", vals = lat)
-dim_lon <- ncdim_def(name = "longitude", units = "degrees_east", vals = lon)
-dim_timedummy <- ncdim_def(name = "time", units = "time", vals = time)
-
-# Define the variable to store in the NetCDF file
-var_value <- ncvar_def(name = "value", units = "units", 
-                       dim = list(dim_lon, dim_lat, dim_timedummy), 
-                       missval = NA)
-
-# Create the NetCDF file - write - and close to save it
-nc_LE <- nc_create("LE.nc", var_value)
-ncvar_put(nc_LE, var_value, array_LE)
-nc_close(nc_LE)
-
-nc_Adult <- nc_create("Adult.nc", var_value)
-ncvar_put(nc_Adult, var_value, array_Adult)
-nc_close(nc_Adult)
+ggsave(paste0(folder_plot, "LE_le_s_diff_gg.png"), LE_le_s_diff_gg, units="in", width=7, height=5.5, dpi=300)
