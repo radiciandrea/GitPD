@@ -157,24 +157,9 @@ LE_av_s_2010_gg <- ggplot()+
 
 ggsave(paste0(folder_plot, "LE_av_s_2010_gg.png"), LE_av_s_2010_gg, units="in", width=7, height=5.5, dpi=300)
 
-# abundance in mjjas: # 4 times (EGGS 2010)
-
-LE_av_s_2010_f <- case_when(LE_av_s_2010_v  > 10^4 ~ "a) > 10^4",
-                            LE_av_s_2010_v > 10^3 ~ "b) > 10^3",
-                            LE_av_s_2010_v  > 10^2 ~ "c) > 10^2",
-                            LE_av_s_2010_v  > 10 ~ "d) > 10",
-                            LE_av_s_2010_v  < 10 ~ "e) < 10")
-
-LE_av_s_2010_gg <- ggplot()+
-  geom_sf(data = domain, aes(fill = LE_av_s_2010_f), color = NA)+
-  geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
-  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
-  scale_fill_viridis_d()+
-  ggtitle(paste0("Average daily laid eggs per ha between May and September"))+
-  guides(fill=guide_legend(title="eggs/ha"))+
-  theme_minimal()
-
-ggsave(paste0(folder_plot, "LE_av_s_2010_gg.png"), LE_av_s_2010_gg, units="in", width=7, height=5.5, dpi=300)
+#palette 1
+palette1= c("#384AB4", "#5570DF", "#8EB0FE", "#C5D7F3", "#F2CDBB", "#F29878", "#D04B45", "#B00026")
+palette_simp= c("#384AB4", "#8EB0FE", "gray90", "#F29878",  "#B00026")
 
 # abundance in mjjas: # 4 times (EGGS 2010)
 
@@ -193,9 +178,24 @@ LE_av_s_2010_gg <- ggplot()+
   guides(fill=guide_legend(title="eggs/ha"))+
   theme_minimal()
 
+# my_breaks = c(10^(c(4:0)), 0)
+# 
+# LE_av_s_2010_gg <- ggplot()+
+#   geom_sf(data = domain, aes(fill = LE_av_s_2010_v), color = NA)+
+#   geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
+#   coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
+#   scale_fill_gradientn(colors = palette1, 
+#                        na.value = "transparent", 
+#                        transform = "log",
+#                        breaks = my_breaks,
+#                        labels = my_breaks) +
+#   ggtitle(paste0("Average daily laid eggs per ha between May and September"))+
+#   guides(fill=guide_legend(title="eggs/ha"))+
+#   theme_minimal()
+
 ggsave(paste0(folder_plot, "LE_av_s_2010_gg.png"), LE_av_s_2010_gg, units="in", width=7, height=5.5, dpi=300)
 
-# abundance in mjjas: # 6 times (EGGS 2010)
+# abundance in mjjas: # 1/6 times (EGGS 2010)
 
 LE_av_s_2010_f <- case_when(LE_av_s_2010_v  > 10^4 ~ "a) > 10^4",
                             LE_av_s_2010_v > 10^3 ~ "b) > 10^3",
@@ -214,7 +214,7 @@ LE_av_s_2010_gg <- ggplot()+
 
 ggsave(paste0(folder_plot, "LE_av_s_2010_gg.png"), LE_av_s_2010_gg, units="in", width=7, height=5.5, dpi=300)
 
-# abundance in mjjas: # 6 times (EGGS 2020)
+# abundance in mjjas: # 2/6 times (EGGS 2020)
 
 LE_av_s_2020_f <- case_when(LE_av_s_2020_v  > 10^4 ~ "a) > 10^4",
                             LE_av_s_2020_v > 10^3 ~ "b) > 10^3",
@@ -233,31 +233,87 @@ LE_av_s_2020_gg <- ggplot()+
 
 ggsave(paste0(folder_plot, "LE_av_s_2020_gg.png"), LE_av_s_2020_gg, units="in", width=7, height=5.5, dpi=300)
 
-# abundance in mjjas: # 6 times (difference EGGS 2020)
+# abundance in mjjas: # 3/6 times (difference EGGS 2020)
 
 LE_av_s_diff_v <- LE_av_s_2020_v - LE_av_s_2010_v
 
-LE_av_s_diff_f <- case_when(LE_av_s_diff_v > 0 ~"a) increase",
-                            LE_av_s_diff_v < 0 ~"b) decrease",
+LE_av_s_diff_f <- case_when(LE_av_s_diff_v > 10^3 ~"a) strong increase (>+1000)",
+                            LE_av_s_diff_v > 10 ~"b) increase (+10 to 1000)",
+                            LE_av_s_diff_v > -10 ~"c) stable (-10 to +10)",
+                            LE_av_s_diff_v > -10^3 ~"d) decrease (-10 to 1000)",
+                            LE_av_s_diff_v < -10^3 ~"e) strong decrease (<-1000)",
                             .default = "NA")
 
 LE_av_s_diff_gg <- ggplot()+
   geom_sf(data = domain, aes(fill = LE_av_s_diff_f), color = NA)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
   coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
-  scale_fill_viridis_d()+
-  ggtitle(paste0("Diff"))+
+  scale_fill_manual(values = rev(palette_simp))+
+  ggtitle(paste0("Difference in eggs density in summer"))+
   guides(fill=guide_legend(title="eggs/ha"))+
   theme_minimal()
 
 ggsave(paste0(folder_plot, "LE_av_s_diff_gg.png"), LE_av_s_2020_gg, units="in", width=7, height=5.5, dpi=300)
 
+# abundance in mjjas: # 4/6 times (Adults 2010)
 
+Adults_av_s_2010_f <- case_when(Adults_av_s_2010_v  > 10^4 ~ "a) > 10^4",
+                            Adults_av_s_2010_v > 10^3 ~ "b) > 10^3",
+                            Adults_av_s_2010_v  > 10^2 ~ "c) > 10^2",
+                            Adults_av_s_2010_v  > 10 ~ "d) > 10",
+                            Adults_av_s_2010_v  < 10 ~ "e) < 10")
 
+Adults_av_s_2010_gg <- ggplot()+
+  geom_sf(data = domain, aes(fill = Adults_av_s_2010_f), color = NA)+
+  geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
+  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
+  scale_fill_viridis_d()+
+  ggtitle(paste0("Average Adults per ha between May and September"))+
+  guides(fill=guide_legend(title="Adults/ha"))+
+  theme_minimal()
 
+ggsave(paste0(folder_plot, "Adults_av_s_2010_gg.png"), Adults_av_s_2010_gg, units="in", width=7, height=5.5, dpi=300)
 
+# abundance in mjjas: # 5/6 times (Adults 2020)
 
+Adults_av_s_2020_f <- case_when(Adults_av_s_2020_v  > 10^4 ~ "a) > 10^4",
+                            Adults_av_s_2020_v > 10^3 ~ "b) > 10^3",
+                            Adults_av_s_2020_v  > 10^2 ~ "c) > 10^2",
+                            Adults_av_s_2020_v  > 10 ~ "d) > 10",
+                            Adults_av_s_2020_v  < 10 ~ "e) < 10")
 
+Adults_av_s_2020_gg <- ggplot()+
+  geom_sf(data = domain, aes(fill = Adults_av_s_2020_f), color = NA)+
+  geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
+  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
+  scale_fill_viridis_d()+
+  ggtitle(paste0("Average Adults per ha between May and September"))+
+  guides(fill=guide_legend(title="Adults/ha"))+
+  theme_minimal()
+
+ggsave(paste0(folder_plot, "Adults_av_s_2020_gg.png"), Adults_av_s_2020_gg, units="in", width=7, height=5.5, dpi=300)
+
+# abundance in mjjas: # /66 times (difference Adults 2020)
+
+Adults_av_s_diff_v <- Adults_av_s_2020_v - Adults_av_s_2010_v
+
+Adults_av_s_diff_f <- case_when(Adults_av_s_diff_v > 10^3 ~"a) strong increase (>+1000)",
+                            Adults_av_s_diff_v > 10 ~"b) increase (+10 to 1000)",
+                            Adults_av_s_diff_v > -10 ~"c) stabAdults (-10 to +10)",
+                            Adults_av_s_diff_v > -10^3 ~"d) decrease (-10 to 1000)",
+                            Adults_av_s_diff_v < -10^3 ~"e) strong decrease (<-1000)",
+                            .default = "NA")
+
+Adults_av_s_diff_gg <- ggplot()+
+  geom_sf(data = domain, aes(fill = Adults_av_s_diff_f), color = NA)+
+  geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
+  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
+  scale_fill_manual(values = rev(palette_simp))+
+  ggtitle(paste0("Difference in Adults density in summer"))+
+  guides(fill=guide_legend(title="Adults/ha"))+
+  theme_minimal()
+
+ggsave(paste0(folder_plot, "Adults_av_s_diff_gg.png"), Adults_av_s_2020_gg, units="in", width=7, height=5.5, dpi=300)
 
 
 #  standardyze dynamics over 2 weeks
