@@ -31,13 +31,13 @@ date_sim = seq(from = first_day, to = last_day, by = 'day')
 DOS_sim = 1:length(date_sim)
 n_d = length(DOS_sim)
 
-#carichiamo 1 per le dimensioni
-load(paste0(folder_out, "/", files[1]))
-
-n_c = 5 # numero di classi
-n_r = (ncol(Sim)-1)/n_c #numero di regioni
-regions = 1:n_r
-
+# #carichiamo 1 per le dimensioni
+# load(paste0(folder_out, "/", files[1]))
+# 
+# n_c = 5 # numero di classi
+# n_r = (ncol(Sim)-1)/n_c #numero di regioni
+# regions = 1:n_r
+# 
 # n_d_i = nrow(Sim)
 # Sim_tot = matrix(NA, ncol = n_c*n_r+1, nrow = n_d) 
 # Sim_tot[1:n_d_i,]=Sim
@@ -75,56 +75,77 @@ regions = 1:n_r
 # #extract adults and eggs
 # index = 1+(1+3*n_r):(4*n_r)
 # 
-# Adult_m = Sim_tot[, index]
-# LE_m = Adult_m*beta_approx_tot
+# Adults_m = Sim_tot[, index]
+# LE_m = Adults_m*beta_approx_tot
 # 
-# save(Adult_m, LE_m, file = paste0(folder_out, "/LE_Adults.RData"))
+# save(Adults_m, LE_m, file = paste0(folder_out, "/LE_Adults.RData"))
 
 load(paste0(folder_out, "/LE_Adults.RData"))
 
-# rolling means over 14 days +correct NAs into 0s
+# Recompute n_c, n_r
+n_c = 5 # numero di classi
+n_r = (ncol(Adults_m)-1)/n_c #numero di regioni
+regions = 1:n_r
+n_y = length(years)
 
-Adult_m[which(is.na(Adult_m))] =0
+# rolling means over 14 days +correct NAs into 0s; same for negative values or estreme values (i.e. > 10^8)
 
-Adult_RM_m <- t(sapply(2:n_d,
-                       function(x){return(colMeans(Adult_m[max(1,(x-7)):min(365,(x+7)),]))}))
+Adults_m[which(is.na(Adults_m))] = 0
+Adults_m[which(Adults_m < 0)] = 0
+Adults_m[which(Adults_m > 10^8)] = 0
 
-LE_m[which(is.na(LE_m))] =0
+# Adults_RM_m <- t(sapply(1:n_d,
+#                        function(x){return(colMeans(Adults_m[max(1,(x-7)):min(n_d,(x+7)),]))}))
 
-LE_RM_m <- t(sapply(2:n_d,
-                    function(x){return(colMeans(LE_m[max(1,(x-7)):min(365,(x+7)),]))}))
+LE_m[which(is.na(LE_m))] = 0
+Adults_m[which(LE_m < 0)] = 0
+Adults_m[which(LE_m > 10^8)] = 0
+
+# LE_RM_m <- t(sapply(2:n_d,
+#                     function(x){return(colMeans(LE_m[max(1,(x-7)):min(n_d,(x+7)),]))}))
+
+# compute annual averages for years (summer s)
+Ab_s_df <- data.frame(region = rep(regions, times = n_y),
+                                 year = rep(years, each = n_r),
+                                 Adults = NA,
+                                 LE = NA)
+
+for (y in years){
+  mjjas = seq(as.Date(paste0(y, "-05-01")), as.Date(paste0(y, "-09-30")), 1)
+  
+  i_mjjas = which(date_sim %in% mjjas)
+  
+  Ab_s_df$Adults[which(Ab_s_df$year == y)] = colMeans(Adults_m[i_mjjas,])
+  Ab_s_df$LE[which(Ab_s_df$year == y)] = colMeans(LE_m[i_mjjas,])
+  
+}
+
+# compute statistics for 2 periods
+
+LE_av_s_2010_v =  Ab_s_df %>% group_by(region) %>% summarise(LE_av = mean(LE)) %>% ungroup() %>% pull(LE_av)
 
 #summer "MJJAS" - mean abundances
-mjjas = 31+28+31+30+1:(31+30+31+31+30-1)
-
-# LE_av_ssn_v = sapply(1:n_r, function(x){mean(LE_RM_m[which(LE_st_m[,x]>thr),x])}) #mean density in summer
-LE_av_ssn_v = colMeans(LE_RM_m[mjjas,]) #mean density in MJJAS
-
-# Adult_av_ssn_v = sapply(1:n_r, function(x){mean(Adult_RM_m[which(Adult_st_m[,x]>thr),x])}) #mean density during activity
-Adult_av_ssn_v = colMeans(Adult_RM_m[mjjas,]) #mean density in MJJAS
 
 # load shp to compare
 folder_sh = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/"
 
-domain <- st_read(paste0(folder_sh, "domain_sel_DaRe.shp")) %>%
+domain <- st_read(paste0(folder_sh, "domain_sel_01_W_EU.shp")) %>%
   arrange(region)
-
-grid <- st_read(paste0(folder_sh, "grid_DaRe+pop.shp"))
 
 countries_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/european-countries.shp")
 
 # abundance in mjjas (EGGS)
 
-LE_av_ssn_f <- case_when(LE_av_ssn_v  > 10^4 ~ "a) > 10.000",
-                         LE_av_ssn_v > 10^3 ~ "b) > 1.000",
-                         LE_av_ssn_v  > 10^2 ~ "c) > 100",
-                         LE_av_ssn_v  > 10 ~ "d) > 10",
-                         LE_av_ssn_v  < 10 ~ "e) < 10")
+LE_av_s_2010_f <- case_when(LE_av_s_2010_v  > 10^4 ~ "a) > 10^4",
+                            LE_av_s_2010_v > 10^3 ~ "b) > 10^3",
+                            LE_av_s_2010_v  > 10^2 ~ "c) > 10^2",
+                            LE_av_s_2010_v  > 10 ~ "d) > 10",
+                            LE_av_s_2010_v  < 10 ~ "e) < 10")
 
-LE_av_ssn_gg <- ggplot()+
-  geom_sf(data = domain, aes(fill = LE_av_ssn_f), color = NA)+
+LE_av_s_2010_gg <- ggplot()+
+  geom_sf(data = domain, aes(fill = LE_av_s_2010_f), color = NA)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray30")+
-  coord_sf(xlim = c(1.5, 19.5), ylim = c(40.5, 48.5)) +
+  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
   scale_fill_viridis_d()+
   ggtitle(paste0("Average daily laid eggs per ha between May and September"))+
   guides(fill=guide_legend(title="eggs/ha"))+
