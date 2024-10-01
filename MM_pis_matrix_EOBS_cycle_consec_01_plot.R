@@ -382,3 +382,131 @@ LE_le_s_diff_gg <- ggplot()+
   theme_minimal()
 
 ggsave(paste0(folder_plot, "LE_le_s_diff_gg.png"), LE_le_s_diff_gg, units="in", width=7, height=5.5, dpi=300)
+
+# Francia (poster ESOVE)
+
+library(ggspatial)
+library(prettymapr)
+library(ggrepel)
+library(RJSONIO)
+
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/01_Esove/images/"
+
+regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
+
+domain_FR <- domain %>%
+  filter(!is.na(Country))
+
+reg_FR = domain_FR$region
+
+# plot cities (from)
+
+locateCountry = function(nameCity, codeCountry) {
+  cleanCityName = gsub(' ', '%20', nameCity)
+  url = paste(
+    "http://nominatim.openstreetmap.org/search?city="
+    , cleanCityName
+    , "&countrycodes="
+    , codeCountry
+    , "&limit=9&format=json"
+    , sep="")
+  resOSM = fromJSON(url)
+  if(length(resOSM) > 0) {
+    return(c(resOSM[[1]]$lon, resOSM[[1]]$lat))
+  } else return(rep(NA,2)) 
+}
+
+cities_df <- data.frame(name = c("Paris", "Marseille", "Lyon", "Toulouse", "Bordeaux", "Nice", "Lille", "Montpellier", "Strasbourg", "Rennes", "Nantes", "Ajaccio"))
+cities_df$code = "FR"
+
+coord = t(apply(cities_df, 1, function(aRow) as.numeric(locateCountry(aRow[1], aRow[2]))))
+
+cities_df$lon = coord[,1]
+cities_df$lat = coord[,2]
+
+points <- lapply(1:nrow(coord), function(i){st_point(coord[i,])})
+points_sf <- st_sfc(points, crs = 4326)
+cities_sf <- st_sf('city' = cities_df$name, 'geometry' = points_sf)  
+
+#plot: Adults 2020 
+
+g_Ad_2020 <- ggplot()+
+  geom_sf(data = domain_FR, aes(fill = Adults_av_s_2020_f[reg_FR]), color = NA)+
+  scale_fill_viridis_d()+
+  geom_sf(data = regions_sh, alpha = 0, colour = "white")+
+  geom_sf(data = points_sf)+
+  ggtitle(paste0("Average Adults per ha between May and September"))+
+  guides(fill=guide_legend(title="Adults/ha"))+
+  theme(panel.grid = element_blank(), 
+        line = element_blank(), 
+        rect = element_blank(), 
+        text = element_blank(), 
+        plot.background = element_rect(fill = "transparent", color = "transparent"))+
+  geom_sf(data = cities_sf) +
+  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
+                   label.padding = 0.1, size = 4)
+
+ggsave(paste0(folder_plot, "g_Ad_2020.png"), g_Ad_2020, units="in", height=8, width= 6, dpi=300)
+
+
+#plot: varAdults 2020 
+
+g_Ad_change <- ggplot()+
+  geom_sf(data = domain_FR, aes(fill = Adults_av_s_diff_f[reg_FR]), color = NA)+
+  scale_fill_manual(values = rev(palette_simp))+
+  geom_sf(data = regions_sh, alpha = 0, colour = "white")+
+  geom_sf(data = points_sf)+
+  ggtitle(paste0("Difference in Adults density in summer"))+
+  guides(fill=guide_legend(title="Adults/ha"))+
+  theme(panel.grid = element_blank(), 
+        line = element_blank(), 
+        rect = element_blank(), 
+        text = element_blank(), 
+        plot.background = element_rect(fill = "transparent", color = "transparent"))+
+  geom_sf(data = cities_sf) +
+  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
+                   label.padding = 0.1, size = 4)
+
+ggsave(paste0(folder_plot, "g_Ad_change.png"), g_Ad_change, units="in", height=8, width= 6, dpi=300)
+
+#plot: LE 2020 
+
+g_Le_2020 <- ggplot()+
+  geom_sf(data = domain_FR, aes(fill = LE_le_s_2020_f[reg_FR]), color = NA)+
+  scale_fill_viridis_d()+
+  geom_sf(data = regions_sh, alpha = 0, colour = "white")+
+  geom_sf(data = points_sf)+
+  ggtitle(paste0("Lenght of the season based on laid eggs, threshold = ", thr_LE_RM, " laid eggs/(ha*d)"))+
+  guides(fill=guide_legend(title="L season"))+
+  theme(panel.grid = element_blank(), 
+        line = element_blank(), 
+        rect = element_blank(), 
+        text = element_blank(), 
+        plot.background = element_rect(fill = "transparent", color = "transparent"))+
+  geom_sf(data = cities_sf) +
+  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
+                   label.padding = 0.1, size = 4)
+
+ggsave(paste0(folder_plot, "g_Le_2020.png"), g_Le_2020, units="in", height=8, width= 6, dpi=300)
+
+
+#plot: var LE 2020 
+
+g_Le_change <- ggplot()+
+  geom_sf(data = domain_FR, aes(fill = LE_le_s_diff_f[reg_FR]), color = NA)+
+  scale_fill_manual(values = rev(palette_simp))+
+  geom_sf(data = regions_sh, alpha = 0, colour = "white")+
+  geom_sf(data = points_sf)+
+  ggtitle(paste0("Difference in season lenght"))+
+  guides(fill=guide_legend(title="Adults/ha"))+
+  theme(panel.grid = element_blank(), 
+        line = element_blank(), 
+        rect = element_blank(), 
+        text = element_blank(), 
+        plot.background = element_rect(fill = "transparent", color = "transparent"))+
+  geom_sf(data = cities_sf) +
+  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
+                   label.padding = 0.1, size = 4)
+
+ggsave(paste0(folder_plot, "g_Le_change.png"), g_Le_change, units="in", height=8, width= 6, dpi=300)
+
