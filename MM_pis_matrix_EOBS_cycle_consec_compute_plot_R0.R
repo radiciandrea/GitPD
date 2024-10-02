@@ -130,7 +130,6 @@ if (disease == "Zika"){
   R0_m = R0_DG_m
 }
 
-
 # #########################
 # #plot
 # 
@@ -171,7 +170,7 @@ R0_2 = colMeans(R0_m[which(years %in% years_sel_2),], na.rm = T)
 
 
 # to plot
-domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_01_W_EU.shp")) %>%
+domain <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_01_W_EU.shp")) %>%
   arrange(region)
 
 x = c(61, 21, 7, 0, 0)
@@ -179,7 +178,7 @@ x_lab = c("e) >9", "d) 3-8", "c) 1-2", "b) < 1", "a) 0")
 col_x <- rev(c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724"))
 
 
-# domain_sel <- domain_sel%>%
+# domain <- domain%>%
 #   arrange(region) %>%
 #   mutate(R0_1 = R0_sel_1)%>%
 #   mutate(R0_1_level=cut(R0_1, breaks=br,
@@ -216,7 +215,7 @@ countries_sh <-  st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post
 #plot 1
 
 g1 <- ggplot()+
-  geom_sf(data = domain_sel, aes(fill = R0_1_level), colour = NA)+ #
+  geom_sf(data = domain, aes(fill = R0_1_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_x))+
   geom_sf(data = countries_sh, alpha = 0, colour = "white")+
   coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
@@ -229,7 +228,7 @@ ggsave(file= paste0(folder_plot, "R0_", disease,"_1_level_01.png"), plot= g1 , u
 #plot 2
 
 g2 <- ggplot()+
-  geom_sf(data = domain_sel, aes(fill = R0_2_level), colour = NA)+ #
+  geom_sf(data = domain, aes(fill = R0_2_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_x))+
   geom_sf(data = countries_sh, alpha = 0, colour = "white")+
   coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
@@ -244,7 +243,7 @@ ggsave(file= paste0(folder_plot, "R0_", disease,"_2_level_01.png"),  plot= g2 , 
 col_x_sint_FR<- c("#384AB4", "#8EB0FE", "#F29878", "#B00026") 
 
 gvar <- ggplot()+
-  geom_sf(data = domain_sel, aes(fill = Risk_zone), colour = NA)+
+  geom_sf(data = domain, aes(fill = Risk_zone), colour = NA)+
   scale_fill_manual(values = rev(col_x_sint_FR))+
   geom_sf(data = countries_sh, alpha = 0, colour = "grey90")+
   coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
@@ -254,3 +253,76 @@ gvar <- ggplot()+
 
 ggsave(file= paste0(folder_plot, "R0_", disease,"_var_level_01.png"), plot= gvar , units="in", width=5.5, height=7, dpi=300)
 
+# Plot Francia (poster ESOVE)
+
+library(ggspatial)
+library(prettymapr)
+library(ggrepel)
+library(RJSONIO)
+
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/01_Esove/images/"
+
+regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
+
+domain_FR <- domain %>%
+  filter(!is.na(Country))
+
+reg_FR = domain_FR$region
+
+# plot cities (from)
+
+locateCountry = function(nameCity, codeCountry) {
+  cleanCityName = gsub(' ', '%20', nameCity)
+  url = paste(
+    "http://nominatim.openstreetmap.org/search?city="
+    , cleanCityName
+    , "&countrycodes="
+    , codeCountry
+    , "&limit=9&format=json"
+    , sep="")
+  resOSM = fromJSON(url)
+  if(length(resOSM) > 0) {
+    return(c(resOSM[[1]]$lon, resOSM[[1]]$lat))
+  } else return(rep(NA,2)) 
+}
+
+cities_df <- data.frame(name = c("Paris", "Marseille", "Lyon", "Toulouse", "Bordeaux", "Nice",
+                                 "Lille", "Montpellier", "Strasbourg", "Rennes", "Nantes", "Ajaccio", "Dijon"))
+cities_df$code = "FR"
+
+coord = t(apply(cities_df, 1, function(aRow) as.numeric(locateCountry(aRow[1], aRow[2]))))
+
+cities_df$lon = coord[,1]
+cities_df$lat = coord[,2]
+
+points <- lapply(1:nrow(coord), function(i){st_point(coord[i,])})
+points_sf <- st_sfc(points, crs = 4326)
+cities_sf <- st_sf('city' = cities_df$name, 'geometry' = points_sf)  
+
+#plot: Adults 2020 
+
+Adults_av_s_2020_FR_v <- Adults_av_s_2020_v[reg_FR]
+
+Adults_av_s_2020_FR_f <- case_when(Adults_av_s_2020_FR_v  > 10^3 ~ "a) > 10^3",
+                                   Adults_av_s_2020_FR_v > 10^2 ~ "b) > 10^2",
+                                   Adults_av_s_2020_FR_v  > 10 ~ "c) > 10",
+                                   Adults_av_s_2020_FR_v  >= 1 ~ "d) > 1",
+                                   Adults_av_s_2020_FR_v  < 1 ~ "e) < 1")
+
+g_Ad_2020 <- ggplot()+
+  geom_sf(data = domain_FR, aes(fill = Adults_av_s_2020_FR_f), color = NA)+
+  scale_fill_viridis_d()+
+  geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
+  geom_sf(data = points_sf)+
+  ggtitle(paste0("Average Adults per ha between May and September"))+
+  guides(fill=guide_legend(title="Adults/ha"))+
+  theme(panel.grid = element_blank(), 
+        line = element_blank(), 
+        rect = element_blank(), 
+        text = element_blank(), 
+        plot.background = element_rect(fill = "transparent", color = "transparent"))+
+  geom_sf(data = cities_sf) +
+  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
+                   label.padding = 0.1, size = 4)
+
+ggsave(paste0(folder_plot, "g_Ad_2020.png"), g_Ad_2020, units="in", height=8, width= 6, dpi=300)
