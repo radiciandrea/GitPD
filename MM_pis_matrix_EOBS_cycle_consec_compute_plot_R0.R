@@ -15,7 +15,7 @@ library(lubridate)
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_01" # EOBS_sim_consec
 folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab_01" # "EOBS_elab"
 
-files = list.files(folder_out, pattern = ".RData")
+files = list.files(folder_out, pattern = "Sim_EOBS")
 
 name = substring(files[1], 10, 13)
 years = substring(files, 15, 18)
@@ -120,7 +120,7 @@ for (i in 1:length(files)){
 
 #Choose here what to plot
 
-disease = "Zika" 
+disease = "dengue" 
 
 if (disease == "Zika"){
   R0_tot = R0_ZK_tot
