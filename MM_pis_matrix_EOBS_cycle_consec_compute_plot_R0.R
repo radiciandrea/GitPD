@@ -299,23 +299,26 @@ points <- lapply(1:nrow(coord), function(i){st_point(coord[i,])})
 points_sf <- st_sfc(points, crs = 4326)
 cities_sf <- st_sf('city' = cities_df$name, 'geometry' = points_sf)  
 
-#plot: Adults 2020 
+#plot: degnue 2020 
 
-Adults_av_s_2020_FR_v <- Adults_av_s_2020_v[reg_FR]
+R0_2020_FR_v <- R0_2[reg_FR]
 
-Adults_av_s_2020_FR_f <- case_when(Adults_av_s_2020_FR_v  > 10^3 ~ "a) > 10^3",
-                                   Adults_av_s_2020_FR_v > 10^2 ~ "b) > 10^2",
-                                   Adults_av_s_2020_FR_v  > 10 ~ "c) > 10",
-                                   Adults_av_s_2020_FR_v  >= 1 ~ "d) > 1",
-                                   Adults_av_s_2020_FR_v  < 1 ~ "e) < 1")
+x = c(61, 21, 7, 0, 0)
+x_lab = c("a) >9", "b) 3-8", "c) 1-2", "d) < 1", "e) 0")
 
-g_Ad_2020 <- ggplot()+
-  geom_sf(data = domain_FR, aes(fill = Adults_av_s_2020_FR_f), color = NA)+
+R0_2020_FR_f <- case_when(R0_2020_FR_v > x[1] ~ x_lab[1],
+                        R0_2020_FR_v > x[2] ~ x_lab[2],
+                        R0_2020_FR_v > x[3] ~ x_lab[3],
+                        R0_2020_FR_v > x[4] ~ x_lab[4],
+                        R0_2020_FR_v == x[5] ~ x_lab[5])
+
+g_D_2020 <- ggplot()+
+  geom_sf(data = domain_FR, aes(fill = R0_2020_FR_f), color = NA)+
   scale_fill_viridis_d()+
   geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
   geom_sf(data = points_sf)+
-  ggtitle(paste0("Average Adults per ha between May and September"))+
-  guides(fill=guide_legend(title="Adults/ha"))+
+  ggtitle(paste0("Lenght period with R0 gt 1 (dengue)"))+
+  guides(fill=guide_legend(title="weeks"))+
   theme(panel.grid = element_blank(), 
         line = element_blank(), 
         rect = element_blank(), 
@@ -325,4 +328,38 @@ g_Ad_2020 <- ggplot()+
   geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
                    label.padding = 0.1, size = 4)
 
-ggsave(paste0(folder_plot, "g_Ad_2020.png"), g_Ad_2020, units="in", height=8, width= 6, dpi=300)
+ggsave(paste0(folder_plot, "g_D_2020.png"), g_D_2020, units="in", height=8, width= 6, dpi=300)
+
+### change
+
+palette_pos2 = c( "gray90", "#F2CDBB", "#F29878", "#D04B45", "#B00026")
+
+R0_2010_FR_v <- R0_1[reg_FR]
+R0_diff_FR_v <- R0_2020_FR_v - R0_2010_FR_v
+
+R0_diff_FR_v[which(R0_2020_FR_v<1)] = NA
+
+R0_diff_FR_f <- case_when(R0_diff_FR_v > 63 ~"a) > 9 w",
+                                   R0_diff_FR_v > 21 ~"b) 3 to 9 w)",
+                                   R0_diff_FR_v > 7 ~"c) 1 to 3 w",
+                                   R0_diff_FR_v > 2 ~"d) 2 d to 1 w ",
+                                   R0_diff_FR_v > -3 ~"e) -2 to +2 d",
+                                   .default = NA)
+
+g_D_change <- ggplot()+
+  geom_sf(data = domain_FR, aes(fill = R0_diff_FR_f), color = NA)+
+  scale_fill_manual(values = rev(palette_pos2), na.value = "transparent")+
+  geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
+  geom_sf(data = points_sf)+
+  ggtitle(paste0("Difference in positive transmission period"))+
+  guides(fill=guide_legend(title="Increase"))+
+  theme(panel.grid = element_blank(), 
+        line = element_blank(), 
+        rect = element_blank(), 
+        text = element_blank(), 
+        plot.background = element_rect(fill = "transparent", color = "transparent"))+
+  geom_sf(data = cities_sf) +
+  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
+                   label.padding = 0.1, size = 4)
+
+ggsave(paste0(folder_plot, "g_D_change.png"), g_D_change, units="in", height=8, width= 6, dpi=300)
