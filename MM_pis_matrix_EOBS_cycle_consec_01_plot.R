@@ -206,7 +206,7 @@ LE_av_s_diff_f <- case_when(LE_av_s_diff_v > 10^3 ~"a) strong increase (>+1000)"
                             LE_av_s_diff_v > -10 ~"c) stable (-10 to +10)",
                             LE_av_s_diff_v >= -10^3 ~"d) decrease (-10 to 1000)",
                             LE_av_s_diff_v < -10^3 ~"e) strong decrease (<-1000)",
-                            .default = "NA")
+                            .default = NA)
 
 LE_av_s_diff_gg <- ggplot()+
   geom_sf(data = domain, aes(fill = LE_av_s_diff_f), color = NA)+
@@ -266,7 +266,7 @@ Adults_av_s_diff_f <- case_when(Adults_av_s_diff_v > 10^3 ~"a) strong increase (
                             Adults_av_s_diff_v > -10 ~"c) stabAdults (-10 to +10)",
                             Adults_av_s_diff_v >= -10^3 ~"d) decrease (-10 to 1000)",
                             Adults_av_s_diff_v < -10^3 ~"e) strong decrease (<-1000)",
-                            .default = "NA")
+                            .default = NA)
 
 Adults_av_s_diff_gg <- ggplot()+
   geom_sf(data = domain, aes(fill = Adults_av_s_diff_f), color = NA)+
@@ -283,7 +283,7 @@ ggsave(paste0(folder_plot, "Adults_av_s_diff_gg.png"), Adults_av_s_diff_gg, unit
 
 #  standardyze dynamics over 2 weeks (eggs)
 
-LE_RM_m <- t(sapply(2:n_d,
+LE_RM_m <- t(sapply(1:n_d,
                     function(x){return(colMeans(LE_m[max(1,(x-7)):min(n_d,(x+7)),]))}))
 
 thr = 0.001
@@ -318,8 +318,8 @@ LE_le_s_2020_v =  Ab_s_df %>% filter(year >= 2015) %>% group_by(region) %>% summ
 
 # PLOTS
 
-# season lenght: # 1/6 times (EGGS 2010)
-x = c("a) > 14 w", "b) < 14 w", "c) < 7 w", "d) < 3 w", "e) - 0 w")
+# season lenght: # 1/3 times (EGGS 2010)
+x = c("a) > 14 w", "b) < 14 w", "c) < 7 w", "d) < 3 w", "e) 0 w")
 
 LE_le_s_2010_f <- case_when(LE_le_s_2010_v > 98 ~ x[1],
                       LE_le_s_2010_v > 49 ~ x[2],
@@ -339,7 +339,7 @@ LE_le_s_2010_gg <- ggplot()+
 
 ggsave(paste0(folder_plot, "LE_le_s_2010_gg.png"), LE_le_s_2010_gg, units="in", width=7, height=5.5, dpi=300)
 
-# season lenght: # 2/6 times (EGGS 2020)
+# season lenght: # 2/3 times (EGGS 2020)
 
 LE_le_s_2020_f <- case_when(LE_le_s_2020_v > 98 ~ x[1],
                             LE_le_s_2020_v > 49 ~ x[2],
@@ -358,7 +358,7 @@ LE_le_s_2020_gg <- ggplot()+
 
 ggsave(paste0(folder_plot, "LE_le_s_2020_gg.png"), LE_le_s_2020_gg, units="in", width=7, height=5.5, dpi=300)
 
-# season lenght: # 3/6 times (difference EGGS 2020)
+# season lenght: # 3/3 times (difference EGGS 2020)
 
 LE_le_s_diff_v <- LE_le_s_2020_v - LE_le_s_2010_v
 
@@ -367,7 +367,7 @@ LE_le_s_diff_f <- case_when(LE_le_s_diff_v > 14 ~"a) strong increase (> 2 w)",
                             LE_le_s_diff_v > -1 ~"c) stable ",
                             LE_le_s_diff_v >= -14 ~"d) decrease (< 2 w)",
                             LE_le_s_diff_v < -14 ~"e) strong decrease (> 2 w)",
-                            .default = "NA")
+                            .default = NA)
 
 LE_le_s_diff_gg <- ggplot()+
   geom_sf(data = domain, aes(fill = LE_le_s_diff_f), color = NA)+
@@ -413,7 +413,8 @@ locateCountry = function(nameCity, codeCountry) {
   } else return(rep(NA,2)) 
 }
 
-cities_df <- data.frame(name = c("Paris", "Marseille", "Lyon", "Toulouse", "Bordeaux", "Nice", "Lille", "Montpellier", "Strasbourg", "Rennes", "Nantes", "Ajaccio"))
+cities_df <- data.frame(name = c("Paris", "Marseille", "Lyon", "Toulouse", "Bordeaux", "Nice",
+                                 "Lille", "Montpellier", "Strasbourg", "Rennes", "Nantes", "Ajaccio", "Dijon"))
 cities_df$code = "FR"
 
 coord = t(apply(cities_df, 1, function(aRow) as.numeric(locateCountry(aRow[1], aRow[2]))))
@@ -438,7 +439,7 @@ Adults_av_s_2020_FR_f <- case_when(Adults_av_s_2020_FR_v  > 10^3 ~ "a) > 10^3",
 g_Ad_2020 <- ggplot()+
   geom_sf(data = domain_FR, aes(fill = Adults_av_s_2020_FR_f), color = NA)+
   scale_fill_viridis_d()+
-  geom_sf(data = regions_sh, alpha = 0, colour = "white")+
+  geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
   geom_sf(data = points_sf)+
   ggtitle(paste0("Average Adults per ha between May and September"))+
   guides(fill=guide_legend(title="Adults/ha"))+
@@ -455,24 +456,26 @@ ggsave(paste0(folder_plot, "g_Ad_2020.png"), g_Ad_2020, units="in", height=8, wi
 
 #plot: varAdults 2020 
 
-palette_pos = c("#8EB0FE", "gray90", "#F29878", "#D04B45", "#B00026")
+#palette_pos = c("#8EB0FE", "gray90", "#F29878", "#D04B45", "#B00026")
+palette_pos2 = c( "gray90", "#F2CDBB", "#F29878", "#D04B45", "#B00026")
 
 Adults_av_s_diff_FR_v <- Adults_av_s_diff_v[reg_FR]
+Adults_av_s_diff_FR_v[which(Adults_av_s_2020_FR_v<1)] = NA
 
-Adults_av_s_diff_FR_f <- case_when(Adults_av_s_diff_FR_v > 100 ~"a) > +100",
-                                Adults_av_s_diff_FR_v > 10 ~"b) +10 to +100)",
-                                Adults_av_s_diff_FR_v > 1 ~"c) +1 to +10",
-                                Adults_av_s_diff_FR_v >= -1 ~"d) -1 to +1",
-                                Adults_av_s_diff_FR_v < -1 ~"e) -10 to -1",
-                                .default = "NA")
+Adults_av_s_diff_FR_f <- case_when(Adults_av_s_diff_FR_v > 200 ~"a) > +200",
+                                   Adults_av_s_diff_FR_v > 80 ~"b) +80 to +200)",
+                                   Adults_av_s_diff_FR_v > 30 ~"c) +30 to +80",
+                                   Adults_av_s_diff_FR_v > 10 ~"d) +10 to +30 ",
+                                   Adults_av_s_diff_FR_v > -10 ~"e) -10 to +10",
+                                   .default = NA)
 
 g_Ad_change <- ggplot()+
   geom_sf(data = domain_FR, aes(fill = Adults_av_s_diff_FR_f), color = NA)+
-  scale_fill_manual(values = rev(palette_pos))+
-  geom_sf(data = regions_sh, alpha = 0, colour = "white")+
+  scale_fill_manual(values = rev(palette_pos2), na.value = "transparent")+
+  geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
   geom_sf(data = points_sf)+
   ggtitle(paste0("Difference in Adults density in summer"))+
-  guides(fill=guide_legend(title="Adults/ha"))+
+  guides(fill=guide_legend(title="Increase"))+
   theme(panel.grid = element_blank(), 
         line = element_blank(), 
         rect = element_blank(), 
@@ -489,7 +492,7 @@ ggsave(paste0(folder_plot, "g_Ad_change.png"), g_Ad_change, units="in", height=8
 g_Le_2020 <- ggplot()+
   geom_sf(data = domain_FR, aes(fill = LE_le_s_2020_f[reg_FR]), color = NA)+
   scale_fill_viridis_d()+
-  geom_sf(data = regions_sh, alpha = 0, colour = "white")+
+  geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
   geom_sf(data = points_sf)+
   ggtitle(paste0("Lenght of the season based on laid eggs, threshold = ", thr_LE_RM, " laid eggs/(ha*d)"))+
   guides(fill=guide_legend(title="L season"))+
@@ -511,20 +514,22 @@ palette_pos2 = c( "gray90", "#F2CDBB", "#F29878", "#D04B45", "#B00026")
 
 LE_le_s_diff_FR_v <- LE_le_s_diff_v[reg_FR]
 
+LE_le_s_diff_FR_v[which(LE_le_s_2020_f[reg_FR]=="e) 0 w")] <- NA
+
 LE_le_s_diff_FR_f <- case_when(LE_le_s_diff_FR_v > 7*7 ~"a) > 7 w",
                             LE_le_s_diff_FR_v >  7*3 ~"b) > 3 w",
                             LE_le_s_diff_FR_v > 7 ~"c) > 1 w ",
                             LE_le_s_diff_FR_v >= 1  ~"d) > 1 d ",
                             LE_le_s_diff_FR_v > -1 ~"e) stable ",
-                            .default = "NA")
+                            .default = NA)
 
 g_Le_change <- ggplot()+
   geom_sf(data = domain_FR, aes(fill = LE_le_s_diff_FR_f), color = NA)+
-  scale_fill_manual(values = rev(palette_pos2))+
-  geom_sf(data = regions_sh, alpha = 0, colour = "white")+
+  scale_fill_manual(values = rev(palette_pos2), na.value = "transparent")+
+  geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
   geom_sf(data = points_sf)+
   ggtitle(paste0("Difference in season lenght"))+
-  guides(fill=guide_legend(title="Adults/ha"))+
+  guides(fill=guide_legend(title="Increase"))+
   theme(panel.grid = element_blank(), 
         line = element_blank(), 
         rect = element_blank(), 
