@@ -28,7 +28,7 @@ years = 2005:2023
 
 #load first EOBS to get lon lat
 
-folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab_01"
+folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab"
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_01"
 folder_in = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Data_sim"
 
@@ -93,9 +93,9 @@ E0 = rep(0, n_r)
 J0 = rep(0, n_r)
 I0 = rep(0, n_r)
 A0 = rep(0, n_r)
-E_d_0 = (10^3)*rep(1, n_r) # at 1st of January (10^6)
+# E_d_0 = (10^3)*rep(1, n_r) # at 1st of January (10^6)
 # load new initial condition
-# load(paste0(folder_in, "/X0_E0_consec_", name, ".RData"))
+load(paste0(folder_in, "/X0_E0_consec_", type, "_", name, ".RData"))
 
 #integration step
 is_1 = 1/60
