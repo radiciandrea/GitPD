@@ -19,20 +19,20 @@ folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/E
 # name = "W_EU"
 # year = 2005
 
-files = list.files(folder_out, pattern = "Sim_EOBS")
-
-name = substring(files[1], 10, 13)
-#years = substring(files, 15, 18)
-
-years = 2005:2022
-
-first_day = as.Date(paste0(min(years), "-01-01"))
-last_day = as.Date(paste0(max(years), "-12-31"))
-
-date_sim = seq(from = first_day, to = last_day, by = 'day')
-DOS_sim = 1:length(date_sim)
-n_d = length(DOS_sim)
-
+# files = list.files(folder_out, pattern = "Sim_EOBS")
+# 
+# name = substring(files[1], 10, 13)
+# #years = substring(files, 15, 18)
+# 
+# years = 2005:2023
+# 
+# first_day = as.Date(paste0(min(years), "-01-01"))
+# last_day = as.Date(paste0(max(years), "-12-31"))
+# 
+# date_sim = seq(from = first_day, to = last_day, by = 'day')
+# DOS_sim = 1:length(date_sim)
+# n_d = length(DOS_sim)
+# 
 # #carichiamo 1 per le dimensioni
 # load(paste0(folder_out, "/", files[1]))
 # 
@@ -41,11 +41,11 @@ n_d = length(DOS_sim)
 # regions = 1:n_r
 # 
 # n_d_i = nrow(Sim)
-# Sim_tot = matrix(NA, ncol = n_c*n_r+1, nrow = n_d) 
+# Sim_tot = matrix(NA, ncol = n_c*n_r+1, nrow = n_d)
 # Sim_tot[1:n_d_i,]=Sim
 # 
 # #same for beta
-# beta_approx_tot = matrix(NA, ncol = n_r, nrow = n_d) 
+# beta_approx_tot = matrix(NA, ncol = n_r, nrow = n_d)
 # beta_approx_tot[1:n_d_i,]=beta_approx
 # 
 # k = n_d_i
@@ -60,19 +60,6 @@ n_d = length(DOS_sim)
 # 
 # 
 # #########################
-# #plot pop
-# Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*max(DOS_sim)),
-#                       "region" = rep(rep(regions, each = max(DOS_sim)), n_c),
-#                       "t" = rep(DOS_sim, n_r*n_c),
-#                       "value" = c(Sim_tot[, 2:(1+n_c*n_r)])) #5 classes
-# 
-# beta_approx_m_df = data.frame("variable" = "beta",
-#                               "region" = rep(regions, each = max(DOS_sim)),
-#                               "t" = rep(DOS_sim, n_r),
-#                               "value" = c(beta_approx_tot)) #5 classes
-# 
-# 
-# 
 # 
 # #extract adults and eggs
 # index = 1+(1+3*n_r):(4*n_r)
@@ -84,7 +71,17 @@ n_d = length(DOS_sim)
 
 load(paste0(folder_out, "/LE_Adults.RData"))
 
-# Recompute n_c, n_r
+# Recompute n_c, n_r...
+
+years = 2005:2022
+
+first_day = as.Date(paste0(min(years), "-01-01"))
+last_day = as.Date(paste0(max(years), "-12-31"))
+
+date_sim = seq(from = first_day, to = last_day, by = 'day')
+DOS_sim = 1:length(date_sim)
+n_d = length(DOS_sim)
+
 n_c = 5 # numero di classi
 n_r = (ncol(Adults_m)) #numero di regioni
 regions = 1:n_r
