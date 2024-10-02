@@ -27,14 +27,15 @@ name = "W_EU"
 years = 2005:2023
 
 #load first EOBS to get lon lat
-if (file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codice/local.R")){
-  folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab"
-  folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_01"
-  folder_in = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Data_sim"
-} else {
-  folder_eobs = "EOBS_elab"
-  folder_out = "EOBS_sim_consec_01"
-  folder_in = "Data_sim"
+
+folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab_01"
+folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_01"
+folder_in = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Data_sim"
+
+if (!file.exists("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Codice/local.R")){
+  folder_eobs <- basename(folder_eobs)
+  folder_out <- basename(folder_out)
+  folder_in <- basename(folder_in)
 }
 
 dir.create(folder_out)
