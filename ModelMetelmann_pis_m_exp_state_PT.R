@@ -34,8 +34,8 @@ Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
 t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
 
 #T_av = 14.66509
-T_add = -2:10
-P_pow = seq(0.1, 2.6, by = 0.25)
+T_add = seq(-2, 8, by = 0.5)
+P_pow = seq(0, 2.4, by = 0.2)
 
 W_tot_cycle_l <- vector(mode = "list", length = length(T_add)*length(P_pow))
 
@@ -243,7 +243,7 @@ Ad <- colMeans(Adults[i_mjjas,])
 Ind_df$Ad = Ad 
 
 # Average R0 in in summer mjjas
-m <- Adults/H
+m <- Adults/H*100
 b_H2v_DG = 0.31 # beta Mtl 2021
 b_v2H = 0.5 # b Blagrove 2020
 a = (0.0043*temp + 0.0943)/2
@@ -253,7 +253,10 @@ EIP_DG = 1.03*(4*exp(5.15 - 0.123*temp)) #Metelmann 2021
 R0_DG = (a*phi_a)^2*m/(mu_A+mu_A^2*EIP_DG)*b_v2H*b_H2v_DG*IIP_DG # as Zanardini et al.
 
 R0 = colMeans(R0_DG[i_mjjas,]) # ndays R0>1
+nR0 = colSums(R0_DG[i_mjjas,]>1)/length(unique(years))
+
 Ind_df$R0 = R0
+Ind_df$nR0 = nR0
 
 # #https://hihayk.github.io/scale/#4/7/40/36/-50/151/0/14/F8C358/248/195/91/white
 # # Ind_df <- Ind_df %>%
@@ -272,18 +275,35 @@ Ind_df$R0 = R0
 #   theme_test()
 
 #https://ggplot2.tidyverse.org/reference/geom_contour.html
+
+point_df <- data.frame("name" = c("Nice"),
+                       "country" = c("FR"),
+                       "T_add" = c(0),
+                       "P_pow" = c(1),
+                       "T_av" = mean(W_tot_df$T_av),
+                       "sdP" = sd(W_tot_df$P))
+
+
 ggplot()+
-  geom_contour_filled(data = Ind_df, aes(x = T_add, y = P_pow, z = E0))+
+  geom_contour_filled(data = Ind_df, aes(x = T_add, y = sdP, z = E0))+
   ggtitle("E0")+
-  theme_test()
+  theme_test() + geom_point(data = point_df, aes(x = T_add, y = sdP)) +
+  geom_text(data = point_df, aes(x = T_add, y = sdP, label = name), hjust=-0.1, vjust=-0.1)
 
 ggplot()+
-  geom_contour_filled(data = Ind_df, aes(x = T_add, y = P_pow, z = Ad))+
+  geom_contour_filled(data = Ind_df, aes(x = T_add, y = sdP, z = Ad))+
   ggtitle("Average adults/ha between may and september")+
-  theme_test()
+  theme_test()+ geom_point(data = point_df, aes(x = T_add, y = sdP)) +
+  geom_text(data = point_df, aes(x = T_add, y = sdP, label = name), hjust=-0.1, vjust=-0.1)
 
 ggplot()+
-  geom_contour_filled(data = Ind_df, aes(x = T_add, y = P_pow, z = R0))+
-  ggtitle("Average R0  between may and september")+
-  theme_test()
+  geom_contour_filled(data = Ind_df, aes(x = T_add, y = sdP, z = R0))+
+  ggtitle("Average R0 between may and september")+
+  theme_test()+ geom_point(data = point_df, aes(x = T_add, y = sdP)) +
+  geom_text(data = point_df, aes(x = T_add, y = sdP, label = name), hjust=-0.1, vjust=-0.1)
 
+ggplot()+
+  geom_contour_filled(data = Ind_df, aes(x = T_add, y = sdP, z = nR0))+
+  ggtitle("n days with R0 >1r")+
+  theme_test()+ geom_point(data = point_df, aes(x = T_add, y = sdP)) +
+  geom_text(data = point_df, aes(x = T_add, y = sdP, label = name), hjust=-0.1, vjust=-0.1)
