@@ -22,7 +22,7 @@ library(pracma)
 
 load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_Nice_200811.RData") #Nizza
 
-H_dens = 200 # 4800 # humans/km2
+H_dens = 4800 # 4800 # humans/km2
 
 #To be needed next: LAT and LON for each place; Human population in each pixel;
 LAT = 43.5
@@ -192,7 +192,7 @@ E0 = rep(0, n_r)
 J0 = rep(0, n_r)
 I0 = rep(0, n_r)
 A0 = rep(0, n_r)
-E_d_0 = 1*rep(1, n_r) # IN THIS EXPERIMENT WE FIX Ed0 to 100
+E_d_0 = 10^4*rep(1, n_r) # IN THIS EXPERIMENT WE FIX Ed0 to 10^4
 X_0 = c(E0, J0, I0, A0, E_d_0)
 
 #integration on multiple years 
@@ -232,13 +232,17 @@ E0 = (pmax(Ed, 0)/E_d_0)^(1/length(years_u))
 
 Ind_df$E0 = E0 
 
-#Adults
+#Adults in summer mjjas
+
 Adults <- Sim[, 1+(n_r*3+1):(n_r*4)]
-Ad <- colMeans(Adults)
+
+i_mjjas <- which(as.numeric(substr(W_tot_cycle_df$date, 7, 7)) %in% 5:9)
+
+Ad <- colMeans(Adults[i_mjjas,])
 
 Ind_df$Ad = Ad 
 
-#R0 
+# Average R0 in in summer mjjas
 m <- Adults/H
 b_H2v_DG = 0.31 # beta Mtl 2021
 b_v2H = 0.5 # b Blagrove 2020
@@ -248,33 +252,38 @@ IIP_DG = 5 #Benkimoun 2021
 EIP_DG = 1.03*(4*exp(5.15 - 0.123*temp)) #Metelmann 2021
 R0_DG = (a*phi_a)^2*m/(mu_A+mu_A^2*EIP_DG)*b_v2H*b_H2v_DG*IIP_DG # as Zanardini et al.
 
-R0 = colMeans(R0_DG)
+R0 = colMeans(R0_DG[i_mjjas,]) # ndays R0>1
 Ind_df$R0 = R0
 
+# #https://hihayk.github.io/scale/#4/7/40/36/-50/151/0/14/F8C358/248/195/91/white
+# # Ind_df <- Ind_df %>%
+# #   mutate(E0_level=cut(E0, breaks=c(-1, 10^-10, 0.01, 0.1, 1, 10, 20, 50, 100),
+# #                       labels=c("0", "0-0.01", "0.01-0.1", "0.1-1", "1-10", "10-20", "20-50", "50-100"))) %>%
+# #   mutate(E0_level=factor(as.character(E0_level), levels=rev(levels(E0_level))))
+# # 
+# # ggplot() + 
+# #   geom_tile(data = Ind_df, aes(x = T_av, y = sdP, fill= E0_level))+
+# #   scale_fill_manual(values = rev(c("#007917", "#65992E", "#8FB338", "#E2CF4D", "#F89061", "#F96970", "#F97ADC", "#A494FB")))+
+# #   theme_test()
+# 
+# ggplot() + 
+#   geom_tile(data = Ind_df, aes(x = T_add, y = P_pow, fill= E0))+
+#   scale_fill_viridis()+
+#   theme_test()
 
-
-#https://hihayk.github.io/scale/#4/7/40/36/-50/151/0/14/F8C358/248/195/91/white
-Ind_df <- Ind_df %>%
-  mutate(E0_level=cut(E0, breaks=c(-1, 10^-10, 0.01, 0.1, 1, 10, 20, 50, 100),
-                      labels=c("0", "0-0.01", "0.01-0.1", "0.1-1", "1-10", "10-20", "20-50", "50-100"))) %>%
-  mutate(E0_level=factor(as.character(E0_level), levels=rev(levels(E0_level))))
-
-p1 <- ggplot() + 
-  geom_tile(data = Ind_df, aes(x = T_av, y = P_pow, fill= E0))+
-  # scale_fill_manual(values = rev(c("#007917", "#65992E", "#8FB338", "#E2CF4D", "#F89061", "#F96970", "#F97ADC", "#A494FB")))+
+#https://ggplot2.tidyverse.org/reference/geom_contour.html
+ggplot()+
+  geom_contour_filled(data = Ind_df, aes(x = T_add, y = P_pow, z = E0))+
+  ggtitle("E0")+
   theme_test()
 
-# max mosquitoes per habitant
-A0_df <- Ind_df %>%
-  select(-c("E0", "E0_level")) %>%
-  mutate(maxA = apply(Sim[, 1+(n_r*3+1):(n_r*4)], 2, max)) %>%
-  mutate(maxM = maxA/H)   
+ggplot()+
+  geom_contour_filled(data = Ind_df, aes(x = T_add, y = P_pow, z = Ad))+
+  ggtitle("Average adults/ha between may and september")+
+  theme_test()
 
-mb = c(10^seq(-2, 6, length.out = 5))
+ggplot()+
+  geom_contour_filled(data = Ind_df, aes(x = T_add, y = P_pow, z = R0))+
+  ggtitle("Average R0  between may and september")+
+  theme_test()
 
-p2 <- ggplot() + 
-  geom_tile(data = A0_df, aes(x = T_av, y = P_pow, fill= maxM))+
-  scale_fill_gradient(low = "white",
-                      high ="#F96970")+
-                      # trans = "log")+
-  theme_test()  
