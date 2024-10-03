@@ -283,27 +283,45 @@ point_df <- data.frame("name" = c("Nice"),
                        "T_av" = mean(W_tot_df$T_av),
                        "sdP" = sd(W_tot_df$P))
 
-
 ggplot()+
-  geom_contour_filled(data = Ind_df, aes(x = T_add, y = sdP, z = E0))+
+  geom_contour_fill(data = Ind_df, aes(x = T_add, y = sdP, z = E0))+
+  scale_fill_viridis()+
   ggtitle("E0")+
   theme_test() + geom_point(data = point_df, aes(x = T_add, y = sdP)) +
   geom_text(data = point_df, aes(x = T_add, y = sdP, label = name), hjust=-0.1, vjust=-0.1)
 
 ggplot()+
-  geom_contour_filled(data = Ind_df, aes(x = T_add, y = sdP, z = Ad))+
+  geom_contour_fill(data = Ind_df, aes(x = T_add, y = sdP, z = Ad))+
   ggtitle("Average adults/ha between may and september")+
   theme_test()+ geom_point(data = point_df, aes(x = T_add, y = sdP)) +
   geom_text(data = point_df, aes(x = T_add, y = sdP, label = name), hjust=-0.1, vjust=-0.1)
 
 ggplot()+
-  geom_contour_filled(data = Ind_df, aes(x = T_add, y = sdP, z = R0))+
+  geom_contour_fill(data = Ind_df, aes(x = T_add, y = sdP, z = R0))+
+  scale_fill_viridis()+
+  geom_contour(data = Ind_df, aes(x = T_add, y = sdP, z = R0), 
+               color = "red", breaks = c(1))+
+  ggtitle("Average R0 between may and september")+
+  theme_test()+ geom_point(data = point_df, aes(x = T_add, y = sdP), color= "white") +
+  geom_text(data = point_df, aes(x = T_add, y = sdP, label = name), hjust=-0.1, vjust=-0.1, color= "white")
+
+ggplot()+
+  geom_contour_fill(data = Ind_df,
+                      aes(x = T_add, y = sdP, z = nR0))+
+  scale_fill_viridis()+
+  ggtitle("n days with R0 >1")+
+  theme_test()+ 
+  geom_point(data = point_df, aes(x = T_add, y = sdP)) +
+  geom_text(data = point_df, aes(x = T_add, y = sdP, label = name), hjust=-0.1, vjust=-0.1)
+
+
+###
+library(metR)
+ggplot()+
+  metR::geom_contour_fill(data = Ind_df, aes(x = T_add, y = sdP, z = R0))+
+  scale_fill_fermenter(palette = 2)+
+  theme(legend.position = "bottom")+
   ggtitle("Average R0 between may and september")+
   theme_test()+ geom_point(data = point_df, aes(x = T_add, y = sdP)) +
   geom_text(data = point_df, aes(x = T_add, y = sdP, label = name), hjust=-0.1, vjust=-0.1)
 
-ggplot()+
-  geom_contour_filled(data = Ind_df, aes(x = T_add, y = sdP, z = nR0))+
-  ggtitle("n days with R0 >1r")+
-  theme_test()+ geom_point(data = point_df, aes(x = T_add, y = sdP)) +
-  geom_text(data = point_df, aes(x = T_add, y = sdP, label = name), hjust=-0.1, vjust=-0.1)
