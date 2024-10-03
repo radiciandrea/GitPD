@@ -22,7 +22,7 @@ library(pracma)
 
 load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_Nice_200811.RData") #Nizza
 
-H_dens = 4800 # humans/km2
+H_dens = 200 # 4800 # humans/km2
 
 #To be needed next: LAT and LON for each place; Human population in each pixel;
 LAT = 43.5
@@ -39,11 +39,10 @@ P_pow = seq(0.1, 2.6, by = 0.25)
 
 W_tot_cycle_l <- vector(mode = "list", length = length(T_add)*length(P_pow))
 
-E0_df = data.frame(T_add = rep(NA, length(T_add)*length(P_pow )),
+Ind_df = data.frame(T_add = rep(NA, length(T_add)*length(P_pow )),
                    T_av = rep(NA, length(T_add)*length(P_pow )),
                    P_pow  = rep(NA, length(T_add)*length(P_pow )),
-                   P = rep(NA, length(T_add)*length(P_pow )),
-                   E0 = rep(NA, length(T_add)*length(P_pow )))
+                   sdP = rep(NA, length(T_add)*length(P_pow )))
 
 for (i in 1:length(T_add)){
   for (j in 1:length(P_pow)){
@@ -62,10 +61,11 @@ for (i in 1:length(T_add)){
     
     W_tot_cycle_l[[k]] <- W_tot_cycle_df
     
-    E0_df$T_add[k] = T_add[i] 
-    E0_df$T_av[k] = mean(W_tot_cycle_df$T_av)
-    E0_df$P_pow[k] = P_pow[j]
-    E0_df$H[k] = W_tot_cycle_df$H[1]
+    Ind_df$T_add[k] = T_add[i] 
+    Ind_df$T_av[k] = mean(W_tot_cycle_df$T_av)
+    Ind_df$P_pow[k] = P_pow[j]
+    Ind_df$sdP[k] = sd(W_tot_cycle_df$P)
+    Ind_df$H[k] = W_tot_cycle_df$H[1]
   }
 }
 
@@ -225,22 +225,47 @@ Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*
                       "t" = rep(DOS_sim, n_r*5),
                       "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
 
-E0_df$E0 = (pmax(Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)], 0)/E_d_0)^(1/length(years_u))
+
+#E0
+Ed = Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)]
+E0 = (pmax(Ed, 0)/E_d_0)^(1/length(years_u))
+
+Ind_df$E0 = E0 
+
+#Adults
+Adults <- Sim[, 1+(n_r*3+1):(n_r*4)]
+Ad <- colMeans(Adults)
+
+Ind_df$Ad = Ad 
+
+#R0 
+m <- Adults/H
+b_H2v_DG = 0.31 # beta Mtl 2021
+b_v2H = 0.5 # b Blagrove 2020
+a = (0.0043*temp + 0.0943)/2
+phi_a = 0.9 #human biting preference (urban)
+IIP_DG = 5 #Benkimoun 2021
+EIP_DG = 1.03*(4*exp(5.15 - 0.123*temp)) #Metelmann 2021
+R0_DG = (a*phi_a)^2*m/(mu_A+mu_A^2*EIP_DG)*b_v2H*b_H2v_DG*IIP_DG # as Zanardini et al.
+
+R0 = colMeans(R0_DG)
+Ind_df$R0 = R0
+
 
 
 #https://hihayk.github.io/scale/#4/7/40/36/-50/151/0/14/F8C358/248/195/91/white
-E0_df <- E0_df %>%
+Ind_df <- Ind_df %>%
   mutate(E0_level=cut(E0, breaks=c(-1, 10^-10, 0.01, 0.1, 1, 10, 20, 50, 100),
                       labels=c("0", "0-0.01", "0.01-0.1", "0.1-1", "1-10", "10-20", "20-50", "50-100"))) %>%
   mutate(E0_level=factor(as.character(E0_level), levels=rev(levels(E0_level))))
 
 p1 <- ggplot() + 
-  geom_tile(data = E0_df, aes(x = T_av, y = P_pow, fill= E0))+
+  geom_tile(data = Ind_df, aes(x = T_av, y = P_pow, fill= E0))+
   # scale_fill_manual(values = rev(c("#007917", "#65992E", "#8FB338", "#E2CF4D", "#F89061", "#F96970", "#F97ADC", "#A494FB")))+
   theme_test()
 
 # max mosquitoes per habitant
-A0_df <- E0_df %>%
+A0_df <- Ind_df %>%
   select(-c("E0", "E0_level")) %>%
   mutate(maxA = apply(Sim[, 1+(n_r*3+1):(n_r*4)], 2, max)) %>%
   mutate(maxM = maxA/H)   
