@@ -24,6 +24,15 @@ load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weath
 
 H_dens = 4800 # humans/km2
 
+#To be needed next: LAT and LON for each place; Human population in each pixel;
+LAT = 43.5
+LON = 7.3
+
+#photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
+SunTimes_df<- getSunlightTimes(data = data.frame("date" = as.Date(W_tot_df$date), "lat"= LAT, "lon" = LON))# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
+Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
+t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
+
 #T_av = 14.66509
 T_add = -2:10
 P_pow = seq(0.5, 3, by = 0.25)
@@ -47,7 +56,9 @@ for (i in 1:length(T_add)){
       mutate(P_pow  = P_pow[j]) %>%
       mutate(P = P^P_pow[j]*(sum(P)/sum(P^P_pow[j]))) %>%
       mutate(H = H_dens) %>%
-      mutate(region = paste0(region, "_tadd_", T_add[i], "_Ppw_", round(P_pow , 2)))
+      mutate(region = paste0(region, "_tadd_", T_add[i], "_Ppw_", round(P_pow , 2))) %>%
+      mutate(Ph_P = Ph_P) %>%
+      mutate(t_sr =t_sr)
     
     W_tot_cycle_l[[k]] <- W_tot_cycle_df
     
@@ -97,10 +108,6 @@ if (any(names(W_df)=="T_M")){
   temp_m <- temp
 }
 
-#To be needed next: LAT and LON for each place; Human population in each pixel;
-LAT = 43.5*rep(1, n_r)
-LON = 7.3*rep(1, n_r)
-
 #elaborate temp and prec + sapply transpose matrices: need to t()
 temp_7 = temp[1,]
 temp_7 = rbind(temp_7, t(sapply(2:n_d,
@@ -109,13 +116,8 @@ temp_min_DJF = temp_m[1,]
 temp_min_DJF = rbind(temp_min_DJF, t(sapply(2:n_d,
                                             function(x){return(apply(temp_m[max(1,x-300):x, ], 2, min))}))) #min temp of last winter (daily or hours?)
 
-#photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
-SunTimes_df<- getSunlightTimes(data = data.frame("date" = as.Date(W_df$date), "lat"= rep(LAT, n_d), "lon" = rep(LON, n_d)))# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
-Ph_P = as.numeric(SunTimes_df$sunset - SunTimes_df$sunrise)
-t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
-
-Ph_P = matrix(Ph_P, nrow = n_d, byrow = T)
-t_sr = matrix(t_sr, nrow = n_d, byrow = T)
+Ph_P = W_df$Ph_P
+t_sr = W_df$t_sr
 
 #parameters (Metelmann 2019)
 CTT_s = 11 #critical temperature over one week in spring (°C )
