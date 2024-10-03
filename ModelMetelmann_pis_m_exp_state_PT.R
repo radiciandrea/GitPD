@@ -35,7 +35,7 @@ t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time o
 
 #T_av = 14.66509
 T_add = -2:10
-P_pow = seq(0.5, 3, by = 0.25)
+P_pow = seq(0.1, 2.6, by = 0.25)
 
 W_tot_cycle_l <- vector(mode = "list", length = length(T_add)*length(P_pow))
 
@@ -162,12 +162,12 @@ df <- function(t, x, parms) {
     #t_n = t[1]-t_s+1 # time of numerical integration to index matrix
     t_n = t[1]
     t_h = 24*(t - t_n) #should put t and not t[1]
-    TM = temp_M[max(1,t_n-1),]*(t_h<t_sr[t_n, ]) + temp_M[t_n,]*(t_h>t_sr[t_n, ])
+    TM = temp_M[max(1,t_n-1),]*(t_h<t_sr[t_n]) + temp_M[t_n,]*(t_h>t_sr[t_n])
     Tm = temp_m[t_n, ]*(t_h<14) + temp_M[min(t_n+1, length(temp_m))]*(t_h>14)
     
-    temp_h = ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h+10)/(10+t_sr[t_n, ])))*(t_h<t_sr[t_n, ])+
-      ((TM+Tm)/2 - (TM-Tm)/2*cos(pi*(t_h-t_sr[t_n, ])/(14-t_sr[t_n, ])))*(t_h>t_sr[t_n, ])*(t_h<14)+
-      ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h-14)/(10+t_sr[t_n, ])))*(t_h>14)
+    temp_h = ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h+10)/(10+t_sr[t_n])))*(t_h<t_sr[t_n])+
+      ((TM+Tm)/2 - (TM-Tm)/2*cos(pi*(t_h-t_sr[t_n])/(14-t_sr[t_n])))*(t_h>t_sr[t_n])*(t_h<14)+
+      ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h-14)/(10+t_sr[t_n])))*(t_h>14)
     
     delta_J = 1/(83.85 - 4.89*temp_h + 0.08*temp_h^2) #juvenile development rate (in SI: 82.42 - 4.87*temp_h + 0.08*temp_h^ 2)
     delta_I = 1/(50.1 - 3.574*temp_h + 0.069*temp_h^2) #first pre blood mean rate
@@ -234,24 +234,10 @@ E0_df <- E0_df %>%
                       labels=c("0", "0-0.01", "0.01-0.1", "0.1-1", "1-10", "10-20", "20-50", "50-100"))) %>%
   mutate(E0_level=factor(as.character(E0_level), levels=rev(levels(E0_level))))
 
-cities_df <- data.frame("name" = c("Nice", "Paris", "Lyon", "Brest", "Sevilla", "Rome", "Munich",
-                                   "Edinburgh", "Trondheim", "Prague"),
-                        "country" = c("FR", "FR", "FR", "FR", "ES", "IT", "GE", "UK", "NO", "CZ"),
-                        "T_av" = c(14.7, 12.4, 12.8, 11.7, 19.2, 17.6, 7.8, 8.6, 5.8, 8.4),
-                        "H" = c(4800, 21000, 11000, 2800, 4900, 2100, 5200, 1800, 500, 2800))
-
 p1 <- ggplot() + 
-  geom_tile(data = E0_df, aes(x = T_av, y = H, fill= E0_level))+
-  scale_fill_manual(values = rev(c("#007917", "#65992E", "#8FB338", "#E2CF4D", "#F89061", "#F96970", "#F97ADC", "#A494FB")))+
-  scale_y_log10()+
+  geom_tile(data = E0_df, aes(x = T_av, y = P_pow, fill= E0))+
+  # scale_fill_manual(values = rev(c("#007917", "#65992E", "#8FB338", "#E2CF4D", "#F89061", "#F96970", "#F97ADC", "#A494FB")))+
   theme_test()
-
-cities_temp_df <- cities_df %>% filter(name == "Nice")
-cities_temp_df <- cities_df %>% filter(country == "FR")
-cities_temp_df <- cities_df 
-
-p1 + geom_point(data = cities_temp_df, aes(x = T_av, y = H)) +
-  geom_text(data = cities_temp_df, aes(x = T_av, y = H, label = name), hjust=-0.1, vjust=-0.1)
 
 # max mosquitoes per habitant
 A0_df <- E0_df %>%
@@ -262,24 +248,8 @@ A0_df <- E0_df %>%
 mb = c(10^seq(-2, 6, length.out = 5))
 
 p2 <- ggplot() + 
-  geom_tile(data = A0_df, aes(x = T_av, y = H, fill= maxA))+
-  scale_y_log10()+
-  scale_fill_gradient(trans = "log",
-                      low = "white",
-                      high ="#F96970",
-                      breaks = mb,
-                      labels = mb)+
-  theme_test()  
-
-p2 + geom_point(data = cities_df, aes(x = T_av, y = H)) +
-  geom_text(data = cities_df, aes(x = T_av, y = H, label = name), hjust=-0.1, vjust=-0.1)
-
-p3 <- ggplot() + 
-  geom_tile(data = A0_df, aes(x = T_av, y = H, fill= maxM))+
+  geom_tile(data = A0_df, aes(x = T_av, y = P_pow, fill= maxM))+
   scale_fill_gradient(low = "white",
                       high ="#F96970")+
-  scale_y_log10()+
+                      # trans = "log")+
   theme_test()  
-
-p3 + geom_point(data = cities_df, aes(x = T_av, y = H)) +
-  geom_text(data = cities_df, aes(x = T_av, y = H, label = name), hjust=-0.1, vjust=-0.1)
