@@ -17,8 +17,7 @@ folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EO
 folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab_01" # "EOBS_elab"
 
 # name = "W_EU"
-# year = 2005
-
+# 
 # files = list.files(folder_out, pattern = "Sim_EOBS")
 # 
 # name = substring(files[1], 10, 13)
@@ -57,6 +56,17 @@ folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/E
 #   beta_approx_tot[k + 1:n_d_i,]=beta_approx
 #   k = k + n_d_i
 # }
+# 
+# # set E_d_0 consect
+# 
+# file = files[length(files)]
+# load(paste0(folder_out, "/", file))
+# 
+# E_d_0 = pmax(1, Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)])
+# E_d_0[which(is.na(E_d_0))] =1
+# 
+# save(E_d_0, file = 
+#        paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Data_sim/X0_E0_consec_01_", name, ".RData"))
 # 
 # 
 # #########################
@@ -136,11 +146,6 @@ domain <- st_read(paste0(folder_sh, "domain_sel_01_W_EU.shp")) %>%
   arrange(region)
 
 countries_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/european-countries.shp")
-
-#palette 1
-palette1= c("#384AB4", "#5570DF", "#8EB0FE", "#C5D7F3", "#F2CDBB", "#F29878", "#D04B45", "#B00026")
-palette_simp= c("#384AB4", "#8EB0FE", "gray90", "#F29878",  "#B00026")
-
 
 # my_breaks = c(10^(c(4:0)), 0)
 # 
@@ -424,7 +429,35 @@ cities_df$lat = coord[,2]
 
 points <- lapply(1:nrow(coord), function(i){st_point(coord[i,])})
 points_sf <- st_sfc(points, crs = 4326)
-cities_sf <- st_sf('city' = cities_df$name, 'geometry' = points_sf)  
+cities_sf <- st_sf('city' = cities_df$name, 'geometry' = points_sf) 
+
+#plot: Adults 2010 
+
+Adults_av_s_2010_FR_v <- Adults_av_s_2010_v[reg_FR]
+
+Adults_av_s_2010_FR_f <- case_when(Adults_av_s_2010_FR_v  > 10^3 ~ "a) > 10^3",
+                                   Adults_av_s_2010_FR_v > 10^2 ~ "b) > 10^2",
+                                   Adults_av_s_2010_FR_v  > 10 ~ "c) > 10",
+                                   Adults_av_s_2010_FR_v  >= 1 ~ "d) > 1",
+                                   Adults_av_s_2010_FR_v  < 1 ~ "e) < 1")
+
+g_Ad_2010 <- ggplot()+
+  geom_sf(data = domain_FR, aes(fill = Adults_av_s_2010_FR_f), color = NA)+
+  scale_fill_viridis_d()+
+  geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
+  geom_sf(data = points_sf)+
+  ggtitle(paste0("Average Adults per ha between May and September"))+
+  guides(fill=guide_legend(title="Adults/ha"))+
+  theme(panel.grid = element_blank(), 
+        line = element_blank(), 
+        rect = element_blank(), 
+        text = element_blank(), 
+        plot.background = element_rect(fill = "transparent", color = "transparent"))+
+  geom_sf(data = cities_sf) +
+  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
+                   label.padding = 0.1, size = 4)
+
+ggsave(paste0(folder_plot, "g_Ad_2010.png"), g_Ad_2010, units="in", height=8, width= 6, dpi=300)
 
 #plot: Adults 2020 
 
@@ -463,7 +496,7 @@ Adults_av_s_diff_FR_v <- Adults_av_s_diff_v[reg_FR]
 Adults_av_s_diff_FR_v[which(Adults_av_s_2020_FR_v<1)] = NA
 
 Adults_av_s_diff_FR_f <- case_when(Adults_av_s_diff_FR_v > 200 ~"a) > +200",
-                                   Adults_av_s_diff_FR_v > 80 ~"b) +80 to +200)",
+                                   Adults_av_s_diff_FR_v > 80 ~"b) +80 to +200",
                                    Adults_av_s_diff_FR_v > 30 ~"c) +30 to +80",
                                    Adults_av_s_diff_FR_v > 10 ~"d) +10 to +30 ",
                                    Adults_av_s_diff_FR_v > -10 ~"e) -10 to +10",
@@ -475,7 +508,7 @@ g_Ad_change <- ggplot()+
   geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
   geom_sf(data = points_sf)+
   ggtitle(paste0("Difference in Adults density in summer"))+
-  guides(fill=guide_legend(title="Increase"))+
+  guides(fill=guide_legend(title="Variation"))+
   theme(panel.grid = element_blank(), 
         line = element_blank(), 
         rect = element_blank(), 
@@ -487,10 +520,48 @@ g_Ad_change <- ggplot()+
 
 ggsave(paste0(folder_plot, "g_Ad_change.png"), g_Ad_change, units="in", height=8, width= 6, dpi=300)
 
+#plot: LE 2010  (ok)
+
+LE_le_s_2010_FR_v <- LE_le_s_2010_v[reg_FR]
+
+x = c("a) > 14 w", "b) < 14 w", "c) < 7 w", "d) < 3 w", "e) 0 w")
+
+LE_le_s_2010_FR_f <- case_when(LE_le_s_2010_FR_v > 98 ~ x[1],
+                            LE_le_s_2010_FR_v > 49 ~ x[2],
+                            LE_le_s_2010_FR_v > 21 ~ x[3],
+                            LE_le_s_2010_FR_v > 0 ~ x[4],
+                            LE_le_s_2010_FR_v == 0 ~ x[5])
+
+g_Le_2010 <- ggplot()+
+  geom_sf(data = domain_FR, aes(fill = LE_le_s_2010_FR_f), color = NA)+
+  scale_fill_viridis_d()+
+  geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
+  geom_sf(data = points_sf)+
+  ggtitle(paste0("Lenght of the season based on laid eggs, threshold = ", thr_LE_RM, " laid eggs/(ha*d)"))+
+  guides(fill=guide_legend(title="L season"))+
+  theme(panel.grid = element_blank(), 
+        line = element_blank(), 
+        rect = element_blank(), 
+        text = element_blank(), 
+        plot.background = element_rect(fill = "transparent", color = "transparent"))+
+  geom_sf(data = cities_sf) +
+  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
+                   label.padding = 0.1, size = 4)
+
+ggsave(paste0(folder_plot, "g_Le_2010.png"), g_Le_2010, units="in", height=8, width= 6, dpi=300)
+
 #plot: LE 2020  (ok)
 
+LE_le_s_2020_FR_v <- LE_le_s_2020_v[reg_FR]
+
+LE_le_s_2020_FR_f <- case_when(LE_le_s_2020_FR_v > 98 ~ x[1],
+                               LE_le_s_2020_FR_v > 49 ~ x[2],
+                               LE_le_s_2020_FR_v > 21 ~ x[3],
+                               LE_le_s_2020_FR_v > 0 ~ x[4],
+                               LE_le_s_2020_FR_v == 0 ~ x[5])
+
 g_Le_2020 <- ggplot()+
-  geom_sf(data = domain_FR, aes(fill = LE_le_s_2020_f[reg_FR]), color = NA)+
+  geom_sf(data = domain_FR, aes(fill = LE_le_s_2020_FR_f), color = NA)+
   scale_fill_viridis_d()+
   geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
   geom_sf(data = points_sf)+
