@@ -494,8 +494,8 @@ ggsave(paste0(folder_plot, "g_Ad_2020.png"), g_Ad_2020, units="in", height=8, wi
 #palette_pos = c("#8EB0FE", "gray90", "#F29878", "#D04B45", "#B00026")
 palette_pos2 = c( "gray90", "#F2CDBB", "#F29878", "#D04B45", "#B00026")
 
-Adults_av_s_diff_FR_v <- Adults_av_s_diff_v[reg_FR]
-Adults_av_s_diff_FR_v[which(Adults_av_s_2020_FR_v<1)] = NA
+Adults_av_s_diff_FR_v <- Adults_av_s_2020_FR_v - Adults_av_s_2010_FR_v
+Adults_av_s_diff_FR_v[which(Adults_av_s_2010_FR_v + Adults_av_s_2020_FR_v<1)] = NA
 
 Adults_av_s_diff_FR_f <- case_when(Adults_av_s_diff_FR_v > 200 ~"a) > +200",
                                    Adults_av_s_diff_FR_v > 80 ~"b) +80 to +200",
@@ -522,7 +522,7 @@ g_Ad_change <- ggplot()+
 
 ggsave(paste0(folder_plot, "g_Ad_change.png"), g_Ad_change, units="in", height=8, width= 6, dpi=300)
 
-#plot: LE 2010  (ok)
+#plot: LE le 2010  (ok)
 
 LE_le_s_2010_FR_v <- LE_le_s_2010_v[reg_FR]
 
@@ -587,12 +587,12 @@ palette_pos2 = c( "gray90", "#F2CDBB", "#F29878", "#D04B45", "#B00026")
 
 LE_le_s_diff_FR_v <- LE_le_s_diff_v[reg_FR]
 
-LE_le_s_diff_FR_v[which(LE_le_s_2020_f[reg_FR]=="e) 0 w")] <- NA
+LE_le_s_diff_FR_v[which(LE_le_s_2010_f[reg_FR]=="e) 0 w")] <- NA
 
-LE_le_s_diff_FR_f <- case_when(LE_le_s_diff_FR_v > 7*7 ~"a) > 7 w",
-                            LE_le_s_diff_FR_v >  7*3 ~"b) > 3 w",
-                            LE_le_s_diff_FR_v > 7 ~"c) > 1 w ",
-                            LE_le_s_diff_FR_v >= 1  ~"d) > 1 d ",
+LE_le_s_diff_FR_f <- case_when(LE_le_s_diff_FR_v > 7*7 ~"a) > +7 w",
+                            LE_le_s_diff_FR_v >  7*3 ~"b) 3 w to 7 w",
+                            LE_le_s_diff_FR_v > 7 ~"c) 1 w to 3 w ",
+                            LE_le_s_diff_FR_v >= 1  ~"d) 1 d to 1 w ",
                             LE_le_s_diff_FR_v > -1 ~"e) stable ",
                             .default = NA)
 
@@ -602,7 +602,7 @@ g_Le_change <- ggplot()+
   geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
   geom_sf(data = points_sf)+
   ggtitle(paste0("Difference in season lenght"))+
-  guides(fill=guide_legend(title="Increase"))+
+  guides(fill=guide_legend(title="Variation"))+
   theme(panel.grid = element_blank(), 
         line = element_blank(), 
         rect = element_blank(), 
