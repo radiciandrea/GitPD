@@ -301,6 +301,37 @@ cities_sf <- st_sf('city' = cities_df$name, 'geometry' = points_sf)
 
 #plot: degnue 2020 
 
+R0_2010_FR_v <- R0_1[reg_FR]
+
+x = c(61, 21, 7, 0, 0)
+x_lab = c("a) >9", "b) 3-8", "c) 1-2", "d) < 1", "e) 0")
+
+R0_2010_FR_f <- case_when(R0_2010_FR_v > x[1] ~ x_lab[1],
+                          R0_2010_FR_v > x[2] ~ x_lab[2],
+                          R0_2010_FR_v > x[3] ~ x_lab[3],
+                          R0_2010_FR_v > x[4] ~ x_lab[4],
+                          R0_2010_FR_v == x[5] ~ x_lab[5])
+
+g_D_2010 <- ggplot()+
+  geom_sf(data = domain_FR, aes(fill = R0_2010_FR_f), color = NA)+
+  scale_fill_viridis_d()+
+  geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
+  geom_sf(data = points_sf)+
+  ggtitle(paste0("Lenght period with R0 gt 1 (dengue)"))+
+  guides(fill=guide_legend(title="weeks"))+
+  theme(panel.grid = element_blank(), 
+        line = element_blank(), 
+        rect = element_blank(), 
+        text = element_blank(), 
+        plot.background = element_rect(fill = "transparent", color = "transparent"))+
+  geom_sf(data = cities_sf) +
+  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
+                   label.padding = 0.1, size = 4)
+
+ggsave(paste0(folder_plot, "g_D_2010.png"), g_D_2010, units="in", height=8, width= 6, dpi=300)
+
+#plot: dengue 2020 
+
 R0_2020_FR_v <- R0_2[reg_FR]
 
 x = c(61, 21, 7, 0, 0)
