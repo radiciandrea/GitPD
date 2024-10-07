@@ -13,7 +13,7 @@ library(sf)
 library(lubridate)
 
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_01" # EOBS_sim_consec
-folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab_01" # "EOBS_elab"
+folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab" # "EOBS_elab"
 
 files = list.files(folder_out, pattern = "Sim_EOBS")
 
@@ -208,7 +208,7 @@ Risk_zone <-  case_when((R0_1 < 1) & (R0_2 < 1) ~ "No p. spread",
 
 ### plot for CC RIO conference
 
-folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Outputs/R0/"
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/R0/"
 
 countries_sh <-  st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/european-countries.shp")
 
@@ -286,7 +286,7 @@ locateCountry = function(nameCity, codeCountry) {
   } else return(rep(NA,2)) 
 }
 
-cities_df <- data.frame(name = c("Paris", "Marseille", "Lyon", "Toulouse", "Bordeaux", "Nice",
+cities_df <- data.frame(name = c("Paris", "Marseille", "Lyon", "Toulouse", "Bordeaux", "Nice", "Dijon",
                                  "Lille", "Montpellier", "Strasbourg", "Rennes", "Nantes", "Ajaccio", "Dijon"))
 cities_df$code = "FR"
 
