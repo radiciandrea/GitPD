@@ -16,22 +16,22 @@ library(lubridate)
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_01" # EOBS_sim_consec
 folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab_01" # "EOBS_elab"
 
-# name = "W_EU"
-# 
-# files = list.files(folder_out, pattern = "Sim_EOBS")
-# 
-# name = substring(files[1], 10, 13)
-# #years = substring(files, 15, 18)
-# 
-# years = 2005:2023
-# 
-# first_day = as.Date(paste0(min(years), "-01-01"))
-# last_day = as.Date(paste0(max(years), "-12-31"))
-# 
-# date_sim = seq(from = first_day, to = last_day, by = 'day')
-# DOS_sim = 1:length(date_sim)
-# n_d = length(DOS_sim)
-# 
+name = "W_EU"
+
+files = list.files(folder_out, pattern = "Sim_EOBS")
+
+name = substring(files[1], 10, 13)
+#years = substring(files, 15, 18)
+
+years = 2005:2023
+
+first_day = as.Date(paste0(min(years), "-01-01"))
+last_day = as.Date(paste0(max(years), "-12-31"))
+
+date_sim = seq(from = first_day, to = last_day, by = 'day')
+DOS_sim = 1:length(date_sim)
+n_d = length(DOS_sim)
+
 # #carichiamo 1 per le dimensioni
 # load(paste0(folder_out, "/", files[1]))
 # 
@@ -65,7 +65,7 @@ folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/E
 # E_d_0 = pmax(1, Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)])
 # E_d_0[which(is.na(E_d_0))] =1
 # 
-# save(E_d_0, file = 
+# save(E_d_0, file =
 #        paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Data_sim/X0_E0_consec_01_", name, ".RData"))
 # 
 # 
@@ -78,7 +78,7 @@ folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/E
 # LE_m = Adults_m*beta_approx_tot
 # 
 # save(Adults_m, LE_m, file = paste0(folder_out, "/LE_Adults.RData"))
-
+# 
 load(paste0(folder_out, "/LE_Adults.RData"))
 
 # Recompute n_c, n_r...
@@ -97,7 +97,7 @@ n_r = (ncol(Adults_m)) #numero di regioni
 regions = 1:n_r
 n_y = length(years)
 
-# rolling means over 14 days +correct NAs into 0s; same for negative values or estreme values (i.e. > 10^8)
+# correct NAs into 0s; same for negative values or estreme values (i.e. > 10^8)
 
 Adults_m[which(is.na(Adults_m))] = 0
 Adults_m[which(Adults_m < 0)] = 0
@@ -204,6 +204,10 @@ ggsave(paste0(folder_plot, "LE_av_s_2020_gg.png"), LE_av_s_2020_gg, units="in", 
 
 # abundance in mjjas: # 3/6 times (difference EGGS 2020)
 
+#temporaneo :
+palette_simp <- c("#384AB4", "#8EB0FE", "gray80", "#F29878", "#B00026")
+
+
 LE_av_s_diff_v <- LE_av_s_2020_v - LE_av_s_2010_v
 
 LE_av_s_diff_f <- case_when(LE_av_s_diff_v > 10^3 ~"a) strong increase (>+1000)",
@@ -284,9 +288,7 @@ Adults_av_s_diff_gg <- ggplot()+
 
 ggsave(paste0(folder_plot, "Adults_av_s_diff_gg.png"), Adults_av_s_diff_gg, units="in", width=7, height=5.5, dpi=300)
 
-# Continua da qui
-
-#  standardyze dynamics over 2 weeks (eggs)
+#  2 weeks rolling mean: standardyze dynamics over 2 weeks (eggs) 
 
 LE_RM_m <- t(sapply(1:n_d,
                     function(x){return(colMeans(LE_m[max(1,(x-7)):min(n_d,(x+7)),]))}))
