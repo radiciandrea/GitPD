@@ -20,13 +20,29 @@ library(pracma)
 
 #Getting T and P and Eggs from Arpae (see ReadNc+ARPAE) + nc by Cyril
 
-load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_Nice_200811.RData") #Nizza
+# load("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_Nice_200811.RData") #Nizza
+# 
+# H_dens = 4800 # 4800 # humans/km2
+# 
+# #To be needed next: LAT and LON for each place; Human population in each pixel;
+# LAT = 43.5
+# LON = 7.3
 
-H_dens = 4800 # 4800 # humans/km2
+city = "Montpellier"
+years = 2000:2023
 
-#To be needed next: LAT and LON for each place; Human population in each pixel;
-LAT = 43.5
-LON = 7.3
+load(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_EOBS_",
+       city, "_", min(years), "_", max(years), ".RData"))
+
+LAT = W_tot_df$lat[1]
+LON = W_tot_df$lon[1]
+H_dens = W_tot_df$pop[1]
+
+#recompute years for simulation
+years_u = 2018:2023
+W_tot_df0 <- W_tot_df
+W_tot_df <-  W_tot_df %>% filter(year %in% years_u)
+W_tot_df$DOS <- 1:nrow(W_tot_df)
 
 #photoperiod Ph_P (which variables should I take? sunrise - sunset): to be modified in the future
 SunTimes_df<- getSunlightTimes(data = data.frame("date" = as.Date(W_tot_df$date), "lat"= LAT, "lon" = LON))# lat= 44.5, lon = 11.5 about all Emilia Romagna; # lat= 43.7, lon = 7.3 in Nice
@@ -88,7 +104,7 @@ W_df <- W_tot_df %>%
 
 DOY = W_df$DOY[DOS_sim]
 years = W_df$year[DOS_sim]
-years_u = unique(years)
+
 date = W_df$date
 
 #dimensions
@@ -276,12 +292,21 @@ Ind_df$nR0 = nR0
 
 #https://ggplot2.tidyverse.org/reference/geom_contour.html
 
+years_eval = c(2003, 2008, 2013, 2018, 2023)
+
 point_df <- data.frame("name" = c("Nice"),
+                       "year" = years_eval,
                        "country" = c("FR"),
-                       "T_add" = c(0),
-                       "P_pow" = c(1),
-                       "T_av" = mean(W_tot_df$T_av),
-                       "sdP" = sd(W_tot_df$P))
+                       "T_av" = NA,
+                       "sdP" = NA)
+
+for(y in years_eval){
+  
+  point_df$T_av[which(point_df$year == y)] <- mean(W_tot_df0$T_av[which(W_tot_df0$year %in% c((y-3):y))])
+  point_df$sdP[which(point_df$year == y)] <- sd(W_tot_df0$P[which(W_tot_df0$year%in% c((y-3):y))])
+  
+}
+
 
 # geom_contour_filled
 
@@ -292,39 +317,47 @@ point_df <- data.frame("name" = c("Nice"),
 #   theme_test() + geom_point(data = point_df, aes(x = T_add, y = sdP)) +
 #   geom_text(data = point_df, aes(x = T_add, y = sdP, label = name), hjust=-0.1, vjust=-0.1)
 
+library(metR)
+
 #Ad
-breaks_ad = 4*10^(0:4)
+breaks_ad = 5*10^(0:3)
+breaks_ad = 5*10^(1:3)
 
 ggplot() +
-  geom_contour_fill(data = Ind_df, aes(x = T_add, y = sdP, z = Ad)) +
+  geom_contour_fill(data = Ind_df, aes(x = T_av, y = sdP, z = Ad)) +
   scale_fill_viridis_c(trans = "log",
                        limits = c(min(breaks_ad), max(breaks_ad)),
                        breaks = breaks_ad)+
   ggtitle("Average adults/ha between may and september")+
-  theme_test()+ geom_point(data = point_df, aes(x = T_add, y = sdP), color= "white") +
-  geom_text(data = point_df, aes(x = T_add, y = sdP, label = name), hjust=-0.1, vjust=-0.1, color= "white")
+  theme_test()+ 
+  geom_point(data = point_df, aes(x = T_av, y = sdP), color= "white") +
+  geom_path(data = point_df, aes(x = T_av, y = sdP), color= "white") +
+  geom_text(data = point_df, aes(x = T_av, y = sdP, label = year), hjust=-0.1, vjust=-0.1, color= "white")
 
 #R0
-breaks_R = c(0, 1, 5, 10, 20, 36)
+breaks_R = c(0, 0.5, 1, 2, 4, 8)
 
 ggplot()+
-  geom_contour_fill(data = Ind_df, aes(x = T_add, y = sdP, z = R0))+
-  scale_fill_viridis(limits = c(min(breaks_R), max(breaks_R)))+
-  geom_contour(data = Ind_df, aes(x = T_add, y = sdP, z = R0),
+  geom_contour_fill(data = Ind_df, aes(x = T_av, y = sdP, z = R0))+
+  scale_fill_viridis_c(limits = c(min(breaks_R), max(breaks_R)))+
+  geom_contour(data = Ind_df, aes(x = T_av, y = sdP, z = R0),
                color = "red", breaks = c(1))+
   ggtitle("Average R0 between may and september")+
-  theme_test()+ geom_point(data = point_df, aes(x = T_add, y = sdP), color= "white") +
-  geom_text(data = point_df, aes(x = T_add, y = sdP, label = name), hjust=-0.1, vjust=-0.1, color= "white")
+  theme_test()+ 
+  geom_point(data = point_df, aes(x = T_av, y = sdP), color= "white") +
+  geom_path(data = point_df, aes(x = T_av, y = sdP), color= "white") +
+  geom_text(data = point_df, aes(x = T_av, y = sdP, label = year), hjust=-0.1, vjust=-0.1, color= "white")
 
 breaks_nR = c(0, 1, 5, 10, 20, 160)
 
 ggplot()+
   geom_contour_fill(data = Ind_df,
-                      aes(x = T_add, y = sdP, z = nR0))+
-  scale_fill_viridis(limits = c(min(breaks_nR), max(breaks_nR)))+
+                      aes(x = T_av, y = sdP, z = nR0))+
+  scale_fill_viridis_c(limits = c(min(breaks_nR), max(breaks_nR)))+
   ggtitle("n days with R0 >1")+
-  theme_test()+ geom_point(data = point_df, aes(x = T_add, y = sdP), color= "white") +
-  geom_text(data = point_df, aes(x = T_add, y = sdP, label = name), hjust=-0.1, vjust=-0.1, color= "white")
-
+  theme_test()+ 
+  geom_point(data = point_df, aes(x = T_av, y = sdP), color= "white") +
+  geom_path(data = point_df, aes(x = T_av, y = sdP, order = year), color= "white") +
+  geom_text(data = point_df, aes(x = T_av, y = sdP, label = year), hjust=-0.1, vjust=-0.1, color= "white")
 
 
