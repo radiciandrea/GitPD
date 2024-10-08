@@ -15,6 +15,7 @@ library(reshape2)
 library(dplyr)
 library(suncalc)
 library(pracma)
+library(data.table)
 
 #load T and P
 
@@ -85,7 +86,7 @@ for (i in 1:length(T_add)){
   }
 }
 
-W_tot_df <-do.call("rbind", W_tot_cycle_l)
+W_tot_df <-rbindlist(W_tot_cycle_l)
 rm(W_tot_cycle_l)
 
 #Create a matrix over which integrate; each colums is a city, each row is a date

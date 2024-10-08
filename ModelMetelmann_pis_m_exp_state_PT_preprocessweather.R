@@ -11,6 +11,7 @@ library(reshape2)
 library(dplyr)
 library(suncalc)
 library(pracma)
+library(data.table)
 
 # place
 # Montpellier 1524
@@ -33,7 +34,7 @@ for (y in years){
   W_df_l[[which(years == y)]] <- W_tot_df %>% filter(region ==region_x)
 }
 
-W_tot_df <-do.call("rbind", W_df_l)
+W_tot_df <-rbindlist(W_df_l)
 
 save(W_tot_df, file = paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_EOBS_",
      city, "_", min(years), "_", max(years), ".RData")) #Nizza
