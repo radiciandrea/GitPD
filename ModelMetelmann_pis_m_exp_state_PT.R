@@ -29,7 +29,7 @@ library(data.table)
 # LAT = 43.5
 # LON = 7.3
 
-city = "Montpellier"
+city = "Paris"
 years = 2000:2023
 
 load(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_EOBS_",
@@ -295,7 +295,7 @@ Ind_df$nR0 = nR0
 
 years_eval = c(2003, 2008, 2013, 2018, 2023)
 
-point_df <- data.frame("name" = c("Nice"),
+point_df <- data.frame("name" = city,
                        "year" = years_eval,
                        "country" = c("FR"),
                        "T_av" = NA,
@@ -319,46 +319,62 @@ for(y in years_eval){
 #   geom_text(data = point_df, aes(x = T_add, y = sdP, label = name), hjust=-0.1, vjust=-0.1)
 
 library(metR)
+library(ggrepel)
+library(ggpubr)
 
 #Ad
 breaks_ad = 5*10^(0:3)
-breaks_ad = 5*10^(1:3)
+breaks_log_ad = 1:10
 
-ggplot() +
-  geom_contour_fill(data = Ind_df, aes(x = T_av, y = sdP, z = Ad)) +
-  scale_fill_viridis_c(trans = "log",
-                       limits = c(min(breaks_ad), max(breaks_ad)),
-                       breaks = breaks_ad)+
-  ggtitle("Average adults/ha between may and september")+
+g1 <- ggplot() +
+  geom_contour_filled(data = Ind_df, aes(x = T_av, y = sdP, z = log(Ad)), breaks = breaks_log_ad) +
+  ggtitle(paste0("Average log adults/ha (May to Sept) in ", city))+
   theme_test()+ 
-  geom_point(data = point_df, aes(x = T_av, y = sdP), color= "white") +
-  geom_path(data = point_df, aes(x = T_av, y = sdP), color= "white") +
-  geom_text(data = point_df, aes(x = T_av, y = sdP, label = year), hjust=-0.1, vjust=-0.1, color= "white")
+  geom_point(data = point_df, aes(x = T_av, y = sdP), color= "black") +
+  geom_path(data = point_df, aes(x = T_av, y = sdP), color= "black") +
+  geom_label_repel(data = point_df, aes(x = T_av, y = sdP, label = year),
+                   label.padding = 0.15) #size = 4
 
 #R0
-breaks_R = c(0, 0.5, 1, 2, 4, 8)
+breaks_R = c(0, 0.5, 1, 2, 3, 4, 8)
 
-ggplot()+
-  geom_contour_fill(data = Ind_df, aes(x = T_av, y = sdP, z = R0))+
-  scale_fill_viridis_c(limits = c(min(breaks_R), max(breaks_R)))+
+g2 <- ggplot()+
+  geom_contour_filled(data = Ind_df, aes(x = T_av, y = sdP, z = R0), breaks = breaks_R)+
   geom_contour(data = Ind_df, aes(x = T_av, y = sdP, z = R0),
                color = "red", breaks = c(1))+
-  ggtitle("Average R0 between may and september")+
+  ggtitle(paste0("Average R0 (May to Sept)"))+
   theme_test()+ 
-  geom_point(data = point_df, aes(x = T_av, y = sdP), color= "white") +
-  geom_path(data = point_df, aes(x = T_av, y = sdP), color= "white") +
-  geom_text(data = point_df, aes(x = T_av, y = sdP, label = year), hjust=-0.1, vjust=-0.1, color= "white")
+  geom_point(data = point_df, aes(x = T_av, y = sdP), color= "black") +
+  geom_path(data = point_df, aes(x = T_av, y = sdP), color= "black") +
+  geom_label_repel(data = point_df, aes(x = T_av, y = sdP, label = year),
+                   label.padding = 0.15) #size = 4
 
-breaks_nR = c(0, 1, 5, 10, 20, 160)
+breaks_nR = c(0, 1, 5, 10, 20, 50, 90, 150)
 
-ggplot()+
-  geom_contour_fill(data = Ind_df,
-                      aes(x = T_av, y = sdP, z = nR0))+
-  scale_fill_viridis_c(limits = c(min(breaks_nR), max(breaks_nR)))+
-  ggtitle("n days with R0 >1")+
+g3 <- ggplot()+
+  geom_contour_filled(data = Ind_df, aes(x = T_av, y = sdP, z = nR0), breaks = breaks_nR)+
+  ggtitle(paste0("n days with R0 >1"))+
   theme_test()+ 
-  geom_point(data = point_df, aes(x = T_av, y = sdP), color= "white") +
-  geom_path(data = point_df, aes(x = T_av, y = sdP, order = year), color= "white") +
-  geom_text(data = point_df, aes(x = T_av, y = sdP, label = year), hjust=-0.1, vjust=-0.1, color= "white")
+  geom_point(data = point_df, aes(x = T_av, y = sdP), color= "black") +
+  geom_path(data = point_df, aes(x = T_av, y = sdP), color= "black") +
+  geom_label_repel(data = point_df, aes(x = T_av, y = sdP, label = year),
+                   label.padding = 0.15) #size = 4
+
+# previous vesion
+# g3 <- ggplot()+
+#   geom_contour_fill(data = Ind_df,
+#                     aes(x = T_av, y = sdP, z = nR0))+
+#   scale_fill_viridis_c(limits = c(min(breaks_nR), max(breaks_nR)))+
+#   ggtitle("n days with R0 >1")+
+#   theme_test()+ 
+#   geom_point(data = point_df, aes(x = T_av, y = sdP), color= "white") +
+#   geom_path(data = point_df, aes(x = T_av, y = sdP), color= "white") +
+#   geom_label_repel(data = point_df, aes(x = T_av, y = sdP, label = year),
+#                    label.padding = 0.15) #size = 4
 
 
+# Save
+g_tot <- ggarrange(g1, g2, g3, ncol = 1)
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/Exposure_state/"
+
+ggsave(paste0(folder_plot, "g", city ,".png"), g_tot, units="in", height=7, width= 5, dpi=300)
