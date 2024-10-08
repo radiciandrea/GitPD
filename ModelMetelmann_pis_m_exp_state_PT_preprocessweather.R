@@ -18,13 +18,19 @@ library(data.table)
 # Paris 3163
 # Paris suburbs sud # 3082
 
+df_cities = data.frame(city = c("Montpellier", "Paris", "Paris_sud"),
+                       code = c("1524", "3163", "3082"))
+
+city_x = "Paris"
+region_x = df_cities$code[df_cities$city == city_x] # region of Montpellier
+
 folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab" # "EOBS_elab"
 name = "W_EU"
 
-city = "Montpellier"
+
 years = 2000:2023
 
-region_x = 1524 # region of Montpellier
+
 
 W_df_l <- vector(mode = "list", length = length(years))
 
@@ -37,4 +43,4 @@ for (y in years){
 W_tot_df <-rbindlist(W_df_l)
 
 save(W_tot_df, file = paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_EOBS_",
-     city, "_", min(years), "_", max(years), ".RData")) #Nizza
+     city_x, "_", min(years), "_", max(years), ".RData")) #Nizza
