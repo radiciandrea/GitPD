@@ -18,10 +18,10 @@ library(data.table)
 # Paris 3163
 # Paris suburbs sud # 3082
 
-df_cities = data.frame(city = c("Montpellier", "Paris", "Paris_sud"),
-                       code = c("1524", "3163", "3082"))
+df_cities = data.frame(city = c("Montpellier", "Paris", "Paris_S", "Madrid", "Rome_E", "London_N", "Berlin"),
+                       code = c("1524", "3163", "3082", "726", "1092", "4032", "4447"))
 
-city_x = "Paris"
+city_x = "Madrid"
 region_x = df_cities$code[df_cities$city == city_x] # region of Montpellier
 
 folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab" # "EOBS_elab"
