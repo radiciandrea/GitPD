@@ -30,8 +30,9 @@ library(pracma)
 # LAT = 43.5
 # LON = 7.3
 
-city = "Madrid"
+city = "Paris"
 rk = "on" #on if integration crashes! (it is way slower)
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/Exposure_state/"
 
 years = 2000:2023
 
@@ -345,6 +346,9 @@ Ind_df$nR0 = nR0
 
 #https://ggplot2.tidyverse.org/reference/geom_contour.html
 
+save(Ind_df, file = paste0(folder_plot, "Ind_", city,".RData"))
+load(paste0(folder_plot, "Ind_", city,".RData"))
+
 years_eval = c(2003, 2008, 2013, 2018, 2023)
 
 point_df <- data.frame("name" = city,
@@ -462,6 +466,6 @@ g3_c <- ggplot()+
 
 # Save
 g_tot <- ggarrange(g1_c, g2_c, g3_c, ncol = 1)
-folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/Exposure_state/"
 
 ggsave(paste0(folder_plot, "g", city ,".png"), g_tot, units="in", height=8, width= 5.5, dpi=300)
+
