@@ -131,7 +131,7 @@ df <- function(t, x, parms) {
     t_h = 24*(t - t_n) #shoud put t and not t[1]
     ts = t_sr[t_n]
     TM = temp_M[max(1,t_n-1)]*(t_h<ts) + temp_M[t_n]*(t_h>ts)
-    Tm = temp_m[t_n]*(t_h<14) + temp_M[min(t_n+1, length(temp_m))]*(t_h>14)
+    Tm = temp_m[t_n]*(t_h<14) + temp_m[min(t_n+1, length(temp_m))]*(t_h>14)
     
     temp_h = ((TM+Tm)/2 + (TM-Tm)/2*cos(pi*(t_h+10)/(10+ts)))*(t_h<ts)+
       ((TM+Tm)/2 - (TM-Tm)/2*cos(pi*(t_h-ts)/(14-ts)))*(t_h>ts)*(t_h<14)+
