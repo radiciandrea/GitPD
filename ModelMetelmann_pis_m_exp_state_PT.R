@@ -16,6 +16,7 @@ library(dplyr)
 library(suncalc)
 library(pracma)
 library(data.table)
+library(pracma)
 
 #load T and P
 
@@ -29,7 +30,9 @@ library(data.table)
 # LAT = 43.5
 # LON = 7.3
 
-city = "Paris"
+city = "Madrid"
+rk = "on" #on if integration crashes! (it is way slower)
+
 years = 2000:2023
 
 load(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_EOBS_",
@@ -40,7 +43,7 @@ LON = W_tot_df$lon[1]
 H_dens = W_tot_df$pop[1]
 
 #recompute years for simulation
-years_u = 2018:2023
+years_u = 2019:2023
 W_tot_df0 <- W_tot_df
 W_tot_df <-  W_tot_df %>% filter(year %in% years_u)
 W_tot_df$DOS <- 1:nrow(W_tot_df)
@@ -52,14 +55,32 @@ t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time o
 
 #T_av = 14.66509
 T_add = seq(-2, 8, by = 0.5)
-P_pow = seq(0, 2.4, by = 0.2)
+#P_pow = seq(0, 2.4, by = 0.2)
+
+#change P_pow: determined Newton Rapson method
+P_summ = W_tot_df %>% 
+  filter(DOY >= 121) %>% #1st may
+  filter(DOY < 274) %>% #1st of october
+  pull(P)
+
+max_P_sd = 15
+
+fun_sd = function(x, p = P_summ, k = max_P_sd){
+  px = p^x * sum(p)/sum(p^x)
+  return(sd(px) - k)
+}
+
+P_pow_max = newtonRaphson(fun_sd, x0 = 1)$root
+P_pow = seq(0, P_pow_max, length.out = 12)
 
 W_tot_cycle_l <- vector(mode = "list", length = length(T_add)*length(P_pow))
 
 Ind_df = data.frame(T_add = rep(NA, length(T_add)*length(P_pow )),
                    T_av = rep(NA, length(T_add)*length(P_pow )),
+                   T_av_summer =rep(NA, length(T_add)*length(P_pow )),
                    P_pow  = rep(NA, length(T_add)*length(P_pow )),
-                   sdP = rep(NA, length(T_add)*length(P_pow )))
+                   sdP = rep(NA, length(T_add)*length(P_pow )),
+                   sdP_summer = rep(NA, length(T_add)*length(P_pow )))
 
 for (i in 1:length(T_add)){
   for (j in 1:length(P_pow)){
@@ -69,19 +90,39 @@ for (i in 1:length(T_add)){
     W_tot_cycle_df <- W_tot_df %>%
       mutate(T_add = T_add[i]) %>%
       mutate(T_av = T_av + T_add[i]) %>%
+      mutate(T_m = T_m + T_add[i]) %>%
+      mutate(T_M = T_M + T_add[i]) %>%
+      mutate(P_summ = P*(DOY >= 121)*(DOY < 274)) %>%
       mutate(P_pow  = P_pow[j]) %>%
-      mutate(P = P^P_pow[j]*(sum(P)/sum(P^P_pow[j]))) %>%
+      mutate(P_summ = P_summ^P_pow[j]*(sum(P_summ)/sum(P_summ^P_pow[j]))) %>%
+      mutate(P = P_summ*(DOY >= 121)*(DOY < 274) + P*(DOY < 121) + P*(DOY >= 274))%>%
       mutate(H = H_dens) %>%
       mutate(region = paste0(region, "_tadd_", T_add[i], "_Ppw_", round(P_pow , 2))) %>%
       mutate(Ph_P = Ph_P) %>%
       mutate(t_sr =t_sr)
+      
     
     W_tot_cycle_l[[k]] <- W_tot_cycle_df
     
     Ind_df$T_add[k] = T_add[i] 
     Ind_df$T_av[k] = mean(W_tot_cycle_df$T_av)
+    Ind_df$T_av_summer[k] = W_tot_cycle_df %>%
+      group_by(year) %>%
+      filter(DOY >= 121) %>% #1st may
+      filter(DOY < 274) %>% #1st of october
+      ungroup() %>%
+      dplyr::summarize(T_av_m = mean(T_av)) %>%
+      pull(T_av_m)
+  
     Ind_df$P_pow[k] = P_pow[j]
     Ind_df$sdP[k] = sd(W_tot_cycle_df$P)
+    Ind_df$sdP_summer[k] = W_tot_cycle_df %>%
+      group_by(year) %>%
+      filter(DOY >= 121) %>% #1st may
+      filter(DOY < 274) %>% #1st of october
+      ungroup() %>%
+      dplyr::summarize(P_sd = sd(P)) %>%
+      pull(P_sd)
     Ind_df$H[k] = W_tot_cycle_df$H[1]
   }
 }
@@ -213,8 +254,10 @@ E_d_0 = 10^4*rep(1, n_r) # IN THIS EXPERIMENT WE FIX Ed0 to 10^4
 X_0 = c(E0, J0, I0, A0, E_d_0)
 
 #integration on multiple years 
-
 Sim <- matrix(nrow = length(DOS_sim), ncol = 1+n_r*5)
+
+#integration step
+is = 1/48
 
 tic()
 for (year in years_u){
@@ -224,24 +267,33 @@ for (year in years_u){
   source("MM_y_parameters_extraction.R")
   
   #break at 1/8 to zero diapausing eggs, even for odd years
-  DOY_y_1 = DOY_y[1:(max(DOY_y)-153)] 
-  Sim_y_1<- ode(X_0, DOY_y_1, df, parms)
-  X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
   
-  DOY_y_2 = DOY_y[(max(DOY_y)-152): max(DOY_y)]
-  Sim_y_2<- ode(X_0, DOY_y_2, df, parms)
+  if(rk == "on"){
+    DOY_y_1_sim = seq(1, (max(DOY_y)-153), by = is)
+    Sim_y_1_sim<- deSolve::rk4(X_0, DOY_y_1_sim, df, parms)
+    Sim_y_1 <-Sim_y_1_sim[1+(0:(max(DOY_y)-154))/is,]
+    
+    X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
+    
+    DOY_y_2_sim = seq((max(DOY_y)-152), max(DOY_y), by = is)
+    Sim_y_2_sim<- deSolve::rk4(X_0, DOY_y_2_sim, df, parms)
+    Sim_y_2 <-Sim_y_2_sim[1+(0:152)/is,]
+  } else {
+    DOY_y_1 = DOY_y[1:(max(DOY_y)-153)]
+    Sim_y_1<- ode(X_0, DOY_y_1, df, parms)
+    
+    X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
+    
+    DOY_y_2 = DOY_y[(max(DOY_y)-152): max(DOY_y)]
+    Sim_y_2<- ode(X_0, DOY_y_2, df, parms)
+
+  }
   
   #break at 31/12 to zero everything except diapausing eggs
   Sim[id_d_y,] = rbind(Sim_y_1, Sim_y_2)
   X_0 = c(rep(0, n_r*4), Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
 }
 toc()
-
-Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*max(DOS_sim)),
-                      "region" = rep(rep(regions, each = max(DOS_sim)), 5),
-                      "t" = rep(DOS_sim, n_r*5),
-                      "value" = c(Sim[, 2:(1+5*n_r)])) #5 classes
-
 
 #E0
 Ed = Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)]
@@ -297,15 +349,29 @@ years_eval = c(2003, 2008, 2013, 2018, 2023)
 
 point_df <- data.frame("name" = city,
                        "year" = years_eval,
-                       "country" = c("FR"),
-                       "T_av" = NA,
-                       "sdP" = NA)
+                       "T_av_summer" = NA,
+                       "sdP_summer" = NA)
 
+# recc Didier: between 1 may and 1 oct
 for(y in years_eval){
   
-  point_df$T_av[which(point_df$year == y)] <- mean(W_tot_df0$T_av[which(W_tot_df0$year %in% c((y-3):y))])
-  point_df$sdP[which(point_df$year == y)] <- sd(W_tot_df0$P[which(W_tot_df0$year%in% c((y-3):y))])
+  # point_df$T_av[which(point_df$year == y)] <- mean(W_tot_df0$T_av[which(W_tot_df0$year %in% c((y-3):y))])
+  # point_df$sdP[which(point_df$year == y)] <- sd(W_tot_df0$P[which(W_tot_df0$year%in% c((y-3):y))])
   
+  
+  point_df$T_av_summer[which(point_df$year == y)] <- W_tot_df0 %>% 
+    filter(year %in% c((y-3):y)) %>%
+    filter(DOY >= 121) %>% #1st may
+    filter(DOY < 274) %>% #1st of october
+    dplyr::summarize(T_av_m = mean(T_av)) %>%
+    pull(T_av_m)
+  
+  point_df$sdP_summer[which(point_df$year == y)] <- W_tot_df0 %>% 
+    filter(year %in% c((y-3):y)) %>%
+    filter(DOY >= 121) %>% #1st may
+    filter(DOY < 274) %>% #1st of october
+    dplyr::summarize(P_sd = sd(P)) %>%
+    pull(P_sd)
 }
 
 
@@ -323,58 +389,79 @@ library(ggrepel)
 library(ggpubr)
 
 #Ad
-breaks_ad = 5*10^(0:3)
-breaks_log_ad = 1:10
+breaks_Ad = seq(1, 50000, by = 500)
 
 g1 <- ggplot() +
-  geom_contour_filled(data = Ind_df, aes(x = T_av, y = sdP, z = log(Ad)), breaks = breaks_log_ad) +
+  geom_contour_filled(data = Ind_df, aes(x = T_av_summer, y = sdP_summer, z = Ad ), breaks = breaks_Ad) +
   ggtitle(paste0("Average log adults/ha (May to Sept) in ", city))+
   theme_test()+ 
-  geom_point(data = point_df, aes(x = T_av, y = sdP), color= "black") +
-  geom_path(data = point_df, aes(x = T_av, y = sdP), color= "black") +
-  geom_label_repel(data = point_df, aes(x = T_av, y = sdP, label = year),
+  geom_point(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "black") +
+  geom_path(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "black") +
+  geom_label_repel(data = point_df, aes(x = T_av_summer, y = sdP_summer, label = year),
+                   label.padding = 0.15) #size = 4
+
+g1_c <- ggplot()+
+  geom_contour_fill(data = Ind_df,
+                    aes(x = T_av_summer, y = sdP_summer, z = log10(Ad)))+
+  scale_fill_viridis_c(limits = c(min(log10(breaks_Ad)), max(log10(breaks_Ad))))+
+  ggtitle(paste0("Average log10 adults/ha (May to Sept) in ", city))+
+  theme_test()+
+  geom_point(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "white") +
+  geom_path(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "white") +
+  geom_label_repel(data = point_df, aes(x = T_av_summer, y = sdP_summer, label = year),
                    label.padding = 0.15) #size = 4
 
 #R0
-breaks_R = c(0, 0.5, 1, 2, 3, 4, 8)
+breaks_R = c(0, 0.5, 1, 2, 4, 8, 16)
 
 g2 <- ggplot()+
-  geom_contour_filled(data = Ind_df, aes(x = T_av, y = sdP, z = R0), breaks = breaks_R)+
-  geom_contour(data = Ind_df, aes(x = T_av, y = sdP, z = R0),
+  geom_contour_filled(data = Ind_df, aes(x = T_av_summer, y = sdP_summer, z = R0), breaks = breaks_R)+
+  geom_contour(data = Ind_df, aes(x = T_av_summer, y = sdP_summer, z = R0),
                color = "red", breaks = c(1))+
   ggtitle(paste0("Average R0 (May to Sept)"))+
   theme_test()+ 
-  geom_point(data = point_df, aes(x = T_av, y = sdP), color= "black") +
-  geom_path(data = point_df, aes(x = T_av, y = sdP), color= "black") +
-  geom_label_repel(data = point_df, aes(x = T_av, y = sdP, label = year),
+  geom_point(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "black") +
+  geom_path(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "black") +
+  geom_label_repel(data = point_df, aes(x = T_av_summer, y = sdP_summer, label = year),
                    label.padding = 0.15) #size = 4
 
-breaks_nR = c(0, 1, 5, 10, 20, 50, 90, 150)
+g2_c <- ggplot()+
+  geom_contour_fill(data = Ind_df,
+                    aes(x = T_av_summer, y = sdP_summer, z = R0))+
+  scale_fill_viridis_c(limits = c(min(breaks_R), max(breaks_R)))+
+  ggtitle("Average R0 (May to Sept)")+
+  theme_test()+
+  geom_point(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "white") +
+  geom_path(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "white") +
+  geom_label_repel(data = point_df, aes(x = T_av_summer, y = sdP_summer, label = year),
+                   label.padding = 0.15) #size = 4
+
+
+breaks_nR = c(0.1, 1, 5, 10, 20, 50, 90, 150)
 
 g3 <- ggplot()+
-  geom_contour_filled(data = Ind_df, aes(x = T_av, y = sdP, z = nR0), breaks = breaks_nR)+
+  geom_contour_filled(data = Ind_df, aes(x = T_av_summer, y = sdP_summer, z = nR0), breaks = breaks_nR)+
   ggtitle(paste0("n days with R0 >1"))+
   theme_test()+ 
-  geom_point(data = point_df, aes(x = T_av, y = sdP), color= "black") +
-  geom_path(data = point_df, aes(x = T_av, y = sdP), color= "black") +
-  geom_label_repel(data = point_df, aes(x = T_av, y = sdP, label = year),
+  geom_point(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "black") +
+  geom_path(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "black") +
+  geom_label_repel(data = point_df, aes(x = T_av_summer, y = sdP_summer, label = year),
                    label.padding = 0.15) #size = 4
 
-# previous vesion
-# g3 <- ggplot()+
-#   geom_contour_fill(data = Ind_df,
-#                     aes(x = T_av, y = sdP, z = nR0))+
-#   scale_fill_viridis_c(limits = c(min(breaks_nR), max(breaks_nR)))+
-#   ggtitle("n days with R0 >1")+
-#   theme_test()+ 
-#   geom_point(data = point_df, aes(x = T_av, y = sdP), color= "white") +
-#   geom_path(data = point_df, aes(x = T_av, y = sdP), color= "white") +
-#   geom_label_repel(data = point_df, aes(x = T_av, y = sdP, label = year),
-#                    label.padding = 0.15) #size = 4
+g3_c <- ggplot()+
+  geom_contour_fill(data = Ind_df,
+                    aes(x = T_av_summer, y = sdP_summer, z = nR0))+
+  scale_fill_viridis_c(limits = c(min(breaks_nR), max(breaks_nR )))+
+  ggtitle("n days with R0 >1")+
+  theme_test()+
+  geom_point(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "white") +
+  geom_path(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "white") +
+  geom_label_repel(data = point_df, aes(x = T_av_summer, y = sdP_summer, label = year),
+                   label.padding = 0.15) #size = 4
 
 
 # Save
-g_tot <- ggarrange(g1, g2, g3, ncol = 1)
+g_tot <- ggarrange(g1_c, g2_c, g3_c, ncol = 1)
 folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/Exposure_state/"
 
-ggsave(paste0(folder_plot, "g", city ,".png"), g_tot, units="in", height=7, width= 5, dpi=300)
+ggsave(paste0(folder_plot, "g", city ,".png"), g_tot, units="in", height=8, width= 5.5, dpi=300)
