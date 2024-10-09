@@ -26,6 +26,7 @@ df <- function(t, x, parms) {
     mu_E = -log(0.955 * exp(-0.5*((temp_h-18.8)/21.53)^6)) # egg mortality rate
     mu_J = -log(0.977 * exp(-0.5*((temp_h-21.8)/16.6)^6)) # juvenile mortality rate
     beta = (33.2*exp(-0.5*((temp_h-70.3)/14.1)^2)*(38.8 - temp_h)^1.5)*(temp_h<= 38.8) #fertility rate
+    beta[which(is.nan(beta))] = 0
     
     # ODE definition 
     dE = beta*(1-omega[t_n, ])*A - (h[t_n, ]*delta_E + mu_E)*E
@@ -72,6 +73,7 @@ df_log <- function(t, x, parms) {
     mu_E = -log(0.955 * exp(-0.5*((temp_h-18.8)/21.53)^6)) # egg mortality rate
     mu_J = -log(0.977 * exp(-0.5*((temp_h-21.8)/16.6)^6)) # juvenile mortality rate
     beta = (33.2*exp(-0.5*((temp_h-70.3)/14.1)^2)*(38.8 - temp_h)^1.5)*(temp_h<= 38.8) #fertility rate
+    beta[which(is.nan(beta))] = 0
     
     # ODE definition 
     dlogE = beta*(1-omega[t_n, ])*exp(logA)/exp(logE) - (h[t_n, ]*delta_E + mu_E)
