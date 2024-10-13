@@ -36,13 +36,18 @@ cities = c("Montpellier", "Paris", "Paris_S", "Madrid", "Rome_E",
                                 "Sicily (Catania)", "Vienna", "Copenhagen", "Praga", 
                                 "Ljubjiana", "Zagreb", "Stockhom", "Oslo", "Dublin")
 
-cities = c("Sicily (Catania)", "Vienna", "Copenhagen", "Praga", 
+cities = c("Vienna", "Copenhagen", "Praga", 
            "Ljubjiana", "Zagreb", "Stockhom", "Oslo", "Dublin")
 
+cities = c("Viterbo",
+         "Coimbra", "Firenze", "Lugano", "Frankfurt aum Main", "Innsbruck",
+         "Antwerp")
+
+#"Sicily (Catania)", not working
 
 
 rk = "on" #on if integration crashes! (it is way slower)
-folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/Exposure_state/"
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/Exposure_state_pow/"
 
 years = 2000:2023
 
@@ -77,11 +82,7 @@ for(city_x in cities){
     filter(DOY < 274) %>% #1st of october
     pull(P)
   
-  max_P_sd = 15
-  
-  if (sd(P_summ)<3) {
-    max_P_sd =12
-  }
+  max_P_sd = 12
   
   fun_sd = function(x, p = P_summ, k = max_P_sd){
     px = p^x * sum(p)/sum(p^x)
@@ -309,7 +310,7 @@ for(city_x in cities){
   R0_DG = (a*phi_a)^2*m/(mu_A+mu_A^2*EIP_DG)*b_v2H*b_H2v_DG*IIP_DG # as Zanardini et al.
   
   R0 = colMeans(R0_DG[i_mjjas,]) # ndays R0>1
-  nR0 = colSums(R0_DG[i_mjjas,]>1)/length(unique(years))
+  nR0 = colSums(R0_DG[i_mjjas,]>1)/length(years_u)
   
   Ind_df$R0 = R0
   Ind_df$nR0 = nR0
@@ -379,7 +380,7 @@ for(city_x in cities){
   library(ggpubr)
   
   #Ad
-  breaks_Ad = seq(1, 50000, by = 500)
+  breaks_Ad = seq(4, 40000, by = 500)
   
   g1 <- ggplot() +
     geom_contour_filled(data = Ind_df, aes(x = T_av_summer, y = sdP_summer, z = Ad ), breaks = breaks_Ad) +
@@ -402,7 +403,7 @@ for(city_x in cities){
                      label.padding = 0.15) #size = 4
   
   #R0
-  breaks_R = c(0, 0.5, 1, 2, 4, 8, 16)
+  breaks_R = c(0, 0.5, 1, 2, 4, 7, 10)
   
   g2 <- ggplot()+
     geom_contour_filled(data = Ind_df, aes(x = T_av_summer, y = sdP_summer, z = R0), breaks = breaks_R)+
