@@ -28,11 +28,15 @@ df_cities = data.frame(city = c("Montpellier", "Paris", "Paris_S", "Madrid", "Ro
                                 "4320", "275", "2955", "5084", "3588", "2259", "2184",
                                 "5649", "5723", "4651"))
 
-city_x = "Madrid"
+
+df_cities = data.frame(city = c("Montpellier", "Paris", "Madrid", "London_N", "Viterbo",
+                                "Coimbra", "Firenze", "Lugano", "Frankfurt aum Main", "Innsbruck",
+                                "Antwerp"),
+                       code = c("1524", "3163",  "726","4032", "1221","657", "1602",
+                                "2236", "3565", "2662", "3876"))
 
 for (city_x in df_cities$city){
-  
-}
+
 region_x = df_cities$code[df_cities$city == city_x] # region of Montpellier
 
 folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab" # "EOBS_elab"
