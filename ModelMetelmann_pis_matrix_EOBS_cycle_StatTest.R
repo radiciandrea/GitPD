@@ -159,5 +159,69 @@ points(y = sensitivity_th, x = specificity_th , col = "red")
 text(y = sensitivity_th -0.03, x = specificity_th -0.32, paste0("biological threshold: 1 (",
                                                           round(specificity_th ,3), ",", round(sensitivity_th,3), ")"))
 
+
+ggsave(file= paste0(folder_plot, "ROC_AUC_Europe_gbif_ecdc.png"), units="in", width=3, height=3, dpi=300)
 # x = (1- specificity) = false positive %
 # y = (sensitivity) = true positive %
+
+
+# plot (ModelMetelmann_pis_matrix_EOBS_cycle_plot)
+
+E0_sel_1 = E0_2006_2014
+E0_sel_2 = E0_2015_2023
+
+br = c(0, 10^(-3:3), 10^10)
+
+#Metelmann map
+col_br= c("#384AB4", "#5570DF", "#8EB0FE", "#C5D7F3", "#F2CDBB", "#F29878", "#D04B45", "#B00026")
+
+domain_years_sel <- domain_sel%>%
+  arrange(region) %>%
+  mutate(E0_1 = E0_sel_1)%>%
+  mutate(E0_1_level=cut(E0_1, breaks=br,
+                        labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
+  mutate(E0_1_level=factor(as.character(E0_1_level), levels=rev(levels(E0_1_level)))) %>%
+  mutate(E0_2 = E0_sel_2)%>%
+  mutate(E0_2_level=cut(E0_2, breaks=br,
+                        labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
+  mutate(E0_2_level=factor(as.character(E0_2_level), levels=rev(levels(E0_2_level))))
+
+
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/05_AeAlbopictus_ImpactrecentClimateChange/Images/"
+
+ggplot()+
+  geom_sf(data = domain_years_sel, aes(fill = E0_1_level), colour = NA)+ #
+  scale_fill_manual(values = rev(col_br))+
+  geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
+  xlim(c(-15,20))+
+  ylim(c(36, 60))+
+  ggtitle(paste0("E0 diapausing eggs, period = ", min(years_sel_1), "-", max(years_sel_1)))+
+  theme_void()
+# + scale_fill_gradient(trans = "log")
+
+ggsave(file= paste0(folder_plot, "E0_1_level.png"), units="in", width=5, height=7, dpi=300)
+
+ggplot()+
+  geom_sf(data = domain_years_sel, aes(fill = E0_1_level), colour = NA)+ #
+  scale_fill_manual(values = rev(col_br))+
+  geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
+  xlim(c(-15,20))+
+  ylim(c(36, 60))+
+  ggtitle(paste0("E0 diapausing eggs, period = ", min(years_sel_1), "-", max(years_sel_1)))+
+  theme_void()
+
+ggsave(file= paste0(folder_plot, "E0_2_level.png"), units="in", width=5, height=7, dpi=300)
+
+ggplot()+
+  geom_sf(data = domain_years_sel, aes(fill = E0_2_level), colour = NA)+ #
+  scale_fill_manual(values = rev(col_br))+
+  geom_sf(data = ECDC_Albo %>% filter(Status == "Absent"), fill = "white", alpha = 0.3, color = NA)+
+  xlim(c(-14,19))+
+  ylim(c(37, 59))+
+  geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
+  geom_sf(data = obs_GBIF, alpha = 1, colour = "yellow", size=0.3)+
+  ggtitle(paste0("E0 diapausing eggs, period = ", min(years_sel_2), "-", max(years_sel_2)))+
+  theme_void()
+# + scale_fill_gradient(trans = "log")
+
+ggsave(file= paste0(folder_plot, "E0_2_level+gbif-ecdc.png"), units="in", width=5, height=7, dpi=300)
