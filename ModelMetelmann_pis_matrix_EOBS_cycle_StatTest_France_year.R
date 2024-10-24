@@ -169,6 +169,22 @@ ggplot(CK, aes(x = year, y = K)) +
 
 s <-summary(lm(K ~ year, CK))
 
+ggplot(CK, aes(x = year, y = K)) +
+  geom_point() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), plot.background = element_rect(fill='transparent', color=NA), 
+        panel.background = element_rect(fill='transparent'), axis.line = element_line(colour = "black"))
+
+theme(
+  panel.background = element_rect(fill='transparent'), #transparent panel bg
+  plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+  panel.grid.major = element_blank(), #remove major gridlines
+  panel.grid.minor = element_blank(), #remove minor gridlines
+  legend.background = element_rect(fill='transparent'), #transparent legend bg
+  legend.box.background = element_rect(fill='transparent') #transparent legend panel
+)
+
+ggsave(file= paste0(folder_plot, "CK.png"), units="in", width=4, height=3, dpi=300)
+
 # plot year by year 
 # https://bookdown.org/ededeban/ConsBioMap/GIF.html
 # https://www.r-bloggers.com/2021/05/animated-graph-gif-with-gganimate-ggplot/
@@ -196,7 +212,7 @@ for(y in years_eval){
     scale_fill_manual(breaks = c("true positive", "true negative", "false positive", "false negative"),
                       values=c("#B0986CFF", "#009474FF", "#EFDDCFFF","#72E1E1FF"))+
     ggtitle(paste0("Year: ", y," - Accuracy (K): ", round(K, 2)))+
-    theme_minimal()
+    theme_void()
   
   ggsave(file= paste0(folder_plot, "Plot_invasion_", y,".png"), plot= p1, units="in", width=7, height=5.5, dpi=300)
 }
@@ -226,7 +242,7 @@ img_list <- lapply(imgs, image_read)
 img_joined <- image_join(img_list)
 
 ## animate at X frames per second
-img_animated <- image_animate(img_joined, fps = 2)
+img_animated <- image_animate(img_joined, fps = 1)
 
 # ## view animated image
 # img_animated
