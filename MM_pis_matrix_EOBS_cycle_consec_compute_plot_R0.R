@@ -162,10 +162,10 @@ if (disease == "Zika"){
 
 #### Geo plot 
 
-years_sel_1 = 2007:2014 # # 2006:2016
+years_sel_1 = 2006:2014 # # 2006:2016
 R0_1 = colMeans(R0_m[which(years %in% years_sel_1),], na.rm = T)
 
-years_sel_2 = 2015:2022 # 2017:2023 
+years_sel_2 = 2015:2023 # 2017:2023 
 R0_2 = colMeans(R0_m[which(years %in% years_sel_2),], na.rm = T)
 
 
@@ -174,8 +174,8 @@ domain <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post
   arrange(region)
 
 x = c(61, 21, 7, 0, 0)
-x_lab = c("e) >9", "d) 3-8", "c) 1-2", "b) < 1", "a) 0")
-col_x <- rev(c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724"))
+x_lab = c("9 or more", "3 to 8", "1 to 2", "0 to 1", "0")
+col_x <- c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724")
 
 
 # domain <- domain%>%
@@ -206,20 +206,20 @@ Risk_zone <-  case_when((R0_1 < 1) & (R0_2 < 1) ~ "No p. spread",
                         (R0_1 < 1) & (R0_2 > 1) ~ "New p. spread",
                         (R0_1 > 1) & (R0_2 < 1) ~ "Prev. p. spread")
 
-### plot for CC RIO conference
+### plot for CC RIO conference /cclimat et impacte/paper
 
 folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/R0/"
-
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/05_AeAlbopictus_ImpactrecentClimateChange/Images/"
 countries_sh <-  st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/european-countries.shp")
 
 #plot 1
 
 g1 <- ggplot()+
   geom_sf(data = domain, aes(fill = R0_1_level), colour = NA)+ #
-  scale_fill_manual(values = rev(col_x))+
+  scale_fill_manual(values = col_x)+
   geom_sf(data = countries_sh, alpha = 0, colour = "white")+
   coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
-  ggtitle(paste0("Possible spread of ", disease, " (period 2007-2014)"))+
+  ggtitle(paste0("Possible spread of ", disease, " (period 2006-2014)"))+
   theme_minimal()+
   guides(fill=guide_legend(title=bquote(R[0]~gt~1~(weeks))))
 
@@ -229,10 +229,10 @@ ggsave(file= paste0(folder_plot, "R0_", disease,"_1_level_01.png"), plot= g1 , u
 
 g2 <- ggplot()+
   geom_sf(data = domain, aes(fill = R0_2_level), colour = NA)+ #
-  scale_fill_manual(values = rev(col_x))+
+  scale_fill_manual(values = col_x)+
   geom_sf(data = countries_sh, alpha = 0, colour = "white")+
   coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
-  ggtitle(paste0("Possible spread of ", disease, " (period 2015-2022)"))+
+  ggtitle(paste0("Possible spread of ", disease, " (period 2015-2023)"))+
   theme_minimal() +
   guides(fill=guide_legend(title=bquote(R[0]~gt~1~(weeks))))
 
