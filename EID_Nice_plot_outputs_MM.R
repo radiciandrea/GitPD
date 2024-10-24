@@ -197,10 +197,22 @@ VectDomain_Nice = data.frame(Name_app = "Nice (EID)",
                              pv_r_gross = cor_brut_p$p.value,
                              rmse_gross = rmse_brut,
                              r_year = cor_annual,
-                             pv_r_year = cor_annual_p$p.value)
+                             pv_r_year = cor_annual_p$p.value,
+                             l_y = length(unique(year(date_common))))
 
-folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_plot"
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/EOBS_sim_consec_plot"
 save(VectDomain_Nice, file = paste0(folder_plot, "/VectDomainStat_Nice.RData"))
+
+g2 <- ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = Type))+
+  ggtitle(paste0("Nice, 9987"))+
+  geom_line(data = Egg_comp_df %>% filter(Type != "laid, obs"))+
+  geom_point(data = Egg_comp_df %>% filter(Type == "laid, obs"))+
+  guides(color = FALSE)+
+  ylab("normalized abundance (%)")+
+  xlab("date")+
+  theme_test()
+
+ggsave(file= paste0(folder_plot, "/New_Nice_EID.png"), plot= g2, width=4, height=3, dpi=300)
 
 #lo plotto nell'inkcscape
 
