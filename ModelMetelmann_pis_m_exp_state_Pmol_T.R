@@ -221,13 +221,16 @@ for(city_x in cities){
   I0 = rep(0, n_r)
   A0 = rep(0, n_r)
   E_d_0 = 1*rep(1, n_r) # IN THIS EXPERIMENT WE FIX Ed0 to 1
-  X_0 = c(E0, J0, I0, A0, E_d_0)
+  X_00 = c(E0, J0, I0, A0, E_d_0)
   
   #integration on multiple years 
   Sim <- matrix(nrow = length(DOS_sim), ncol = 1+n_r*5)
+  Ed_m = matrix(NA, nrow = length(years_u), ncol = n_r)
   
   tic()
   for (year in years_u){
+    X_0 = X_00
+    
     id_d_y = which(years_rep == year)# vector of if days
     DOS_y = DOS_sim[id_d_y]
     DOY_y = DOY[id_d_y]
@@ -262,15 +265,14 @@ for(city_x in cities){
       
     }
     
-    #break at 31/12 to zero everything except diapausing eggs
-    Sim[id_d_y,] = rbind(Sim_y_1, Sim_y_2)
-    X_0 = c(rep(0, n_r*4), Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
+    Ed_m[which(years_u ==  year),] = Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)]
+  
   }
   toc()
   
   #E0
-  Ed = Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)]
-  E0 = (pmax(Ed, 0)/E_d_0)^(1/length(years_u))
+
+  E0 = apply(Ed_m, 2, function(x){exp(mean(log(x)))})
   
   Ind_df$E0 = E0 
   
@@ -386,7 +388,7 @@ for(city_x in cities){
   }
   
   
-  #Ad
+  #E0
   breaks_E0 = c(0, 100)
 
   g0_c <- ggplot()+
