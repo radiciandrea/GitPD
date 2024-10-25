@@ -220,7 +220,7 @@ g1 <- ggplot()+
   geom_sf(data = countries_sh, alpha = 0, colour = "white")+
   coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
   ggtitle(paste0("Possible spread of ", disease, " (period 2006-2014)"))+
-  theme_minimal()+
+  theme_void()+
   guides(fill=guide_legend(title=bquote(R[0]~gt~1~(weeks))))
 
 ggsave(file= paste0(folder_plot, "R0_", disease,"_1_level_01.png"), plot= g1 , units="in", width=5.5, height=7, dpi=300)
@@ -233,7 +233,7 @@ g2 <- ggplot()+
   geom_sf(data = countries_sh, alpha = 0, colour = "white")+
   coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
   ggtitle(paste0("Possible spread of ", disease, " (period 2015-2023)"))+
-  theme_minimal() +
+  theme_void() +
   guides(fill=guide_legend(title=bquote(R[0]~gt~1~(weeks))))
 
 ggsave(file= paste0(folder_plot, "R0_", disease,"_2_level_01.png"),  plot= g2 , units="in", width=5.5, height=7, dpi=300)
@@ -248,7 +248,7 @@ gvar <- ggplot()+
   geom_sf(data = countries_sh, alpha = 0, colour = "grey90")+
   coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
   ggtitle(paste0("Variation in the spread pattern of ", disease))+
-  theme_minimal() +
+  theme_void() +
   guides(fill=guide_legend(title=bquote(R[0]~variation)))
 
 ggsave(file= paste0(folder_plot, "R0_", disease,"_var_level_01.png"), plot= gvar , units="in", width=5.5, height=7, dpi=300)
