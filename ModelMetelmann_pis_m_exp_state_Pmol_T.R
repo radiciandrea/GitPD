@@ -40,12 +40,28 @@ cities = c("Viterbo",
            "Coimbra", "Firenze", "Lugano", "Frankfurt aum Main", "Innsbruck",
            "Antwerp")
 
-df_cities = data.frame(city = c("Montpellier", "Bilbao", "Augsburg", "Paris-centre", "Paris-suburbs", "Paris-region"))
+cities = c("Montpellier", "Bilbao", "Augsburg", "Paris-centre", "Paris-suburbs", "Paris-region")
 
 rk = "on" #on if integration crashes! (it is way slower)
 folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/Exposure_state_mol/"
 
 years = 2000:2023
+
+#settings
+#years ref
+years_u = 2019:2023
+
+# advanced parameter for carrying capacity_x
+alpha_evap = 0.9
+alpha_dens = 0.001
+alpha_rain = 0.00001
+
+eps_rat = 0.2
+eps_0 = 1.5
+eps_var = 0.05
+eps_opt = 8
+eps_dens = 0.01
+eps_fac = 0.01
 
 for(city_x in cities){
   
@@ -57,7 +73,6 @@ for(city_x in cities){
   H_dens = W_tot_df$pop[1]
   
   #recompute years for simulation
-  years_u = 2019:2023
   W_tot_df0 <- W_tot_df
   W_tot_df <-  W_tot_df %>% filter(year %in% years_u)
   W_tot_df$DOS <- 1:nrow(W_tot_df)
@@ -69,7 +84,7 @@ for(city_x in cities){
   
   #T_av = 14.66509
   T_add = seq(-2, 8, by = 0.5)
-  P_mol = seq(0.5, 2, by = 0.1)
+  P_mol = seq(0, 2, by = 1/6)
   
   # #change P_mol: determined Newton Rapson method
   # P_summ = W_tot_df %>% 
@@ -95,12 +110,12 @@ for(city_x in cities){
         mutate(T_av = T_av + T_add[i]) %>%
         mutate(T_m = T_m + T_add[i]) %>%
         mutate(T_M = T_M + T_add[i]) %>%
-        mutate(P_summ = P*(DOY >= 121)*(DOY < 274)) %>%
+        mutate(P_summ = P*(DOY >= 121)*(DOY < 304)) %>%
         mutate(P_mol  = P_mol[j]) %>%
         mutate(P_summ = P_summ*P_mol[j]) %>%
-        mutate(P = P_summ*(DOY >= 121)*(DOY < 274) + P*(DOY < 121) + P*(DOY >= 274))%>%
+        mutate(P = P_summ*(DOY >= 121)*(DOY < 304) + P*(DOY < 121) + P*(DOY >= 304))%>%
         mutate(H = H_dens) %>%
-        mutate(region = paste0(region, "_tadd_", T_add[i], "_Ppw_", round(P_mol[j], 2))) %>%
+        mutate(region = paste0(region, "_tadd_", T_add[i], "_Pmol_", round(P_mol[j], 2))) %>%
         mutate(Ph_P = Ph_P) %>%
         mutate(t_sr =t_sr)
       
@@ -114,8 +129,8 @@ for(city_x in cities){
         filter(DOY >= 121) %>% #1st may
         filter(DOY < 304) %>% #1st of november
         ungroup() %>%
-        dplyr::summarize(T_av_m = mean(T_av)) %>%
-        pull(T_av_m)
+        dplyr::summarize(T_av_summer = mean(T_av)) %>%
+        pull(T_av_summer)
       
       Ind_df$P_mol[k] = P_mol[j]
       Ind_df$P_summ_tot[k] = W_tot_cycle_df %>%
@@ -123,7 +138,7 @@ for(city_x in cities){
         filter(DOY >= 121) %>% #1st may
         filter(DOY < 304) %>% #1st of october
         ungroup() %>%
-        dplyr::summarize(P_summ_tot = sum(P)/length(years)) %>%
+        dplyr::summarize(P_summ_tot = sum(P)/length(years_u)) %>%
         pull(P_summ_tot)
       Ind_df$H[k] = W_tot_cycle_df$H[1]
     }
@@ -191,18 +206,6 @@ for(city_x in cities){
   
   gamma = 0.93*exp(-0.5*((temp_min_DJF -11.68)/15.67)^6) #survival probability of diapausing eggs (1:/inter) #at DOY = 10?
   lambda = 10^6 # capacity_x parameter (larvae/day/ha)
-  
-  # advanced parameter for carrying capacity_x
-  alpha_evap = 0.9
-  alpha_dens = 0.001
-  alpha_rain = 0.00001
-  
-  eps_rat = 0.2
-  eps_0 = 1.5
-  eps_var = 0.05
-  eps_opt = 8
-  eps_dens = 0.01
-  eps_fac = 0.01
   
   h = (1-eps_rat)*(1+eps_0)*exp(-eps_var*(prec-eps_opt)^2)/
     (exp(-eps_var*(prec-eps_opt)^2)+ eps_0) +
@@ -326,20 +329,14 @@ for(city_x in cities){
     X_0 = c(rep(0, n_r*4), Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)])
   }
   toc()
-  
-  #E0
-  Ed = Sim[nrow(Sim), 1+(n_r*4+1):(n_r*5)]
-  E0 = (pmax(Ed, 0)/E_d_0)^(1/length(years_u))
-  
-  Ind_df$E0 = E0 
-  
+
   #Adults in summer mjjas
   
   Adults <- Sim[, 1+(n_r*3+1):(n_r*4)]
   
-  i_mjjas <- which(as.numeric(substr(W_tot_cycle_df$date, 7, 7)) %in% 5:9)
+  i_mjjaso <- which(as.numeric(substr(W_tot_cycle_df$date, 6, 7)) %in% 5:10)
   
-  Ad <- colMeans(Adults[i_mjjas,])
+  Ad <- colMeans(Adults[i_mjjaso,])
   
   Ind_df$Ad = Ad 
   
@@ -353,8 +350,8 @@ for(city_x in cities){
   EIP_DG = 1.03*(4*exp(5.15 - 0.123*temp)) #Metelmann 2021
   R0_DG = (a*phi_a)^2*m/(mu_A+mu_A^2*EIP_DG)*b_v2H*b_H2v_DG*IIP_DG # as Zanardini et al.
   
-  R0 = colMeans(R0_DG[i_mjjas,]) # ndays R0>1
-  nR0 = colSums(R0_DG[i_mjjas,]>1)/length(years_u)
+  R0 = colMeans(R0_DG[i_mjjaso,]) # ndays R0>1
+  nR0 = colSums(R0_DG[i_mjjaso,]>1)/length(years_u)
   
   Ind_df$R0 = R0
   Ind_df$nR0 = nR0
@@ -362,47 +359,52 @@ for(city_x in cities){
   save(Ind_df, file = paste0(folder_plot, "Ind_", city_x,".RData"))
   load(paste0(folder_plot, "Ind_", city_x,".RData"))
   
-  years_eval = c(2003, 2008, 2013, 2018, 2023)
+  years_eval = 2004:2023
   
   point_df <- data.frame("name" = city_x,
                          "year" = years_eval,
                          "T_av_summer" = NA,
-                         "sdP_summer" = NA)
+                         "P_summ_tot" = NA)
   
   # recc Didier: between 1 may and 1 oct
   for(y in years_eval){
     
-    point_df$T_av_summer[which(point_df$year == y)] <- W_tot_df %>% 
-      filter(year %in% c((y-3):y)) %>%
+    point_df$T_av_summer[which(point_df$year == y)] <- W_tot_df0 %>% 
+      filter(year %in% c((y-4):y)) %>%
       filter(DOY >= 121) %>% #1st may
-      filter(DOY < 274) %>% #1st of october
-      dplyr::summarize(T_av_m = mean(T_av)) %>%
-      pull(T_av_m)
+      filter(DOY < 304) %>% #1st of november
+      dplyr::summarize(T_av_summer = mean(T_av)) %>%
+      pull(T_av_summer)
     
-    point_df$sdP_summer[which(point_df$year == y)] <- W_tot_df %>% 
-      filter(year %in% c((y-3):y)) %>%
+    point_df$P_summ_tot[which(point_df$year == y)] <- W_tot_df0 %>% 
+      filter(year %in% c((y-4):y)) %>%
       filter(DOY >= 121) %>% #1st may
-      filter(DOY < 274) %>% #1st of october
-      dplyr::summarize(P_sd = sd(P)) %>%
-      pull(P_sd)
+      filter(DOY < 304) %>% #1st of november
+      dplyr::summarize(P_summ_tot = sum(P)/length(c((y-3):y))) %>%
+      pull(P_summ_tot)
   }
   
+  #Plot
+  library(metR)
+  library(ggrepel)
+  library(ggpubr)
   
   #E0
-  breaks_E0 = c(0, 100)
+  breaks_E0 = c(10^(-5), 10^6)
 
   g0_c <- ggplot()+
     geom_contour_fill(data = Ind_df,
-                      aes(x = T_av_summer, y = sdP_summer, z = E0))+
-    scale_fill_viridis_c(limits = c(min(breaks_E0), max(breaks_E0)),
+                      aes(x = T_av_summer, y = P_summ_tot, z = log10(E0)))+
+    scale_fill_viridis_c(limits = log10(c(min(breaks_E0), max(breaks_E0))),
                          na.value = "#32003C")+
-    ggtitle(paste0("Average E0~, ", city_x))+
-    geom_contour(data = Ind_df, aes(x = T_av_summer, y = sdP_summer, z = E0),
+    ggtitle(paste0("Average E0, ", city_x))+
+    geom_contour(data = Ind_df, aes(x = T_av_summer, y = P_summ_tot, z = E0),
                  color = "red", breaks = c(1))+
     theme_test()+
-    geom_point(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "white") +
-    geom_path(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "white") +
-    geom_label_repel(data = point_df, aes(x = T_av_summer, y = sdP_summer, label = year),
+    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot, color = year)) +
+    scale_color_grey()+
+    geom_path(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
+    geom_label_repel(data = point_df, aes(x = T_av_summer, y = P_summ_tot, label = year),
                      label.padding = 0.15) #size = 4
   
   
@@ -411,14 +413,14 @@ for(city_x in cities){
 
   g1_c <- ggplot()+
     geom_contour_fill(data = Ind_df,
-                      aes(x = T_av_summer, y = sdP_summer, z = log10(Ad)))+
+                      aes(x = T_av_summer, y = P_summ_tot, z = log10(Ad)))+
     scale_fill_viridis_c(limits = c(min(log10(breaks_Ad)), max(log10(breaks_Ad))),
                          na.value = "#32003C")+
     ggtitle(paste0("Average log10 adults/ha (May to Oct)"))+
     theme_test()+
-    geom_point(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "white") +
-    geom_path(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "white") +
-    geom_label_repel(data = point_df, aes(x = T_av_summer, y = sdP_summer, label = year),
+    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
+    geom_path(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
+    geom_label_repel(data = point_df, aes(x = T_av_summer, y = P_summ_tot, label = year),
                      label.padding = 0.15) #size = 4
   
   # #R0
@@ -426,16 +428,16 @@ for(city_x in cities){
   # 
   # g2_c <- ggplot()+
   #   geom_contour_fill(data = Ind_df,
-  #                     aes(x = T_av_summer, y = sdP_summer, z = R0))+
-  #   geom_contour(data = Ind_df, aes(x = T_av_summer, y = sdP_summer, z = R0),
+  #                     aes(x = T_av_summer, y = P_summ_tot, z = R0))+
+  #   geom_contour(data = Ind_df, aes(x = T_av_summer, y = P_summ_tot, z = R0),
   #                color = "red", breaks = c(1))+
   #   scale_fill_viridis_c(limits = c(min(breaks_R), max(breaks_R)),
   #                        na.value = "#32003C")+
   #   ggtitle("Average R0 (May to Oct)")+
   #   theme_test()+
-  #   geom_point(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "white") +
-  #   geom_path(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "white") +
-  #   geom_label_repel(data = point_df, aes(x = T_av_summer, y = sdP_summer, label = year),
+  #   geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
+  #   geom_path(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
+  #   geom_label_repel(data = point_df, aes(x = T_av_summer, y = P_summ_tot, label = year),
   #                    label.padding = 0.15) #size = 4
   
   
@@ -443,16 +445,16 @@ for(city_x in cities){
 
   g3_c <- ggplot()+
     geom_contour_fill(data = Ind_df,
-                      aes(x = T_av_summer, y = sdP_summer, z = nR0))+
+                      aes(x = T_av_summer, y = P_summ_tot, z = nR0))+
     scale_fill_viridis_c(limits = c(min(breaks_nR), max(breaks_nR )),
                          na.value = "#32003C")+
     ggtitle("n days with R0 >1")+
-    geom_contour(data = Ind_df, aes(x = T_av_summer, y = sdP_summer, z = nR0),
+    geom_contour(data = Ind_df, aes(x = T_av_summer, y = P_summ_tot, z = nR0),
                  color = "red", breaks = c(1))+
     theme_test()+
-    geom_point(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "white") +
-    geom_path(data = point_df, aes(x = T_av_summer, y = sdP_summer), color= "white") +
-    geom_label_repel(data = point_df, aes(x = T_av_summer, y = sdP_summer, label = year),
+    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
+    geom_path(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
+    geom_label_repel(data = point_df, aes(x = T_av_summer, y = P_summ_tot, label = year),
                      label.padding = 0.15) #size = 4
   
   
