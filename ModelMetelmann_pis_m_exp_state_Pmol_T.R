@@ -380,7 +380,7 @@ for(city_x in cities){
       filter(year %in% c((y-4):y)) %>%
       filter(DOY >= 121) %>% #1st may
       filter(DOY < 304) %>% #1st of november
-      dplyr::summarize(P_summ_tot = sum(P)/length(c((y-3):y))) %>%
+      dplyr::summarize(P_summ_tot = sum(P)/length(c((y-4):y))) %>%
       pull(P_summ_tot)
   }
   
@@ -401,9 +401,9 @@ for(city_x in cities){
     geom_contour(data = Ind_df, aes(x = T_av_summer, y = P_summ_tot, z = E0),
                  color = "red", breaks = c(1))+
     theme_test()+
-    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot, color = year)) +
-    scale_color_grey()+
     geom_path(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
+    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot, color = as.factor(year))) +
+    scale_color_grey()+
     geom_label_repel(data = point_df, aes(x = T_av_summer, y = P_summ_tot, label = year),
                      label.padding = 0.15) #size = 4
   
@@ -441,7 +441,7 @@ for(city_x in cities){
   #                    label.padding = 0.15) #size = 4
   
   
-  breaks_nR = c(0, 1, 5, 10, 20, 50, 90, 150)
+  breaks_nR = c(0, 1, 5, 10, 20, 50, 90, 150, 200)
 
   g3_c <- ggplot()+
     geom_contour_fill(data = Ind_df,
