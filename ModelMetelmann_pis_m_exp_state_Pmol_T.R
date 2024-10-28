@@ -10,13 +10,19 @@ rm(list = ls())
 gc()
 
 library(deSolve)
-library(ggplot2)
 library(reshape2) 
 library(dplyr)
 library(suncalc)
 library(pracma)
 library(data.table)
 library(pracma)
+
+#Plot
+library(ggplot2)
+library(metR)
+library(ggrepel)
+library(ggpubr)
+
 
 #load T and P
 
@@ -383,14 +389,9 @@ for(city_x in cities){
       dplyr::summarize(P_summ_tot = sum(P)/length(c((y-4):y))) %>%
       pull(P_summ_tot)
   }
-  
-  #Plot
-  library(metR)
-  library(ggrepel)
-  library(ggpubr)
-  
+
   #E0
-  breaks_E0 = c(10^(-5), 10^6)
+  breaks_E0 = c(10^(-7), 10^7)
 
   g0_c <- ggplot()+
     geom_contour_fill(data = Ind_df,
@@ -402,9 +403,10 @@ for(city_x in cities){
                  color = "red", breaks = c(1))+
     theme_test()+
     geom_path(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
-    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot, color = as.factor(year))) +
+    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot, color = as.factor(year)), size = 2) +
+    guides(size = "legend", colour = "none")+
     scale_color_grey()+
-    geom_label_repel(data = point_df, aes(x = T_av_summer, y = P_summ_tot, label = year),
+    geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023), aes(x = T_av_summer, y = P_summ_tot, label = year),
                      label.padding = 0.15) #size = 4
   
   
@@ -418,9 +420,11 @@ for(city_x in cities){
                          na.value = "#32003C")+
     ggtitle(paste0("Average log10 adults/ha (May to Oct)"))+
     theme_test()+
-    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
     geom_path(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
-    geom_label_repel(data = point_df, aes(x = T_av_summer, y = P_summ_tot, label = year),
+    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot, color = as.factor(year)), size = 2) +
+    guides(size = "legend", colour = "none")+
+    scale_color_grey()+
+    geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023), aes(x = T_av_summer, y = P_summ_tot, label = year),
                      label.padding = 0.15) #size = 4
   
   # #R0
@@ -441,7 +445,7 @@ for(city_x in cities){
   #                    label.padding = 0.15) #size = 4
   
   
-  breaks_nR = c(0, 1, 5, 10, 20, 50, 90, 150, 200)
+  breaks_nR = c(0, 1, 5, 10, 20, 40, 80, 120, 170)
 
   g3_c <- ggplot()+
     geom_contour_fill(data = Ind_df,
@@ -452,9 +456,11 @@ for(city_x in cities){
     geom_contour(data = Ind_df, aes(x = T_av_summer, y = P_summ_tot, z = nR0),
                  color = "red", breaks = c(1))+
     theme_test()+
-    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
     geom_path(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
-    geom_label_repel(data = point_df, aes(x = T_av_summer, y = P_summ_tot, label = year),
+    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot, color = as.factor(year)), size = 2) +
+    guides(size = "legend", colour = "none")+
+    scale_color_grey()+
+    geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023), aes(x = T_av_summer, y = P_summ_tot, label = year),
                      label.padding = 0.15) #size = 4
   
   
