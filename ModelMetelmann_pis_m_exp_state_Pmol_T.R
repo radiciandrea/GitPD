@@ -411,7 +411,7 @@ for(city_x in cities){
   
   
   #Ad
-  breaks_Ad = seq(3, 30000, by = 500)
+  breaks_Ad = seq(0.03, 30000, by = 500)
 
   g1_c <- ggplot()+
     geom_contour_fill(data = Ind_df,

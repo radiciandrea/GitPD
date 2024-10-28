@@ -16,7 +16,7 @@ library(sf)
 library(lubridate)
 
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec"
-folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_plot"
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/EOBS_sim_consec_plot"
 
 # name = "W_EU"
 # year = 2005
@@ -216,6 +216,7 @@ VectDomain$pv_r_gross = NA
 VectDomain$rmse_gross = NA
 VectDomain$r_year = NA
 VectDomain$pv_r_year = NA
+VectDomain$l_y = NA
 
 #Sim starts in 2005
 date = as.Date(DOS_sim, origin = first_day-1)
@@ -302,7 +303,7 @@ for(region_x in regions_availab){
   rmse_brut = sqrt(mean((Eggs_sim_common_df$norm_eggs/100 - Eggs_obs_df$norm_eggs/100)^2))
   
   #### corr_per_year
-  # at least 7 in summer
+  # at least 9 in summer
   
   Eggs_obs_filtered_df <- Eggs_obs_df %>%
     mutate(month = month(date)) %>%
@@ -366,30 +367,29 @@ for(region_x in regions_availab){
   VectDomain$rmse_gross[VectDomain$region == region_x] = rmse_brut
   VectDomain$r_year[VectDomain$region == region_x] = cor_annual
   VectDomain$pv_r_year[VectDomain$region == region_x] = cor_annual_p
+  VectDomain$l_y[VectDomain$region == region_x] = length(unique(year(date_common)))
   
   #####
   
   egg_plot <- ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = type))+
-    ggtitle(paste0("standardized Eggs abundance, VA (points) vs simulated (line), cell id: ",
-                   region_x, ", ID VA: ", id_VA, ", locality: ", name_region))+
+    ggtitle(paste0(name_region," (", id_VA, ")"))+
     geom_line(data = Egg_comp_df %>% filter(type == "laid, simulated"))+
     geom_point(data = Egg_comp_df %>% filter(type != "laid, simulated"))+
     guides(color = FALSE)+
     ylab("normalized abundance (%)")+
-    theme_test()+
-    annotate(geom="text", x= min(Egg_comp_df$date)+(max(Egg_comp_df$date) - min(Egg_comp_df$date))*0.13, y=max(Egg_comp_df$norm_eggs),
-             label= label_cor, color="black")
+    theme_test()#+
+    # annotate(geom="text", x= min(Egg_comp_df$date)+(max(Egg_comp_df$date) - min(Egg_comp_df$date))*0.13, y=max(Egg_comp_df$norm_eggs),
+    #          label= label_cor, color="black")
 
-  ggsave(paste0(folder_plot, "/egg_plot_cell_id_", region_x, ".png"), plot = egg_plot,
-         width = 3000,
-         height = 1500,
-         units = "px",
-         dpi = 300)
-  
-  
+  ggsave(paste0(folder_plot, "/New_egg_plot_cell_id_", region_x, ".png"), plot = egg_plot,
+         units="in", width=4, height=3, dpi=300)
+
+
 }
 
 save(VectDomain, file = paste0(folder_plot, "/VectDomainStat.RData"))
+
+# st_write(st_centroid(VectDomain), "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_W_EU_IDVectAb_elab.shp")
 
 ### Elab_a posteriori
 countries_sh <-  st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/european-countries.shp")
@@ -399,32 +399,36 @@ load(paste0(folder_plot, "/VectDomainStat.RData"))
 # Replace Nice with EID data
 load(paste0(folder_plot, "/VectDomainStat_Nice.RData"))
 
-VectDomain$r_gross[VectDomain$Name_app == "Nice"] = VectDomain_Nice$r_gross
-VectDomain$pv_r_gros[VectDomain$Name_app == "Nice"] = VectDomain_Nice$pv_r_gros
-VectDomain$rmse_gross[VectDomain$Name_app == "Nice"] = VectDomain_Nice$rmse_gross
-VectDomain$r_year[VectDomain$Name_app == "Nice"] = VectDomain_Nice$r_year
-VectDomain$pv_r_year[VectDomain$Name_app == "Nice"] = VectDomain_Nice$pv_r_year
-VectDomain$Name_app[VectDomain$Name_app == "Nice"] = VectDomain_Nice$Name_app
+VectDomain$r_gross[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$r_gross
+VectDomain$pv_r_gros[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$pv_r_gros
+VectDomain$rmse_gross[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$rmse_gross
+VectDomain$r_year[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$r_year
+VectDomain$pv_r_year[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$pv_r_year
+VectDomain$Name_app[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$Name_app
+VectDomain$l_y[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$l_y
 
 ###
 
 summary(VectDomain$r_gross)
 summary(VectDomain$pv_r_gross)
 
+folder_plot2 = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/05_AeAlbopictus_ImpactrecentClimateChange/Images/"
+
 #plot map 
 ggplot()+
   geom_sf(data = countries_sh, alpha = 1, colour = "white")+
-  geom_sf(data = VectDomain, aes(fill = r_gross))+
+  geom_sf(data = st_centroid(VectDomain), aes(color = r_gross, size = l_y))+
   coord_sf(xlim = c(7, 17), ylim = c(37, 47))+
-  scale_fill_gradient2(
+  scale_color_gradient2(
     name = waiver(),
-    low = "red",
-    mid = "grey90",
-    high = "blue",
+    low = "#384AB4",
+    mid = "white",
+    high = "#B00026",
     midpoint = 0)+
   ggtitle('Linear correlation')+
-  theme_minimal()
+  theme_void()
 
+ggsave(file= paste0(folder_plot2, "VectAbundance_corr.png"), units="in", width=4, height=6, dpi=300)
 
 ggplot()+
   geom_sf(data = countries_sh, alpha = 1, colour = "white")+
@@ -433,9 +437,9 @@ ggplot()+
   coord_sf(xlim = c(7, 17), ylim = c(37, 47))+
   scale_fill_gradient2(
     name = waiver(),
-    low = "blue",
+    low = "#384AB4",
     mid = "grey90",
-    high = "red",
+    high = "#B00026",
     midpoint = 0.2)+
   ggtitle('p-value linear corr')+
   theme_minimal()
