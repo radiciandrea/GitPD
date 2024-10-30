@@ -15,9 +15,9 @@ library(sf)
 library(lubridate)
 
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim_consec_01" # EOBS_sim_consec
-folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab_01" # "EOBS_elab"
+folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab" # "EOBS_elab"
 
-files = list.files(folder_out, pattern = ".RData")
+files = list.files(folder_out, pattern = "Sim_EOBS")
 
 # name = substring(files[1], 10, 13)
 # years = substring(files, 15, 18)
@@ -148,6 +148,8 @@ domain_Dengue <- left_join(domain_Dengue, domain_sel)
 
 
 library(pROC)
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/R0/"
+
 
 category = domain_Dengue$status
 prediction = domain_Dengue$R0_l
@@ -155,10 +157,10 @@ prediction = domain_Dengue$R0_l
 category = category[which(!is.na(prediction))]
 prediction = prediction[which(!is.na(prediction))]
 
+png(file= paste0(folder_plot, "ROC_AUC_Europe_disease_ecdc.png"),width = 480, height = 480, res = 150, units = "px")
 par(pty = "s")
-
 roc(category , prediction, plot = TRUE, col = "#377eb8", lwd = 3, print.thres=TRUE)
-
+dev.off()
 # x = (1- specificity) = 1 - true negative %
 # y = (sensitivity) = true positive %
 
@@ -192,7 +194,7 @@ R0_l_level <- case_when(R0_l > x[1] ~ x_lab[1],
 gx <- ggplot()+
   geom_sf(data = domain, aes(fill = R0_l_level), colour = NA)+ #
   scale_fill_manual(values = col_x)+
-  geom_sf(data = ECDC_Dengue %>% filter(Infection == "Yes"), fill = "white", alpha = 0.6, color = "white")+
+  geom_sf(data = ECDC_Dengue %>% filter(Infection == "Yes"), fill = "white", alpha = 0.6, color = "red")+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray90")+
   coord_sf(xlim = c(-11, 18), ylim = c(37, 59)) +
   ggtitle(paste0("Comparison ECDC vs #cases R0"))+
