@@ -33,7 +33,7 @@ cities = c("Coimbra", "Montpellier", "Madrid", "Lugano", "Frankfurt aum Main", "
 
 cities = c("Montpellier", "Bilbao", "Augsburg", "Paris-centre", "Paris-suburbs", "Paris-region")
 
-years_eval = 2004:2023
+years_eval = c(2004, 2007, 2010, 2014, 2017, 2020, 2023) #2004:2023
 years = 2000:2023
 
 #MULTIPLICATIVE
@@ -148,9 +148,9 @@ for (city_x in cities){
   # Save
   g_tot <- ggarrange(g0_c, g1_c, g3_c, ncol = 1)
   
-  ggsave(paste0(folder_plot, "NEW_g", city_x ,"_E0.png"), g0_c, units="in", height=8/3, width= 5.5, dpi=300)
-  ggsave(paste0(folder_plot, "NEW_g", city_x ,"_Ad.png"), g1_c, units="in", height=8/3, width= 5.5, dpi=300)
-  ggsave(paste0(folder_plot, "NEW_g", city_x ,"_nR.png"), g3_c, units="in", height=8/3, width= 5.5, dpi=300)
+  ggsave(paste0(folder_plot, "NEW_g", city_x ,"_E0_15.png"), g0_c + xlab("")+ ylab("")+ggtitle("")+guides(size = "legend", fill = "none"), units="in", height=8/(3*1.5), width= 5.5/1.5, dpi=300)
+  ggsave(paste0(folder_plot, "NEW_g", city_x ,"_Ad_15.png"), g1_c + xlab("")+ ylab("")+ggtitle("")+guides(size = "legend", fill = "none"), units="in", height=8/(3*1.5), width= 5.5/1.5, dpi=300)
+  ggsave(paste0(folder_plot, "NEW_g", city_x ,"_nR_15.png"), g3_c + xlab("")+ ylab("")+ggtitle("")+guides(size = "legend", fill = "none"), units="in", height=8/(3*1.5), width= 5.5/1.5, dpi=300)
   
   ggsave(paste0(folder_plot, "NEW_g", city_x ,".png"), g_tot, units="in", height=8, width= 5.5, dpi=300)
 }
