@@ -151,16 +151,16 @@ prediction_th = 1*(prediction>thr)
 sensitivity_th = sum((prediction_th+category)==2, na.rm = T)/sum(category)
 specificity_th = sum((prediction_th+category)==0, na.rm = T)/(sum(category==0))
 
-
+png(file= paste0(folder_plot, "ROC_AUC_Europe_gbif_ecdc.png"),width = 480, height = 480, res = 150, units = "px")
 par(pty = "s")
 #roc(obese, glm.fit$fitted.values, plot = TRUE)
 roc(category , prediction, plot = TRUE, col = "#377eb8", lwd = 3, print.thres=TRUE)
-points(y = sensitivity_th, x = specificity_th , col = "red")
-text(y = sensitivity_th -0.03, x = specificity_th -0.32, paste0("biological threshold: 1 (",
-                                                          round(specificity_th ,3), ",", round(sensitivity_th,3), ")"))
+# points(y = sensitivity_th, x = specificity_th , col = "red")
+# text(y = sensitivity_th -0.03, x = specificity_th -0.32, paste0("biological threshold: 1 (",
+#                                                           round(specificity_th ,3), ",", round(sensitivity_th,3), ")"))
 
+dev.off()
 
-ggsave(file= paste0(folder_plot, "ROC_AUC_Europe_gbif_ecdc.png"), units="in", width=3, height=3, dpi=300)
 # x = (1- specificity) = false positive %
 # y = (sensitivity) = true positive %
 
@@ -202,12 +202,12 @@ ggplot()+
 ggsave(file= paste0(folder_plot, "E0_1_level.png"), units="in", width=5, height=7, dpi=300)
 
 ggplot()+
-  geom_sf(data = domain_years_sel, aes(fill = E0_1_level), colour = NA)+ #
+  geom_sf(data = domain_years_sel, aes(fill = E0_2_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
   xlim(c(-15,20))+
   ylim(c(36, 60))+
-  ggtitle(paste0("E0 diapausing eggs, period = ", min(years_sel_1), "-", max(years_sel_1)))+
+  ggtitle(paste0("E0 diapausing eggs, period = ", min(years_sel_2), "-", max(years_sel_2)))+
   theme_void()
 
 ggsave(file= paste0(folder_plot, "E0_2_level.png"), units="in", width=5, height=7, dpi=300)
