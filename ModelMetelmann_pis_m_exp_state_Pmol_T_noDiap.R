@@ -46,8 +46,9 @@ folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperi
 years = 2000:2023
 
 #settings
-#years ref
-years_u = 2019:2023
+#years ref (modified since we're taking untile august)
+years_ref = 2018:2022
+years_u = min(years_ref):(max(years_ref)+1)
 
 # advanced parameter for carrying capacity_x
 alpha_evap = 0.9
@@ -147,7 +148,6 @@ for(city_x in cities){
   
   #Create a matrix over which integrate; each colums is a city_x, each row is a date
   regions = unique(W_tot_df$region)
-  DOS = unique(W_tot_df$DOS)
   
   # set simualtion horizon
   t_s = DOS[1] # simulate multiple year
@@ -209,73 +209,80 @@ for(city_x in cities){
     (exp(-eps_var*(prec-eps_opt)^2)+ eps_0) +
     eps_rat*eps_dens/(eps_dens + exp(-eps_fac*H))
   
-  source("MM_integration_functions_exp_state.R")
+  source("MM_integration_functions_exp_state_noDiap.R")
   
   #integration step
   is = 1/60
   
   #### exp 1
   
-  # System initialization
-  E0 = rep(0, n_r)
-  J0 = rep(0, n_r)
-  I0 = rep(0, n_r)
-  A0 = rep(100, n_r)
-  E_d_0 = rep(0, n_r) # IN THIS EXPERIMENT WE FIX Ed0 to 1
-  X_00 = c(E0, J0, I0, A0, E_d_0)
+  # System initialization (to fit with the og system, we start with 1 in each class)
+  E0 = rep(1, n_r)
+  J0 = rep(1, n_r)
+  I0 = rep(1, n_r)
+  A0 = rep(100, n_r) # IN THIS EXPERIMENT WE FIX A0 to 100
+  E_d_0 = rep(1, n_r) 
   
-  #integration on multiple years 
-  Sim <- matrix(nrow = length(DOS_sim), ncol = 1+n_r*5)
-  Ed_m = matrix(NA, nrow = length(years_u), ncol = n_r)
+  X_0_d = c(E0, J0, I0, A0, E_d_0)
+  X_0_nd = c(E0, J0, I0, A0)
+  
+  #indicator A0 defined as in supp mat: 
+  # but starting from 1st of july up to end of august:
+  # mean(A[181 +1:62]/mean(A[365+181 +1:62]))
+  A0_d_m = matrix(NA, nrow = length(years_ref), ncol = n_r)
+  A0_nd_m = matrix(NA, nrow = length(years_ref), ncol = n_r)
   
   tic()
-  for (year in years_u){
-    X_0 = X_00
+  for (year in years_ref){
     
-    id_d_y = which(years_rep == year)# vector of if days
+    id_d_y = which(years_rep == year | years_rep == year +1)# vector of of days
+    id_d_y = id_d_y[183:608] # select from 1st of july to the end of august of next year
+    
+    # consider DOY_y as julian day starting from 1/jan/year
     DOS_y = DOS_sim[id_d_y]
-    DOY_y = DOY[id_d_y]
+    DOY_y = 1:length(DOY_y)
+    
     source("MM_y_parameters_extraction.R")
     
-    #break at 1/8 to zero diapausing eggs, even for odd years
+    # we do not remove diapausing eggs
+    # we work with the 
     
     if(rk == "on"){
       
-      #log system
-      DOY_y_1_sim = seq(1, (max(DOY_y)-153), by = is)
-      Sim_y_1_sim<- deSolve::rk4(X_0, DOY_y_1_sim, df, parms)
-      Sim_y_1 <-Sim_y_1_sim[1+(0:(max(DOY_y)-154))/is,]
+      DOY_y_2_sim = seq(1, max(DOY_y), by = is)
       
-      X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
+      #log system - diapause
+      X_0_d_log = X_0_d
+      X_0_d_log[1:(n_r*4)] = log(X_0_d_log[1:(n_r*4)])
       
-      X_0_log = X_0
-      X_0_log[1:(n_r*4)] = log(X_0[1:(n_r*4)])
-      DOY_y_2_sim = seq((max(DOY_y)-152), max(DOY_y), by = is)
-      Sim_y_2_sim<- deSolve::rk4(X_0_log, DOY_y_2_sim, df_log, parms)
-      Sim_y_2 <-Sim_y_2_sim[1+(0:152)/is,]
-      Sim_y_2[, 1+1:(n_r*4)] = exp(Sim_y_2[, 1+1:(n_r*4)])
+      Sim_y_d_sim<- deSolve::rk4(X_0_d_log, DOY_y_2_sim, df_log, parms)
+      Sim_y_d <-Sim_y_d_sim[1+(0:152)/is,]
+      Sim_y_d[, 1+1:(n_r*4)] = exp(Sim_y_d[, 1+1:(n_r*4)])
       
-    } else {
-      DOY_y_1 = DOY_y[1:(max(DOY_y)-153)]
-      Sim_y_1<- ode(X_0, DOY_y_1, df, parms)
+      #log system - no diapause
+      X_0_nd_log = log(X_0_nd)
       
-      X_0 = c(Sim_y_1[nrow(Sim_y_1), 1+1:(n_r*4)], rep(0, n_r))
-      
-      DOY_y_2 = DOY_y[(max(DOY_y)-152): max(DOY_y)]
-      Sim_y_2<- ode(X_0, DOY_y_2, df, parms)
+      Sim_y_nd_sim<- deSolve::rk4(X_0_nd_log, DOY_y_2_sim, df_log_noDiap, parms)
+      Sim_y_nd <-exp(Sim_y_nd_sim[1+(0:152)/is,])
       
     }
     
-    Ed_m[which(years_u ==  year),] = Sim_y_2[nrow(Sim_y_2), 1+(n_r*4+1):(n_r*5)]
+    A0_d_m[which(years_u ==  year),] = Sim_y_d[nrow(Sim_y_d)-61:0, 1+(n_r*3+1):(n_r*4)]/
+      Sim_y_d[1:62, 1+(n_r*3+1):(n_r*4)]
+    
+    A0_nd_m[which(years_u ==  year),] = Sim_y_nd[nrow(Sim_y_nd)-61:0, 1+(n_r*3+1):(n_r*4)]/
+      Sim_y_nd[1:62, 1+(n_r*3+1):(n_r*4)]
     
   }
   toc()
   
   #E0
   
-  E0 = apply(Ed_m, 2, function(x){exp(mean(log(x)))})
+  A0_d = apply(A0_d_m, 2, function(x){exp(mean(log(x)))})
+  A0_nd = apply(A0_nd_m, 2, function(x){exp(mean(log(x)))})
   
-  Ind_df$E0 = E0 
+  Ind_df$A0_d = A0_d 
+  Ind_df$A0_nd = A0_nd 
   
    
   save(Ind_df, file = paste0(folder_plot, "Ind_", city_x,".RData"))
