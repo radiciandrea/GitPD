@@ -43,42 +43,61 @@ library(fields)
 tps_model <- Tps(x = st_coordinates(data_presence_sf_cp), Y = data_presence_sf_cp$year_col)
 
 # load grid and other datas
-grid_France <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_01_France.shp")
+grid_W_EU <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_01_W_EU.shp")
 
-grid_France_c <- st_centroid(grid_France)
-grid_France_cp <- st_transform(grid_France_c, crs = "EPSG:3035")
+grid_W_EU_c <- st_centroid(grid_W_EU)
+grid_W_EU_cp <- st_transform(grid_W_EU_c, crs = "EPSG:3035")
 
 # predict over a grid
-grid_France_cp$year_pred = predict(tps_model, st_coordinates(grid_France_cp))
+grid_W_EU_cp$year_pred = predict(tps_model, st_coordinates(grid_W_EU_cp))
 
 # make a matrix out of it
-grid_France_m_year = matrix(grid_France_cp$year_pred, nrow = 88, byrow = F)
-grid_France_m_x = matrix(st_coordinates(grid_France_cp)[,1], nrow = 88, byrow = F)
-grid_France_m_y = matrix(st_coordinates(grid_France_cp)[,2], nrow = 88, byrow = F)
+grid_W_EU_m_year = matrix(grid_W_EU_cp$year_pred, nrow = 240, byrow = F) #88
+grid_W_EU_m_x = matrix(st_coordinates(grid_W_EU_cp)[,1], nrow = 240, byrow = F) #88
+grid_W_EU_m_y = matrix(st_coordinates(grid_W_EU_cp)[,2], nrow = 240, byrow = F) #88
 
-grid_France_v_x = grid_France_m_x[1,]
-grid_France_v_y = grid_France_m_y[,1]
+grid_W_EU_v_x = grid_W_EU_m_x[1,]
+grid_W_EU_v_y = grid_W_EU_m_y[,1]
+
+#if projected
+dx = mean(grid_W_EU_m_x[,2:291]-grid_W_EU_m_x[,1:290]) # 1:131
+dy = mean(grid_W_EU_m_y[1:239,]-grid_W_EU_m_y[2:240,]) # #1:88
 
 # compute velocity
 library(pracma)
 
-gradient_xy <- gradient(grid_France_m_year, grid_France_v_x, grid_France_v_y)
+gradient_xy <- gradient(grid_W_EU_m_year, dx, dy)
 gradient_x = gradient_xy[[1]]
 gradient_y = gradient_xy[[2]]
 
-velocity <- sqrt(gradient_x^2 + gradient_y^2)
+# velocity (is friction in reality velocity)
+friction <- sqrt(gradient_x^2 + gradient_y^2)
 
-grid_France_cp$velocity = as.vector(velocity)
+#considerr a 11*11 windows: Kraemer
+# the resulting friction surface (time/distance) was smoothed using an average 11 × 11
+# cell filter to prevent local null frictions values
+friction_smoothed <- friction
 
-ggplot(grid_France_cp, aes(color = velocity)) +
+d_smooth = 5
+
+for(j in 1:ncol(friction)){
+  for(i in 1:nrow(friction)){
+    friction_smoothed[i,j] <- mean(friction[max(1,(i-d_smooth)):min((i+d_smooth),nrow(friction))
+                                                     ,max(1,(j-d_smooth)):min((j+d_smooth),ncol(friction))])
+  }
+}
+
+velocity = 1/friction_smoothed*0.001 # (to express as km/y)
+
+grid_W_EU_cp$velocity = as.vector(velocity)
+
+ggplot(grid_W_EU_cp, aes(color = velocity)) +
   geom_sf() +
-  scale_fill_viridis_c() + 
-  labs(title = "Spread Velocity", x = "X Coordinate", y = "Y Coordinate", fill = "Velocity") +
+  scale_color_viridis_c() + 
+  labs(title = "Spread Velocity", x = "X Coordinate", y = "Y Coordinate", color = "Velocity") +
   theme_minimal()
 
-
 # LATER
-
 type = "_01"
 
 folder_out = paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim", type)
@@ -92,10 +111,58 @@ domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/
   arrange(region) %>%
   filter(!(is.na(Country))) 
 
-domain_sel_v <- left_join(domain_sel, st_drop_geometry(grid_France_cp))
+domain_sel_v <- left_join(domain_sel, st_drop_geometry(grid_W_EU_cp))
 
 ggplot(domain_sel_v, aes(fill = velocity), color = NULL) +
   geom_sf() +
-  scale_fill_viridis_c() + 
+  scale_fill_viridis_c(na.value = "transparent") + 
   labs(title = "Spread Velocity", fill = "Velocity") +
+  theme_minimal()
+
+
+#### alternative code
+
+bb_france <- st_bbox(st_transform(domain_sel, crs = "EPSG:3035"))# km
+
+# bb_france <- st_bbox(data_presence_sf_cp) # alternatively
+
+dxy = 5000
+
+x_range <- seq(bb_france[1], bb_france[3], by = dxy)
+y_range <- seq(bb_france[2], bb_france[4], by = dxy)
+grid <- expand.grid(X = x_range, Y = y_range)
+
+grid$year_pred <- predict(tps_model, grid)
+
+z_matrix <- matrix(grid$year_pred, ncol = length(x_range), nrow = length(y_range), byrow = F)
+
+library(pracma)
+
+gradient_xy <- gradient(z_matrix, x_range, y_range)
+gradient_x = gradient_xy[[1]]
+gradient_y = gradient_xy[[2]]
+
+# velocity (is friction in reality velocity)
+friction <- sqrt(gradient_x^2 + gradient_y^2)
+
+#considerr a 11*11 windows: Kraemer
+# the resulting friction surface (time/distance) was smoothed using an average 11 × 11
+# cell filter to prevent local null frictions values
+friction_smoothed <- friction
+
+for(j in 1:ncol(friction)){
+  for(i in 1:nrow(friction)){
+    friction_smoothed[i,j] <- mean(friction[max(1,(i-5)):min((i+5),nrow(friction))
+                                            ,max(1,(j-5)):min((j+5),ncol(friction))])
+  }
+}
+
+velocity = 1/friction_smoothed*0.001 # (to express as km/y)
+
+grid$velocity = as.vector(t(velocity))
+
+ggplot(grid, aes(x = X, y = Y, fill = velocity), colo = NULL) +
+  geom_tile() +
+  scale_fill_viridis_c() + 
+  labs(title = "Spread Velocity", x = "X Coordinate", y = "Y Coordinate", fill = "Velocity") +
   theme_minimal()
