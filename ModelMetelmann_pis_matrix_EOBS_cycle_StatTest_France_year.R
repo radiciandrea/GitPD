@@ -163,6 +163,8 @@ for (year in years_eval){
 
  # Linear regression: K vs year
 
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/02_ClimaImpact_nov_2024/Images/"
+
 ggplot(CK, aes(x = year, y = K)) +
   geom_point() +
   geom_smooth(method='lm')
@@ -172,9 +174,7 @@ s <-summary(lm(K ~ year, CK))
 ggplot(CK, aes(x = year, y = K)) +
   geom_point() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), plot.background = element_rect(fill='transparent', color=NA), 
-        panel.background = element_rect(fill='transparent'), axis.line = element_line(colour = "black"))
-
-theme(
+        panel.background = element_rect(fill='transparent'), axis.line = element_line(colour = "black")) +theme(
   panel.background = element_rect(fill='transparent'), #transparent panel bg
   plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
   panel.grid.major = element_blank(), #remove major gridlines
@@ -189,7 +189,6 @@ ggsave(file= paste0(folder_plot, "CK.png"), units="in", width=4, height=3, dpi=3
 # https://bookdown.org/ededeban/ConsBioMap/GIF.html
 # https://www.r-bloggers.com/2021/05/animated-graph-gif-with-gganimate-ggplot/
 
-folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/02_ClimaImpact_nov_2024/Images/"
   
 library(gganimate)
 library(magick)
