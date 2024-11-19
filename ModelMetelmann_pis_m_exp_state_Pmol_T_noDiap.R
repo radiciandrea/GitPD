@@ -38,7 +38,7 @@ library(ggpubr)
 # LAT = 43.5
 # LON = 7.3
 
-cities = c("Montpellier")
+cities = c("Madrid", "Paris")
 
 rk = "on" #on if integration crashes! (it is way slower)
 folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/NoDiap/"
@@ -82,8 +82,8 @@ for(city_x in cities){
   t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
   
   #T_av = 14.66509
-  T_add = seq(-2, 8, by = 0.5)
-  P_mol = 1 #seq(0, 2, by = 1/6)
+  T_add = seq(-2, 8, by = 1) #0.5
+  P_mol = seq(0, 2, by = 1/3) #by = 1/6
   
   # #change P_mol: determined Newton Rapson method
   # P_summ = W_tot_df %>% 
@@ -148,6 +148,7 @@ for(city_x in cities){
   
   #Create a matrix over which integrate; each colums is a city_x, each row is a date
   regions = unique(W_tot_df$region)
+  DOS = unique(W_tot_df$DOS)
   
   # set simualtion horizon
   t_s = DOS[1] # simulate multiple year
@@ -212,16 +213,18 @@ for(city_x in cities){
   source("MM_integration_functions_exp_state_noDiap.R")
   
   #integration step
-  is = 1/60
+  is = 1/30
   
   #### exp 1
   
   # System initialization (to fit with the og system, we start with 1 in each class)
-  E0 = rep(1, n_r)
-  J0 = rep(1, n_r)
-  I0 = rep(1, n_r)
+  E0 = rep(0, n_r)
+  J0 = rep(0, n_r)
+  I0 = rep(0, n_r)
   A0 = rep(100, n_r) # IN THIS EXPERIMENT WE FIX A0 to 100
-  E_d_0 = rep(1, n_r) 
+  E_d_0 = rep(0, n_r) 
+  
+  # there's a problem with initial state
   
   X_0_d = c(E0, J0, I0, A0, E_d_0)
   X_0_nd = c(E0, J0, I0, A0)
@@ -240,7 +243,7 @@ for(city_x in cities){
     
     # consider DOY_y as julian day starting from 1/jan/year
     DOS_y = DOS_sim[id_d_y]
-    DOY_y = 1:length(DOY_y)
+    DOY_y = 1:length(id_d_y)
     
     source("MM_y_parameters_extraction.R")
     
@@ -249,29 +252,23 @@ for(city_x in cities){
     
     if(rk == "on"){
       
-      DOY_y_2_sim = seq(1, max(DOY_y), by = is)
+      DOY_y_sim = seq(1, max(DOY_y), by = is)
       
-      #log system - diapause
-      X_0_d_log = X_0_d
-      X_0_d_log[1:(n_r*4)] = log(X_0_d_log[1:(n_r*4)])
+      #diapause
+      Sim_y_d_sim<- deSolve::rk4(X_0_d, DOY_y_sim, df, parms)
+      Sim_y_d <-Sim_y_d_sim[1+(0:(max(DOY_y)-1))/is,]
       
-      Sim_y_d_sim<- deSolve::rk4(X_0_d_log, DOY_y_2_sim, df_log, parms)
-      Sim_y_d <-Sim_y_d_sim[1+(0:152)/is,]
-      Sim_y_d[, 1+1:(n_r*4)] = exp(Sim_y_d[, 1+1:(n_r*4)])
-      
-      #log system - no diapause
-      X_0_nd_log = log(X_0_nd)
-      
-      Sim_y_nd_sim<- deSolve::rk4(X_0_nd_log, DOY_y_2_sim, df_log_noDiap, parms)
-      Sim_y_nd <-exp(Sim_y_nd_sim[1+(0:152)/is,])
+      #no diapause
+      Sim_y_nd_sim<- deSolve::rk4(X_0_nd, DOY_y_sim, df_noDiap, parms)
+      Sim_y_nd <-Sim_y_nd_sim[1+(0:(max(DOY_y)-1))/is,]
       
     }
     
-    A0_d_m[which(years_u ==  year),] = Sim_y_d[nrow(Sim_y_d)-61:0, 1+(n_r*3+1):(n_r*4)]/
-      Sim_y_d[1:62, 1+(n_r*3+1):(n_r*4)]
+    A0_d_m[which(years_u ==  year),] = colSums(Sim_y_d[nrow(Sim_y_d)-61:0, 1+(n_r*3+1):(n_r*4)])/
+      colSums(Sim_y_d[1:62, 1+(n_r*3+1):(n_r*4)])
     
-    A0_nd_m[which(years_u ==  year),] = Sim_y_nd[nrow(Sim_y_nd)-61:0, 1+(n_r*3+1):(n_r*4)]/
-      Sim_y_nd[1:62, 1+(n_r*3+1):(n_r*4)]
+    A0_nd_m[which(years_u ==  year),] = colSums(Sim_y_nd[nrow(Sim_y_nd)-61:0, 1+(n_r*3+1):(n_r*4)])/
+      colSums(Sim_y_nd[1:62, 1+(n_r*3+1):(n_r*4)])
     
   }
   toc()
@@ -284,7 +281,7 @@ for(city_x in cities){
   Ind_df$A0_d = A0_d 
   Ind_df$A0_nd = A0_nd 
   
-   
+  
   save(Ind_df, file = paste0(folder_plot, "Ind_", city_x,".RData"))
   load(paste0(folder_plot, "Ind_", city_x,".RData"))
   
@@ -314,15 +311,49 @@ for(city_x in cities){
   }
   
   #E0
-  breaks_E0 = c(10^(-7), 10^7)
+  breaks_A0 = c(0, 15)
   
-  g0_c <- ggplot()+
+  g_d_c <- ggplot()+
     geom_contour_fill(data = Ind_df,
-                      aes(x = T_av_summer, y = P_summ_tot, z = log10(E0)))+
-    scale_fill_viridis_c(limits = log10(c(min(breaks_E0), max(breaks_E0))),
+                      aes(x = T_av_summer, y = P_summ_tot, z = A0_d))+
+    scale_fill_viridis_c(limits = c(min(breaks_A0), max(breaks_A0)),
                          na.value = "#32003C")+
-    ggtitle(paste0("Average E0, ", city_x))+
-    geom_contour(data = Ind_df, aes(x = T_av_summer, y = P_summ_tot, z = E0),
+    ggtitle(paste0("Average A0, ", city_x))+
+    geom_contour(data = Ind_df, aes(x = T_av_summer, y = P_summ_tot, z = A0_d),
+                 color = "red", breaks = c(1))+
+    theme_test()+
+    geom_path(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
+    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot, color = as.factor(year)), size = 2) +
+    guides(size = "legend", colour = "none")+
+    scale_color_grey()+
+    geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023), aes(x = T_av_summer, y = P_summ_tot, label = year),
+                     label.padding = 0.15) #size = 4
+  
+  g_nd_c <- ggplot()+
+    geom_contour_fill(data = Ind_df,
+                      aes(x = T_av_summer, y = P_summ_tot, z = A0_nd))+
+    scale_fill_viridis_c(limits = c(min(breaks_A0), max(breaks_A0)),
+                         na.value = "#32003C")+
+    ggtitle(paste0("Average A0 without diapause, ", city_x))+
+    geom_contour(data = Ind_df, aes(x = T_av_summer, y = P_summ_tot, z = A0_nd),
+                 color = "red", breaks = c(1))+
+    theme_test()+
+    geom_path(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
+    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot, color = as.factor(year)), size = 2) +
+    guides(size = "legend", colour = "none")+
+    scale_color_grey()+
+    geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023), aes(x = T_av_summer, y = P_summ_tot, label = year),
+                     label.padding = 0.15) #size = 4
+  
+  breaks_A0r = c(0,2)
+  
+  g_d_nd_c <- ggplot()+
+    geom_contour_fill(data = Ind_df,
+                      aes(x = T_av_summer, y = P_summ_tot, z = A0_nd/A0_d))+
+    scale_fill_viridis_c(limits = c(min(breaks_A0r), max(breaks_A0r)),
+                         na.value = "#32003C")+
+    ggtitle(paste0("Ratio between A0 without diapause vs with diapause, ", city_x))+
+    geom_contour(data = Ind_df, aes(x = T_av_summer, y = P_summ_tot, z = A0_nd/A0_d),
                  color = "red", breaks = c(1))+
     theme_test()+
     geom_path(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
@@ -333,8 +364,9 @@ for(city_x in cities){
                      label.padding = 0.15) #size = 4
   
   # Save
-  g_tot <- ggarrange(g0_c, g1_c, g3_c, ncol = 1)
+  g_tot <- ggarrange(g_d_c, g_nd_c, g_d_nd_c, ncol = 1)
   
   ggsave(paste0(folder_plot, "NEW_g", city_x ,".png"), g_tot, units="in", height=8, width= 5.5, dpi=300)
   
 }
+
