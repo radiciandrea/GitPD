@@ -87,13 +87,13 @@ g_y = matrix(NA, nrow = 240, ncol = 291)
 
 for(i in 2:239){
   for(j in 2:290){
-    g_x[i,j] = (z_m[i+1,j]-z_m[i-1,j])/(x_m[i+1,j]-x_m[i-1,j])
+    g_x[i,j] = (z_m[i,j+1]-z_m[i,j-1])/(x_m[i,j+1]-x_m[i,j-1])
     g_y[i,j] = (z_m[i+1,j]-z_m[i-1,j])/(y_m[i+1,j]-y_m[i-1,j])
   }
 }
 
 # velocity (is friction in reality velocity^-1)
-friction <- sqrt(gradient_x^2 + gradient_y^2)
+friction <- sqrt(g_x^2 + g_y^2)
 
 #considerr a 11*11 windows: Kraemer 2019
 # the resulting friction surface (time/distance) was smoothed using an average 11 × 11
@@ -220,14 +220,14 @@ z_E0 = grid_W_EU_cp$year_pred_E0
 
 # x_m = matrix(x, nrow = 240, byrow = F)
 # y_m = matrix(y, nrow = 240, byrow = F)
-z_E0_m = matrix(z, nrow = 240, byrow = F)
+z_E0_m = matrix(z_E0, nrow = 240, byrow = F)
 
 g_x_E0 = matrix(NA, nrow = 240, ncol = 291)
 g_y_E0 = matrix(NA, nrow = 240, ncol = 291)
 
 for(i in 2:239){
   for(j in 2:290){
-    g_x_E0[i,j] = (z_E0_m[i+1,j]-z_E0_m[i-1,j])/(x_m[i+1,j]-x_m[i-1,j])
+    g_x_E0[i,j] = (z_E0_m[i,j+1]-z_E0_m[i,j-1])/(x_m[i,j+1]-x_m[i,j-1])
     g_y_E0[i,j] = (z_E0_m[i+1,j]-z_E0_m[i-1,j])/(y_m[i+1,j]-y_m[i-1,j])
   }
 }
@@ -270,13 +270,13 @@ domain_sel_v_E0 <- left_join(domain_sel, st_drop_geometry(grid_W_EU_cp))
 
 ### Plots ----
 
-ggplot(domain_sel_v_E0, aes(fill = velocity), color = NULL) +
+ggplot(domain_sel_v, aes(fill = velocity), color = NULL) +
   geom_sf() +
   scale_fill_viridis_c(na.value = "transparent") + 
   labs(title = "Spread Velocity - obs", fill = "(km/y)") +
   theme_minimal()
 
-ggplot(domain_sel_v_E0, aes(fill = year_pred), color = NULL) +
+ggplot(domain_sel_v, aes(fill = year_pred), color = NULL) +
   geom_sf() +
   scale_fill_viridis_c(na.value = "transparent") + 
   labs(title = "Colonization - obs", fill = "Year") +
