@@ -75,6 +75,7 @@ z_m = matrix(z, nrow = 240, byrow = F)
 #approximate gradient
 
 #g = (f(i+1)-f(i-1))/(x(i+1)-x(i-1))
+# actually this is consistent with Kraemer 2019 ("we took a 3*3 windows")
 
 g_x = matrix(NA, nrow = 240, ncol = 291)
 g_y = matrix(NA, nrow = 240, ncol = 291)
@@ -89,7 +90,7 @@ for(i in 2:239){
 # velocity (is friction in reality velocity^-1)
 friction <- sqrt(gradient_x^2 + gradient_y^2)
 
-#considerr a 11*11 windows: Kraemer
+#considerr a 11*11 windows: Kraemer 2019
 # the resulting friction surface (time/distance) was smoothed using an average 11 × 11
 # cell filter to prevent local null frictions values
 friction_smoothed <- friction
@@ -202,6 +203,7 @@ tps_model_E0 <- Tps(x = st_coordinates(domain_sel_E0_sel_cp), Y = domain_sel_E0_
 grid_W_EU_cp$year_pred_E0 = predict(tps_model_E0, st_coordinates(grid_W_EU_cp))
 
 # gradient with more accurated formula (as before: g = (f(i+1)-f(i-1))/(x(i+1)-x(i-1)))
+# actually this is consistent with Kraemer 2019 ("we took a 3*3 windows")
 
 # x = st_coordinates(grid_W_EU_cp)[,1]
 # y = st_coordinates(grid_W_EU_cp)[,2]
@@ -224,7 +226,7 @@ for(i in 2:239){
 # velocity (is friction in reality velocity^-1)
 friction_E0 <- sqrt(g_x_E0^2 + g_y_E0^2)
 
-#considerr a 11*11 windows: Kraemer
+#considerr a 11*11 windows: Kraemer 2019
 # the resulting friction surface (time/distance) was smoothed using an average 11 × 11
 # cell filter to prevent local null frictions values
 friction_smoothed_E0 <- friction_E0
