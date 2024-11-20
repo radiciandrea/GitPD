@@ -38,7 +38,7 @@ library(ggpubr)
 # LAT = 43.5
 # LON = 7.3
 
-cities = c("Madrid", "Paris")
+cities = c("Montpellier", "Madrid", "Paris")
 
 rk = "on" #on if integration crashes! (it is way slower)
 folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/NoDiap/"
@@ -82,8 +82,8 @@ for(city_x in cities){
   t_sr = as.numeric(SunTimes_df$sunrise- as.POSIXct(SunTimes_df$date) +2) # time of sunrise: correction needed since time is in UTC
   
   #T_av = 14.66509
-  T_add = seq(-2, 8, by = 1) #0.5
-  P_mol = seq(0, 2, by = 1/3) #by = 1/6
+  T_add = seq(-2, 8, by = 0.5) #0.5
+  P_mol = seq(0, 2, by = 1/6) #by = 1/6
   
   # #change P_mol: determined Newton Rapson method
   # P_summ = W_tot_df %>% 
@@ -311,7 +311,7 @@ for(city_x in cities){
   }
   
   #E0
-  breaks_A0 = c(0, 15)
+  breaks_A0 = c(0, 100)
   
   g_d_c <- ggplot()+
     geom_contour_fill(data = Ind_df,
@@ -345,7 +345,7 @@ for(city_x in cities){
     geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023), aes(x = T_av_summer, y = P_summ_tot, label = year),
                      label.padding = 0.15) #size = 4
   
-  breaks_A0r = c(0,2)
+  breaks_A0r = c(0,1.5)
   
   g_d_nd_c <- ggplot()+
     geom_contour_fill(data = Ind_df,
