@@ -97,7 +97,7 @@ ggplot(grid_W_EU_cp, aes(color = velocity)) +
   labs(title = "Spread Velocity", x = "X Coordinate", y = "Y Coordinate", color = "Velocity") +
   theme_minimal()
 
-# LATER
+# plot over French grid
 type = "_01"
 
 folder_out = paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim", type)
@@ -116,7 +116,157 @@ domain_sel_v <- left_join(domain_sel, st_drop_geometry(grid_W_EU_cp))
 ggplot(domain_sel_v, aes(fill = velocity), color = NULL) +
   geom_sf() +
   scale_fill_viridis_c(na.value = "transparent") + 
+  labs(title = "Spread Velocity", fill = "km/y") +
+  theme_minimal()
+
+ggplot(domain_sel_v, aes(fill = year_pred), color = NULL) +
+  geom_sf() +
+  scale_fill_viridis_c(na.value = "transparent") + 
+  labs(title = "Year of colonization", fill = "year") +
+  theme_minimal()
+
+
+# MODEL SPREAD VELOCITY FROM E0
+
+#carichiamo 1 per le dimensioni
+load(paste0(folder_out, "/", files[1]))
+
+E0_m = matrix(NA, ncol = length(E0_v), nrow = length(files))
+rm(Sim)
+
+for (i in 1:length(files)){
+  file = files[i]
+  load(paste0(folder_out, "/", file))
+  E0_m[i,]= E0_v
+  rm(Sim)
+}
+
+years_eval = 2006:2023
+delay = 6 #1:8
+
+domain_sel_E0 <- domain_sel
+domain_sel_E0$year_detection <- NA
+
+#select only E0 in France
+E0_m_FR = E0_m[,domain_sel$region]
+
+for (year in years_eval){
+  years_sel = (year-delay):(year) 
+  E0_m_FR_c_sel <- apply(E0_m_FR[which(years %in% years_sel),], 2,
+                      function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
+  
+  E0_sel = apply(E0_m_FR_c_sel, 2,
+                 function(x){exp(mean(log(x)))})
+  
+  id_reg_E0 = which(E0_sel>1)
+  id_reg_noy = which(is.na(domain_sel_E0$year_detection))
+  id_new_invasions = intersect(id_reg_noy, id_reg_E0)
+  # if gretare than 1 AND no values, then year_colonization = year
+  
+  if(length(id_new_invasions>1)){
+    domain_sel_E0$year_detection[id_new_invasions] = year
+  }
+}
+
+#
+domain_sel_E0_sel <-domain_sel_E0%>%
+  filter(!is.na(year_detection))
+
+domain_sel_E0_sel_c <- st_centroid(domain_sel_E0_sel)
+
+# project them to EPSG 3035
+#https://epsg.io/3035
+
+domain_sel_E0_sel_cp <- st_transform(domain_sel_E0_sel_c, crs = "EPSG:3035") #meters
+
+tps_model_E0 <- Tps(x = st_coordinates(domain_sel_E0_sel_cp), Y = domain_sel_E0_sel_cp$year_detection)
+
+# # load grid and other datas
+# grid_W_EU <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_01_W_EU.shp")
+# 
+# grid_W_EU_c <- st_centroid(grid_W_EU)
+# grid_W_EU_cp <- st_transform(grid_W_EU_c, crs = "EPSG:3035")
+
+# predict over a grid
+grid_W_EU_cp$year_pred_E0 = predict(tps_model_E0, st_coordinates(grid_W_EU_cp))
+
+# make a matrix out of it
+grid_W_EU_m_year_E0 = matrix(grid_W_EU_cp$year_pred_E0, nrow = 240, byrow = F) #88
+# grid_W_EU_m_x = matrix(st_coordinates(grid_W_EU_cp)[,1], nrow = 240, byrow = F) #88
+# grid_W_EU_m_y = matrix(st_coordinates(grid_W_EU_cp)[,2], nrow = 240, byrow = F) #88
+# 
+# grid_W_EU_v_x = grid_W_EU_m_x[1,]
+# grid_W_EU_v_y = grid_W_EU_m_y[,1]
+# 
+# #if projected
+# dx = mean(grid_W_EU_m_x[,2:291]-grid_W_EU_m_x[,1:290]) # 1:131
+# dy = mean(grid_W_EU_m_y[1:239,]-grid_W_EU_m_y[2:240,]) # #1:88
+
+# compute velocity
+
+gradient_xy_E0 <- gradient(grid_W_EU_m_year_E0, dx, dy)
+gradient_x_E0 = gradient_xy_E0[[1]]
+gradient_y_E0 = gradient_xy_E0[[2]]
+
+# velocity (is friction in reality velocity)
+friction_E0 <- sqrt(gradient_x_E0^2 + gradient_y_E0^2)
+
+#considerr a 11*11 windows: Kraemer
+# the resulting friction surface (time/distance) was smoothed using an average 11 × 11
+# cell filter to prevent local null frictions values
+friction_smoothed_E0 <- friction_E0
+
+d_smooth = 5
+
+for(j in 1:ncol(friction_E0)){
+  for(i in 1:nrow(friction_E0)){
+    friction_smoothed_E0[i,j] <- mean(friction_E0[max(1,(i-d_smooth)):min((i+d_smooth),nrow(friction))
+                                            ,max(1,(j-d_smooth)):min((j+d_smooth),ncol(friction))])
+  }
+}
+
+velocity_E0 = 1/friction_smoothed_E0*0.001 # (to express as km/y)
+
+grid_W_EU_cp$velocity_E0 = as.vector(velocity_E0)
+
+ggplot(grid_W_EU_cp, aes(color = velocity_E0)) +
+  geom_sf() +
+  scale_color_viridis_c() + 
+  labs(title = "Spread Velocity", x = "X Coordinate", y = "Y Coordinate", color = "Velocity") +
+  theme_minimal()
+
+domain_sel_v_E0 <- left_join(domain_sel, st_drop_geometry(grid_W_EU_cp))
+
+ggplot(domain_sel_v_E0, aes(fill = velocity_E0), color = NULL) +
+  geom_sf() +
+  scale_fill_viridis_c(na.value = "transparent") + 
   labs(title = "Spread Velocity", fill = "Velocity") +
+  theme_minimal()
+
+#Plots
+
+ggplot(domain_sel_v_E0, aes(fill = velocity), color = NULL) +
+  geom_sf() +
+  scale_fill_viridis_c(na.value = "transparent") + 
+  labs(title = "Spread Velocity - obs", fill = "(km/y)") +
+  theme_minimal()
+
+ggplot(domain_sel_v_E0, aes(fill = year_pred), color = NULL) +
+  geom_sf() +
+  scale_fill_viridis_c(na.value = "transparent") + 
+  labs(title = "Colonization - obs", fill = "Year") +
+  theme_minimal()
+
+ggplot(domain_sel_v_E0, aes(fill = velocity_E0), color = NULL) +
+  geom_sf() +
+  scale_fill_viridis_c(na.value = "transparent") + 
+  labs(title = "Spread Velocity - E0", fill = "(km/y)") +
+  theme_minimal()
+
+ggplot(domain_sel_v_E0, aes(fill = year_pred_E0), color = NULL) +
+  geom_sf() +
+  scale_fill_viridis_c(na.value = "transparent") + 
+  labs(title = "Colonization - E0", fill = "Year") +
   theme_minimal()
 
 
