@@ -311,7 +311,7 @@ for(city_x in cities){
   }
   
   #E0
-  breaks_A0 = c(0, 100)
+  breaks_A0 = c(0, 50)
   
   g_d_c <- ggplot()+
     geom_contour_fill(data = Ind_df,
@@ -345,7 +345,7 @@ for(city_x in cities){
     geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023), aes(x = T_av_summer, y = P_summ_tot, label = year),
                      label.padding = 0.15) #size = 4
   
-  breaks_A0r = c(0,1.5)
+  breaks_A0r = c(0,1.2)
   
   g_d_nd_c <- ggplot()+
     geom_contour_fill(data = Ind_df,
