@@ -203,7 +203,9 @@ folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eg
 load(paste0(folder_obs, "VectAbundance_025.RData"))
 
 # load vectAbundance names
-VectDomain <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_W_EU_IDVectAb.shp") %>%
+domain <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_W_EU_IDVectAb.shp")
+
+VectDomain <- domain %>%
   filter(!is.na(IDVectAb))
 
 Eggs_tot_df <- left_join(Eggs_tot_df, VectDomain) %>%
@@ -267,8 +269,11 @@ for(region_x in regions_availab){
                             eggs = beta_approx_x_df$value*Sim_x_df$A, #"all eggs, diapaused or not"
                             type = "laid, simulated")
   
+  # moving average eggs: 7 previous days ?
+  Eggs_sim_df$eggs = sapply(1:nrow(Eggs_sim_df), function(x){mean(Eggs_sim_df$eggs[max(1,x-6):x])})
   
-  #alcolo il max solo relativo al date_sel per il plot
+  
+  #Calcolo il max solo relativo al date_sel per il plot
   
   Eggs_sim_max_date_sel <- max(Eggs_sim_df$eggs[Eggs_sim_df$date %in% date_sel], na.rm = T)
   
@@ -407,6 +412,23 @@ VectDomain$pv_r_year[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$pv_r
 VectDomain$Name_app[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$Name_app
 VectDomain$l_y[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$l_y
 
+#load Montpellier
+load(paste0(folder_plot, "/VectDomainStat_Perols.RData"))
+
+VectDomain_Montpellier <- domain%>%
+  filter(region == 1524) %>%
+  mutate(Name_app = "Montpellier (Altopictus)") %>%
+  mutate(r_gross = VectDomain_Perols$r_gross) %>%
+  mutate(pv_r_gross = VectDomain_Perols$pv_r_gross) %>%
+  mutate(rmse_gross = VectDomain_Perols$rmse_gross) %>%
+  mutate(r_year  = VectDomain_Perols$r_year) %>%
+  mutate(pv_r_year = VectDomain_Perols$pv_r_year) %>%
+  mutate(l_y = VectDomain_Perols$l_y) %>%
+  select(c("region", "IDVectAb", "Name_app", "geometry", "r_gross", "pv_r_gross",
+         "rmse_gross", "r_year", "pv_r_year", "l_y"))
+                              
+VectDomain <- rbind(VectDomain, VectDomain_Montpellier)
+
 ###
 
 summary(VectDomain$r_gross)
@@ -418,7 +440,7 @@ folder_plot2 = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiC
 ggplot()+
   geom_sf(data = countries_sh, alpha = 1, colour = "white")+
   geom_sf(data = st_centroid(VectDomain), aes(color = r_gross, size = l_y))+
-  coord_sf(xlim = c(7, 17), ylim = c(37, 47))+
+  coord_sf(xlim = c(4, 18), ylim = c(37, 47))+
   scale_color_gradient2(
     name = waiver(),
     low = "#384AB4",
