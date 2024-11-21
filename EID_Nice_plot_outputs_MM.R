@@ -70,6 +70,10 @@ Eggs_sim_df <- data.frame(date = Sim_x_df$date,
                           eggs = beta_approx_m_df$value*Sim_x_df$A, #"all eggs, diapaused or not"
                           type = "laid, simulated")
 
+# moving average eggs: 7 previous days ?
+Eggs_sim_df$eggs = sapply(1:nrow(Eggs_sim_df), function(x){mean(Eggs_sim_df$eggs[max(1,x-6):x])})
+
+
 Eggs_sim_08_23_df <- Eggs_sim_df %>%
   filter(year > 2007)%>%
   mutate(norm_eggs = 100*eggs/max(eggs))%>%
@@ -83,7 +87,7 @@ Eggs_sim_08_23_df <- Eggs_sim_df %>%
 # load also 
 
 folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/"
-load(paste0(folder_obs, "EID_Nice_2008_2023.RData"))
+load(paste0(folder_obs, "EID_Nice_2008_2023_median.RData"))
 
 Eggs_obs_df <- Eggs_tot_df %>%
   mutate("type" = "laid, obs") %>%
@@ -188,7 +192,7 @@ g1 <- ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = Type))+
   theme_bw()+
   theme(legend.position = "none")
 
-ggsave(file= paste0(folder_plot, "Nice_traj.svg"), plot= g1 , width=8, height=3)
+ggsave(file= paste0(folder_plot, "Nice_traj_withmedian.svg"), plot= g1 , width=8, height=3)
 
 # Save with VectDomain (vectabundance)
 
@@ -212,7 +216,7 @@ g2 <- ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = Type))+
   xlab("date")+
   theme_test()
 
-ggsave(file= paste0(folder_plot, "/New_Nice_EID.png"), plot= g2, width=4, height=3, dpi=300)
+ggsave(file= paste0(folder_plot, "/New_Nice_EID_withmedian.png"), plot= g2, width=4, height=3, dpi=300)
 
 #lo plotto nell'inkcscape
 
