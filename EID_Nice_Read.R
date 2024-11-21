@@ -5,6 +5,7 @@ rm(list = ls())
 # library(readxl)
 library(xlsx)
 library(dplyr)
+library(lubridate)
 
 folder_data = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EID_Nice"
 
@@ -998,7 +999,7 @@ ggplot(data_all_summ )+
 folder_out = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/"
 
 Eggs_tot_df <- data_all_summ %>%
-  rename(eggs = av_eggs_per_day)%>%
+  rename(eggs = me_eggs_per_day)%>%
   mutate(type = "observed") %>%
   mutate(date = as.Date(date_detection)) %>%
   mutate(region = "194") %>% #in France!
@@ -1007,5 +1008,5 @@ Eggs_tot_df <- data_all_summ %>%
   ungroup()%>%
   select(c("region", "DOS", "eggs","DOY", "date"))
 
-save(Eggs_tot_df, file = paste0(folder_out, "EID_Nice_2008_2023.RData"))
+save(Eggs_tot_df, file = paste0(folder_out, "EID_Nice_2008_2023_median.RData"))
 
