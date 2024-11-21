@@ -292,7 +292,7 @@ for(region_x in regions_availab){
     filter(date %in% date_common)
   
   #cor
-  cor_brut = cor(Eggs_sim_common_df$norm_eggs, Eggs_obs_df$norm_eggs)
+  cor_brut = cor(Eggs_sim_common_df$norm_eggs, Eggs_obs_df$norm_eggs, use = "complete.obs")
   
   #cor test (https://statsandr.com/blog/correlation-coefficient-and-correlation-test-in-r/)
   # Pearson correlation test
@@ -305,7 +305,7 @@ for(region_x in regions_availab){
                              cor_brut_p < 0.05 ~ "*",
                              .default = "")
   #rmse
-  rmse_brut = sqrt(mean((Eggs_sim_common_df$norm_eggs/100 - Eggs_obs_df$norm_eggs/100)^2))
+  rmse_brut = sqrt(mean((Eggs_sim_common_df$norm_eggs/100 - Eggs_obs_df$norm_eggs/100)^2, na.rm = T))
   
   #### corr_per_year
   # at least 9 in summer
@@ -404,13 +404,28 @@ load(paste0(folder_plot, "/VectDomainStat.RData"))
 # Replace Nice with EID data
 load(paste0(folder_plot, "/VectDomainStat_Nice.RData"))
 
-VectDomain$r_gross[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$r_gross
-VectDomain$pv_r_gross[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$pv_r_gross
-VectDomain$rmse_gross[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$rmse_gross
-VectDomain$r_year[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$r_year
-VectDomain$pv_r_year[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$pv_r_year
-VectDomain$Name_app[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$Name_app
-VectDomain$l_y[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$l_y
+VectDomain <- VectDomain %>%
+  filter(Name_app != "Nice")
+
+VectDomain_Nice <- domain%>%
+  filter(region == 1597) %>%
+  mutate(Name_app = "Nice (EID)") %>%
+  mutate(r_gross = VectDomain_Nice$r_gross) %>%
+  mutate(pv_r_gross = VectDomain_Nice$pv_r_gross) %>%
+  mutate(rmse_gross = VectDomain_Nice$rmse_gross) %>%
+  mutate(r_year  = VectDomain_Nice$r_year) %>%
+  mutate(pv_r_year = VectDomain_Nice$pv_r_year) %>%
+  mutate(l_y = VectDomain_Nice$l_y) %>%
+  select(c("region", "IDVectAb", "Name_app", "geometry", "r_gross", "pv_r_gross",
+           "rmse_gross", "r_year", "pv_r_year", "l_y"))
+
+# VectDomain$r_gross[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$r_gross
+# VectDomain$pv_r_gross[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$pv_r_gross
+# VectDomain$rmse_gross[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$rmse_gross
+# VectDomain$r_year[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$r_year
+# VectDomain$pv_r_year[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$pv_r_year
+# VectDomain$Name_app[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$Name_app
+# VectDomain$l_y[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$l_y
 
 #load Montpellier
 load(paste0(folder_plot, "/VectDomainStat_Perols.RData"))
@@ -427,7 +442,7 @@ VectDomain_Montpellier <- domain%>%
   select(c("region", "IDVectAb", "Name_app", "geometry", "r_gross", "pv_r_gross",
          "rmse_gross", "r_year", "pv_r_year", "l_y"))
                               
-VectDomain <- rbind(VectDomain, VectDomain_Montpellier)
+VectDomain <- rbind(VectDomain, VectDomain_Nice, VectDomain_Montpellier)
 
 ###
 
@@ -440,17 +455,21 @@ folder_plot2 = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiC
 ggplot()+
   geom_sf(data = countries_sh, alpha = 1, colour = "white")+
   geom_sf(data = st_centroid(VectDomain), aes(color = r_gross, size = l_y))+
-  coord_sf(xlim = c(4, 18), ylim = c(37, 47))+
-  scale_color_gradient2(
-    name = waiver(),
-    low = "#384AB4",
-    mid = "white",
-    high = "#B00026",
-    midpoint = 0)+
+  # geom_sf(data = st_centroid(VectDomain) %>% filter(pv_r_gross< 0.05), shape = 3, color = "black")+
+  geom_sf(data = st_centroid(VectDomain) %>% filter(pv_r_gross< 0.01), shape = 1, color = "black")+
+  coord_sf(xlim = c(4.25, 18), ylim = c(37, 46.5))+
+  # scale_color_gradient2(
+  #   name = waiver(),
+  #   low = "#384AB4",
+  #   mid = "white",
+  #   high = "#B00026",
+  #   midpoint = 0)+
+  scale_color_viridis_c(limits = c(0,1),
+                        na.value = "grey50")+
   ggtitle('Linear correlation')+
   theme_void()
 
-ggsave(file= paste0(folder_plot2, "VectAbundance_corr.png"), units="in", width=4, height=6, dpi=300)
+ggsave(file= paste0(folder_plot2, "VectAbundance_corr_withmontpel.png"), units="in", width=6, height=7, dpi=300)
 
 ggplot()+
   geom_sf(data = countries_sh, alpha = 1, colour = "white")+
