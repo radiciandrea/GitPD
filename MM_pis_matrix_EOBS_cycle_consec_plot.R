@@ -59,7 +59,7 @@ for (i in 2:length(files)){
 }
 
 
-#########################
+# #########################
 #plot pop
 Sim_m_df = data.frame("variable" = rep(c("E", "J", "I", "A", "E_d"), each = n_r*max(DOS_sim)),
                       "region" = rep(rep(regions, each = max(DOS_sim)), n_c),
@@ -71,68 +71,68 @@ beta_approx_m_df = data.frame("variable" = "beta",
                       "t" = rep(DOS_sim, n_r),
                       "value" = c(beta_approx_tot)) #5 classes
 
-# st_write(domain_sel, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/res_sim_2011_", name, ".shp"))
-#plot
-
-#210
-
-id_reg = 1092 #
-
-#Roma: 1091, 1992
-#Nizza: 1597 e un'altra
-
-region_x = id_reg #regions[id_reg]
-
-Sim_m_x_df <- Sim_m_df %>%
-  filter(region == region_x)
-
-Sim_x_df<- dcast(Sim_m_x_df, t ~ variable)
-
-ggplot(Sim_m_x_df, aes(x = t, y = value, color = variable))+
-  geom_line()+
-  scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
-  # ylim(1, max(Sim_m_x_df$value))+
-  # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
-  labs(color = paste0("Abundances per classes (", region_x, ")")) +
-  theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
-
-#plot eg only adults
-
-Sim_A_x_df <- Sim_m_x_df %>% 
-  filter(variable == "A") %>%
-  mutate(date = date_sim) 
-
-ggplot(Sim_A_x_df, aes(x = date, y = value))+
-  geom_line()+
-  # scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
-  # ylim(1, max(Sim_m_x_df$value))+
-  # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
-  labs(color = paste0("Abundances per classes, adult")) +
-  theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
-
-#only mean_by_day
-Sim_A_x_average_df <- Sim_m_x_df %>% 
-  filter(variable == "A") %>%
-  mutate(date = date_sim) %>%
-  mutate(date_dj = as.Date(substr(date, 6, 10), format = "%m-%d")) %>%
-  mutate(year = as.numeric(substr(date_sim, 1, 4)))  %>%
-  filter(year > 2009) %>%
-  filter(year < 2020) %>%
-  # group_by(date)%>%
-  # mutate(DOY = julian(date, origin = as.Date(paste0(as.numeric(year)-1, "-12-31"))))%>%
-  # ungroup()%>%
-  group_by(date_dj)%>%
-  summarize(adults_2010s = mean(value))%>%
-  ungroup()
-
-ggplot(Sim_A_x_average_df, aes(x = date_dj, y = adults_2010s))+
-  geom_line()+
-  # scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
-  # ylim(1, max(Sim_m_x_df$value))+
-  # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
-  labs(color = paste0("Abundances per classes, adult")) +
-  theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
-
+# # st_write(domain_sel, paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/res_sim_2011_", name, ".shp"))
+# #plot
+# 
+# #210
+# 
+# id_reg = 1092 #
+# 
+# #Roma: 1091, 1992
+# #Nizza: 1597 e un'altra
+# 
+# region_x = id_reg #regions[id_reg]
+# 
+# Sim_m_x_df <- Sim_m_df %>%
+#   filter(region == region_x)
+# 
+# Sim_x_df<- dcast(Sim_m_x_df, t ~ variable)
+# 
+# ggplot(Sim_m_x_df, aes(x = t, y = value, color = variable))+
+#   geom_line()+
+#   scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
+#   # ylim(1, max(Sim_m_x_df$value))+
+#   # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
+#   labs(color = paste0("Abundances per classes (", region_x, ")")) +
+#   theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
+# 
+# #plot eg only adults
+# 
+# Sim_A_x_df <- Sim_m_x_df %>% 
+#   filter(variable == "A") %>%
+#   mutate(date = date_sim) 
+# 
+# ggplot(Sim_A_x_df, aes(x = date, y = value))+
+#   geom_line()+
+#   # scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
+#   # ylim(1, max(Sim_m_x_df$value))+
+#   # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
+#   labs(color = paste0("Abundances per classes, adult")) +
+#   theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
+# 
+# #only mean_by_day
+# Sim_A_x_average_df <- Sim_m_x_df %>% 
+#   filter(variable == "A") %>%
+#   mutate(date = date_sim) %>%
+#   mutate(date_dj = as.Date(substr(date, 6, 10), format = "%m-%d")) %>%
+#   mutate(year = as.numeric(substr(date_sim, 1, 4)))  %>%
+#   filter(year > 2009) %>%
+#   filter(year < 2020) %>%
+#   # group_by(date)%>%
+#   # mutate(DOY = julian(date, origin = as.Date(paste0(as.numeric(year)-1, "-12-31"))))%>%
+#   # ungroup()%>%
+#   group_by(date_dj)%>%
+#   summarize(adults_2010s = mean(value))%>%
+#   ungroup()
+# 
+# ggplot(Sim_A_x_average_df, aes(x = date_dj, y = adults_2010s))+
+#   geom_line()+
+#   # scale_y_continuous(trans='log2', limits = c(1, max(Sim_m_x_df$value)))+
+#   # ylim(1, max(Sim_m_x_df$value))+
+#   # ggtitle(paste0("Abundances per classes (", region_x, ")")) +
+#   labs(color = paste0("Abundances per classes, adult")) +
+#   theme(legend.position = "bottom") #plot.title=element_text(margin=margin(t=40,b=-30)),
+# 
 
 # compute laid eggs: change into integration function #beta should be calculatedd hour by hour
 
@@ -142,55 +142,55 @@ folder_obs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eg
 
 load(paste0(folder_obs, "VectAbundance_025.RData"))
 #Eggs_tot_df
-#Eg Nice = 1597 (actually: 1537)
-
-id_reg = 1597
-region_v = regions[id_reg]
-
-# other sources
-# load(paste0(folder_obs, "Eggs_Weather_Nice_200811.RData"))
-# region_v = "NICE"
-
-Eggs_obs_df <- Eggs_tot_df %>%
-  filter(region == region_v) %>%
-  mutate("type" = "laid, obs") %>%
-  mutate(date = as.Date((date))) %>%
-  select("eggs", "type", "date") 
-
-date_sel = Eggs_obs_df$date
-
-#Sim starts in 2005
-date = as.Date(DOS_sim, origin = first_day-1)
-
-Sim_m_x_df <- Sim_m_df %>%
-  filter(region == region_x) %>%
-  mutate(date = rep(date, n_c)) %>%
-  filter(date %in% date_sel)
-
-Sim_x_df<- dcast(Sim_m_x_df, date ~ variable)
-
-#accidenti, dovevo salvare anche beta!
-
-beta_approx_x_df = beta_approx_m_df %>%
-  filter(region == region_x) %>%
-  mutate(date = date) %>%
-  filter(date %in% date_sel)
-
-Eggs_sim_df <- data.frame(date = Sim_x_df$date,
-                                         eggs = beta_approx_x_df$value*Sim_x_df$A, #"all eggs, diapaused or not"
-                                         type = "laid, simulated")
-
-# join sims
-Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_df) %>%
-  group_by(type)%>%
-  # mutate(norm_eggs = 100*eggs/mean(eggs, na.rm = T))%>%
-  mutate(norm_eggs = 100*eggs/max(eggs, na.rm = T))%>%
-  ungroup()
-
-ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = type))+
-  geom_line(data = Egg_comp_df %>% filter(type != "observed"))+
-  geom_point(data = Egg_comp_df %>% filter(type == "observed"))+
-  theme_test()
+# #Eg Nice = 1597 (actually: 1537)
+# 
+# id_reg = 1597
+# region_v = regions[id_reg]
+# 
+# # other sources
+# # load(paste0(folder_obs, "Eggs_Weather_Nice_200811.RData"))
+# # region_v = "NICE"
+# 
+# Eggs_obs_df <- Eggs_tot_df %>%
+#   filter(region == region_v) %>%
+#   mutate("type" = "laid, obs") %>%
+#   mutate(date = as.Date((date))) %>%
+#   select("eggs", "type", "date") 
+# 
+# date_sel = Eggs_obs_df$date
+# 
+# #Sim starts in 2005
+# date = as.Date(DOS_sim, origin = first_day-1)
+# 
+# Sim_m_x_df <- Sim_m_df %>%
+#   filter(region == region_x) %>%
+#   mutate(date = rep(date, n_c)) %>%
+#   filter(date %in% date_sel)
+# 
+# Sim_x_df<- dcast(Sim_m_x_df, date ~ variable)
+# 
+# #accidenti, dovevo salvare anche beta!
+# 
+# beta_approx_x_df = beta_approx_m_df %>%
+#   filter(region == region_x) %>%
+#   mutate(date = date) %>%
+#   filter(date %in% date_sel)
+# 
+# Eggs_sim_df <- data.frame(date = Sim_x_df$date,
+#                                          eggs = beta_approx_x_df$value*Sim_x_df$A, #"all eggs, diapaused or not"
+#                                          type = "laid, simulated")
+# 
+# # join sims
+# Egg_comp_df <- rbind(Eggs_obs_df, Eggs_sim_df) %>%
+#   group_by(type)%>%
+#   # mutate(norm_eggs = 100*eggs/mean(eggs, na.rm = T))%>%
+#   mutate(norm_eggs = 100*eggs/max(eggs, na.rm = T))%>%
+#   ungroup()
+# 
+# ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = type))+
+#   geom_line(data = Egg_comp_df %>% filter(type != "observed"))+
+#   geom_point(data = Egg_comp_df %>% filter(type == "observed"))+
+#   theme_test()
 
 
 ########## plot cycle
@@ -405,7 +405,7 @@ load(paste0(folder_plot, "/VectDomainStat.RData"))
 load(paste0(folder_plot, "/VectDomainStat_Nice.RData"))
 
 VectDomain$r_gross[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$r_gross
-VectDomain$pv_r_gros[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$pv_r_gros
+VectDomain$pv_r_gross[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$pv_r_gross
 VectDomain$rmse_gross[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$rmse_gross
 VectDomain$r_year[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$r_year
 VectDomain$pv_r_year[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$pv_r_year
@@ -456,7 +456,7 @@ ggplot()+
   geom_sf(data = countries_sh, alpha = 1, colour = "white")+
   geom_sf(data = VectDomain, fill = "black")+
   geom_sf(data = VectDomain %>% filter(r_gross>0), aes(fill = pv_r_gross))+
-  coord_sf(xlim = c(7, 17), ylim = c(37, 47))+
+  coord_sf(xlim = c(4, 17), ylim = c(37, 47))+
   scale_fill_gradient2(
     name = waiver(),
     low = "#384AB4",
@@ -466,12 +466,13 @@ ggplot()+
   ggtitle('p-value linear corr')+
   theme_minimal()
 
+sum(VectDomain %>%  pull(r_gross) >0.5, na.rm = T)
 sum(VectDomain %>% filter(r_gross>0) %>% pull(pv_r_gross) <0.1, na.rm = T)  
 
 ggplot()+
   geom_sf(data = countries_sh, alpha = 1, colour = "white")+
   geom_sf(data = VectDomain, aes(fill = r_year))+
-  coord_sf(xlim = c(7, 17), ylim = c(37, 47))+
+  coord_sf(xlim = c(4, 17), ylim = c(37, 47))+
   scale_fill_gradient2(
     name = waiver(),
     low = "red",
@@ -485,7 +486,7 @@ ggplot()+
   geom_sf(data = countries_sh, alpha = 1, colour = "white")+
   geom_sf(data = VectDomain, fill = "black")+
   geom_sf(data = VectDomain %>% filter(r_year > 0), aes(fill = pv_r_year))+
-  coord_sf(xlim = c(7, 17), ylim = c(37, 47))+
+  coord_sf(xlim = c(4, 17), ylim = c(37, 47))+
   scale_fill_gradient2(
     name = waiver(),
     low = "blue",
