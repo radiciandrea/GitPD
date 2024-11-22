@@ -148,6 +148,24 @@ domain_sel_v <- left_join(domain_sel, st_drop_geometry(grid_W_EU_cp))
 #   labs(title = "Year of colonization", fill = "year") +
 #   theme_minimal()
 
+#### INTERSECT GRID to get presence data at the same resolution
+
+sf::sf_use_s2(FALSE)
+data_presence_sf <- sf::st_make_valid(data_presence_sf)
+
+tic()
+domain_presence_intersect <- st_intersection(data_presence_sf, domain_sel)
+toc()
+
+domain_presence_merged <-domain_presence_intersect %>%
+  filter(presence == 1) %>%
+  select(c("region", "year_col")) %>%
+  st_drop_geometry() %>%
+  group_by(region) %>%
+  summarise(year_col = min(year_col, na.rm = T))%>%
+  ungroup()
+
+domain_sel_v  <- left_join(domain_sel_v, (domain_presence_merged))
 
 #### MODEL SPREAD VELOCITY FROM E0 ---- 
 
@@ -194,6 +212,10 @@ for (year in years_eval){
 #
 domain_sel_E0_sel <-domain_sel_E0%>%
   filter(!is.na(year_col))
+
+domain_sel_E0_sel_df <- domain_sel_E0_sel%>%
+  st_drop_geometry()%>%
+  select(c("region", "year_col"))
 
 domain_sel_E0_sel_c <- st_centroid(domain_sel_E0_sel)
 
@@ -262,6 +284,8 @@ grid_W_EU_cp$velocity_E0 = as.vector(velocity_E0)
 
 domain_sel_v_E0 <- left_join(domain_sel, st_drop_geometry(grid_W_EU_cp))
 
+domain_sel_v_E0 <- left_join(domain_sel_v_E0, (domain_sel_E0_sel_df))
+
 # ggplot(domain_sel_v_E0, aes(fill = velocity_E0), color = NULL) +
 #   geom_sf() +
 #   scale_fill_viridis_c(na.value = "transparent") + 
@@ -270,30 +294,106 @@ domain_sel_v_E0 <- left_join(domain_sel, st_drop_geometry(grid_W_EU_cp))
 
 ### Plots ----
 
-ggplot(domain_sel_v, aes(fill = velocity), color = NULL) +
-  geom_sf() +
-  scale_fill_viridis_c(na.value = "transparent") + 
-  labs(title = "Spread Velocity - obs", fill = "(km/y)") +
-  theme_minimal()
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/Spread France"
 
-ggplot(domain_sel_v, aes(fill = year_pred), color = NULL) +
-  geom_sf() +
+ggplot(domain_sel_v, aes(fill = year_col)) +
+  geom_sf(color = NA) +
   scale_fill_viridis_c(na.value = "transparent") + 
   labs(title = "Colonization - obs", fill = "Year") +
   theme_minimal()
 
-ggplot(domain_sel_v_E0, aes(fill = velocity_E0), color = NULL) +
-  geom_sf() +
+ggplot(domain_sel_v %>% filter(!is.na(year_col)), aes(fill = velocity)) +
+  geom_sf(color = NA) +
   scale_fill_viridis_c(na.value = "transparent") + 
-  labs(title = "Spread Velocity - E0", fill = "(km/y)") +
+  labs(title = "Spread Velocity - obs", fill = "(km/y)") +
   theme_minimal()
 
-ggplot(domain_sel_v_E0, aes(fill = year_pred_E0), color = NULL) +
-  geom_sf() +
+ggplot(domain_sel_v, aes(fill = year_pred)) +
+  geom_sf(color = NA) +
+  scale_fill_viridis_c(na.value = "transparent") + 
+  labs(title = "Pred colonization - obs", fill = "Year") +
+  theme_minimal()
+
+#
+ggplot(domain_sel_v_E0, aes(fill = year_col)) +
+  geom_sf(color = NA) +
   scale_fill_viridis_c(na.value = "transparent") + 
   labs(title = "Colonization - E0", fill = "Year") +
   theme_minimal()
 
+ggplot(domain_sel_v_E0 %>% filter(!is.na(year_col)), aes(fill = velocity_E0)) +
+  geom_sf(color = NA) +
+  scale_fill_viridis_c(na.value = "transparent") + 
+  labs(title = "Spread Velocity - E0", fill = "(km/y)") +
+  theme_minimal()
+
+ggplot(domain_sel_v_E0, aes(fill = year_pred_E0)) +
+  geom_sf(color = NA) +
+  scale_fill_viridis_c(na.value = "transparent") + 
+  labs(title = "Pred colonization - E0", fill = "Year") +
+  theme_minimal()
+
+# plot velocity global
+velocity_df <- domain_sel_v %>%
+  filter(!is.na(year_col)) %>%
+  select(c("year_col", "velocity")) %>%
+  mutate(source = "obs")
+
+velocity_E0_df <- domain_sel_v_E0 %>%
+  filter(!is.na(year_col)) %>%
+  rename(velocity = velocity_E0) %>%
+  select(c("year_col", "velocity")) %>%
+  mutate(source = "E0")
+
+#Obs
+ggplot(domain_sel_v %>% filter(!is.na(year_col)),
+       aes(x = as.factor(year_col), y  = velocity_E0)) +
+  ylim(c(0, 40))+
+  geom_boxplot(color = "red", outliers = F)+
+  geom_jitter(shape=16, position=position_jitter(0.2), alpha = 0.1)+
+  labs(title = "Spread velocity by year - obs") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.background = element_rect(fill='transparent',color=NA), 
+        panel.background = element_rect(fill='transparent'),
+        axis.line = element_line(colour = "black"),
+        legend.background = element_rect(fill='transparent'), #transparent legend bg
+        legend.box.background = element_rect(fill='transparent')) #transparent legend panel
+
+# E0
+ggplot(domain_sel_v_E0 %>% filter(!is.na(year_col)),
+       aes(x = as.factor(year_col), y  = velocity_E0)) +
+  geom_boxplot(color = "red", outliers = F)+
+  geom_jitter(shape=16, position=position_jitter(0.2), alpha = 0.1)+
+  labs(title = "Spread velocity by year - E0") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.background = element_rect(fill='transparent',color=NA), 
+        panel.background = element_rect(fill='transparent'),
+        axis.line = element_line(colour = "black"),
+        legend.background = element_rect(fill='transparent'), #transparent legend bg
+        legend.box.background = element_rect(fill='transparent')) #transparent legend panel
+
+
+velocity_all_df = rbind(velocity_df, velocity_E0_df )
+
+vel <- ggplot(velocity_all_df,
+       aes(x = as.factor(year_col), y  = velocity, color = source)) +
+  geom_boxplot(outliers = F)+
+  ylim(c(0, 40))+
+  scale_x_discrete(labels=c("", "2005", "", "", "", "", "2010", "", "", "", "",
+         "2015","", "", "", "", "2020", "", "", ""))+
+  geom_jitter(shape=16, position=position_jitter(0.2), alpha = 0.1)+
+  scale_color_manual(values=c("#B0986CFF", "#009474FF"))+
+  labs(title = "Spread velocity by year - obs vs E0") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.background = element_rect(fill='transparent',color=NA), 
+        panel.background = element_rect(fill='transparent'),
+        axis.line = element_line(colour = "black"),
+        legend.position = "none") #transparent legend panel
+
+ggsave(file= paste0(folder_plot, "/Velocity.png"), units="in", width=4, height=3, dpi=300)
 
 # #### alternatives code
 # #### 1
