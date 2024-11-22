@@ -244,8 +244,8 @@ d_smooth = 5
 
 for(j in 1:ncol(friction_E0)){
   for(i in 1:nrow(friction_E0)){
-    friction_smoothed_E0[i,j] <- mean(friction_E0[max(1,(i-d_smooth)):min((i+d_smooth),nrow(friction))
-                                            ,max(1,(j-d_smooth)):min((j+d_smooth),ncol(friction))])
+    friction_smoothed_E0[i,j] <- mean(friction_E0[max(1,(i-d_smooth)):min((i+d_smooth),nrow(friction_E0))
+                                            ,max(1,(j-d_smooth)):min((j+d_smooth),ncol(friction_E0))])
   }
 }
 
