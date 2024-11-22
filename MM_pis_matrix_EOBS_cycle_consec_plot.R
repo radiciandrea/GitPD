@@ -387,7 +387,7 @@ for(region_x in regions_availab){
     #          label= label_cor, color="black")
 
   ggsave(paste0(folder_plot, "/New_egg_plot_cell_id_", region_x, ".png"), plot = egg_plot,
-         units="in", width=4, height=3, dpi=300)
+         units="in", width=3.5, height=2.5, dpi=300)
 
 
 }
