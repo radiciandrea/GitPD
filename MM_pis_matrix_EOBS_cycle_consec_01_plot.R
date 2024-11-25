@@ -140,7 +140,7 @@ Adults_av_s_2020_v =  Ab_s_df %>% filter(year >= 2015) %>% group_by(region) %>% 
 
 # load shp to compare
 folder_sh = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/"
-folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/MM_pis_matrix_EOBS_cycle_consec_01_plot/"
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/05_AeAlbopictus_ImpactrecentClimateChange/Images/"
 
 domain <- st_read(paste0(folder_sh, "domain_sel_01_W_EU.shp")) %>%
   arrange(region)
@@ -175,8 +175,8 @@ LE_av_s_2010_f <- case_when(LE_av_s_2010_v  > 10^4 ~ "a) > 10^4",
 LE_av_s_2010_gg <- ggplot()+
   geom_sf(data = domain, aes(fill = LE_av_s_2010_f), color = NA)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray90")+
-  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
-  scale_fill_viridis_d(direction = -1)+
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60))+
+  scale_fill_viridis_d(direction = -1, option = "mako")+
   ggtitle(paste0("Average daily laid eggs per ha between May and October"))+
   guides(fill=guide_legend(title="eggs/ha"))+
   theme_void()
@@ -194,8 +194,8 @@ LE_av_s_2020_f <- case_when(LE_av_s_2020_v  > 10^4 ~ "a) > 10^4",
 LE_av_s_2020_gg <- ggplot()+
   geom_sf(data = domain, aes(fill = LE_av_s_2020_f), color = NA)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray90")+
-  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
-  scale_fill_viridis_d(direction = -1)+
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60))+
+  scale_fill_viridis_d(direction = -1, option = "mako")+
   ggtitle(paste0("Average daily laid eggs per ha between May and October"))+
   guides(fill=guide_legend(title="eggs/ha"))+
   theme_void()
@@ -220,7 +220,7 @@ LE_av_s_diff_f <- case_when(LE_av_s_diff_v > 10^3 ~"a) strong increase (>+1000)"
 LE_av_s_diff_gg <- ggplot()+
   geom_sf(data = domain, aes(fill = LE_av_s_diff_f), color = NA)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray90")+
-  coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60))+
   scale_fill_manual(values = rev(palette_simp))+
   ggtitle(paste0("Difference in eggs density in summer"))+
   guides(fill=guide_legend(title="eggs/ha"))+
@@ -240,7 +240,7 @@ Adults_av_s_2010_gg <- ggplot()+
   geom_sf(data = domain, aes(fill = Adults_av_s_2010_f), color = NA)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray90")+
   coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
-  scale_fill_viridis_d(direction = -1)+
+  scale_fill_viridis_d(direction = -1, option = "mako")+
   ggtitle(paste0("Average Adults per ha between May and October"))+
   guides(fill=guide_legend(title="Adults/ha"))+
   theme_void()
@@ -259,7 +259,7 @@ Adults_av_s_2020_gg <- ggplot()+
   geom_sf(data = domain, aes(fill = Adults_av_s_2020_f), color = NA)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray90")+
   coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
-  scale_fill_viridis_d(direction = -1)+
+  scale_fill_viridis_d(direction = -1, option = "mako")+
   ggtitle(paste0("Average Adults per ha between May and October"))+
   guides(fill=guide_legend(title="Adults/ha"))+
   theme_void()
@@ -272,7 +272,7 @@ Adults_av_s_diff_v <- Adults_av_s_2020_v - Adults_av_s_2010_v
 
 Adults_av_s_diff_f <- case_when(Adults_av_s_diff_v > 500 ~"a) strong increase (>+500)",
                             Adults_av_s_diff_v > 5 ~"b) increase (+5 to 500)",
-                            Adults_av_s_diff_v > -5 ~"c) stabile (-5 to +5)",
+                            Adults_av_s_diff_v > -5 ~"c) stable (-5 to +5)",
                             Adults_av_s_diff_v >= -500 ~"d) decrease (-5 to 500)",
                             Adults_av_s_diff_v < -500 ~"e) strong decrease (<-500)",
                             .default = NA)
@@ -281,7 +281,7 @@ Adults_av_s_diff_gg <- ggplot()+
   geom_sf(data = domain, aes(fill = Adults_av_s_diff_f), color = NA)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray90")+
   coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
-  scale_fill_manual(values = rev(palette_simp))+
+  scale_fill_manual(values = c("gray10", "gray30", "gray50", "gray70", "gray90"), na.value = "white")+
   ggtitle(paste0("Difference in Adults density in summer"))+
   guides(fill=guide_legend(title="Adults/ha"))+
   theme_void()
@@ -339,7 +339,7 @@ LE_le_s_2010_gg <- ggplot()+
   geom_sf(data = domain, aes(fill = LE_le_s_2010_f), color = NA)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray90")+
   coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
-  scale_fill_viridis_d(direction = -1)+
+  scale_fill_viridis_d(direction = -1, option = "mako")+
   ggtitle(paste0("Lenght of the season based on laid eggs, threshold = ", thr_LE_RM, " laid eggs/(ha*d)"))+
   guides(fill=guide_legend(title="L season"))+
   theme_void()
@@ -358,7 +358,7 @@ LE_le_s_2020_gg <- ggplot()+
   geom_sf(data = domain, aes(fill = LE_le_s_2020_f), color = NA)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray90")+
   coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
-  scale_fill_viridis_d(direction = -1)+
+  scale_fill_viridis_d(direction = -1, option = "mako")+
   ggtitle(paste0("Lenght of the season based on laid eggs, threshold = ", thr_LE_RM, " laid eggs/(ha*d)"))+
   guides(fill=guide_legend(title="L season"))+
   theme_void()
@@ -445,7 +445,7 @@ Adults_av_s_2010_FR_f <- case_when(Adults_av_s_2010_FR_v  > 10^3 ~ "a) > 10^3",
 
 g_Ad_2010 <- ggplot()+
   geom_sf(data = domain_FR, aes(fill = Adults_av_s_2010_FR_f), color = NA)+
-  scale_fill_viridis_d(direction = -1)+
+  scale_fill_viridis_d(direction = -1, option = "mako")+
   geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
   geom_sf(data = points_sf)+
   ggtitle(paste0("Average Adults per ha between May and October"))+
@@ -473,7 +473,7 @@ Adults_av_s_2020_FR_f <- case_when(Adults_av_s_2020_FR_v  > 10^3 ~ "a) > 10^3",
 
 g_Ad_2020 <- ggplot()+
   geom_sf(data = domain_FR, aes(fill = Adults_av_s_2020_FR_f), color = NA)+
-  scale_fill_viridis_d(direction = -1)+
+  scale_fill_viridis_d(direction = -1, option = "mako")+
   geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
   geom_sf(data = points_sf)+
   ggtitle(paste0("Average Adults per ha between May and October"))+
@@ -536,7 +536,7 @@ LE_le_s_2010_FR_f <- case_when(LE_le_s_2010_FR_v > 98 ~ x[1],
 
 g_Le_2010 <- ggplot()+
   geom_sf(data = domain_FR, aes(fill = LE_le_s_2010_FR_f), color = NA)+
-  scale_fill_viridis_d(direction = -1)+
+  scale_fill_viridis_d(direction = -1, option = "mako")+
   geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
   geom_sf(data = points_sf)+
   ggtitle(paste0("Lenght of the season based on laid eggs, threshold = ", thr_LE_RM, " laid eggs/(ha*d)"))+
@@ -564,7 +564,7 @@ LE_le_s_2020_FR_f <- case_when(LE_le_s_2020_FR_v > 98 ~ x[1],
 
 g_Le_2020 <- ggplot()+
   geom_sf(data = domain_FR, aes(fill = LE_le_s_2020_FR_f), color = NA)+
-  scale_fill_viridis_d(direction = -1)+
+  scale_fill_viridis_d(direction = -1, option = "mako")+
   geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
   geom_sf(data = points_sf)+
   ggtitle(paste0("Lenght of the season based on laid eggs, threshold = ", thr_LE_RM, " laid eggs/(ha*d)"))+
