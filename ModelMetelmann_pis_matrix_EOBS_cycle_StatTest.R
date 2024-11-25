@@ -167,6 +167,8 @@ dev.off()
 
 # plot (ModelMetelmann_pis_matrix_EOBS_cycle_plot)
 
+regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/W_EU_s.shp")
+
 E0_sel_1 = E0_2006_2014
 E0_sel_2 = E0_2015_2023
 
