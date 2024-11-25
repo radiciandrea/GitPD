@@ -181,8 +181,8 @@ text(y = sensitivity_th -0.03, x = specificity_th -0.03, paste0(thr, " day(s) ("
 
 
 # run togheter with MM_pis_matrix_EOBS_cycle_consec_compute_plot_R0
-x = c(61, 21, 7, 0, 0)
-x_lab = c("9 or more", "3 to 8", "1 to 2", "0 to 1", "0")
+x = c(105, 56, 21, 0, 0)
+x_lab = c("e 15 or more", "d 8 to 15", "c 3 to 8", "b 0 to 3", "a 0")
 col_x <- c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724")
 
 R0_l_level <- case_when(R0_l > x[1] ~ x_lab[1],
@@ -191,16 +191,22 @@ R0_l_level <- case_when(R0_l > x[1] ~ x_lab[1],
                         R0_l > x[4] ~ x_lab[4],
                         R0_l == x[5] ~ x_lab[5])
 
+countries_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/W_EU_s.shp")
+
 gx <- ggplot()+
-  geom_sf(data = domain, aes(fill = R0_l_level), colour = NA)+ #
+  geom_sf(data = domain_sel, aes(fill = R0_l_level), colour = NA)+ #
   scale_fill_manual(values = col_x)+
-  geom_sf(data = ECDC_Dengue %>% filter(Infection == "Yes"), fill = "white", alpha = 0.6, color = "red")+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray90")+
-  coord_sf(xlim = c(-11, 18), ylim = c(37, 59)) +
+  geom_sf(data = ECDC_Dengue %>% filter(Infection == "Yes"), fill = "white", alpha = 0.8, color = "red", lwd = 0.7)+
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60))+
   ggtitle(paste0("Comparison ECDC vs #cases R0"))+
   theme_minimal() +
   guides(fill=guide_legend(title=bquote(R[0]~gt~1~(weeks))))+
   theme_void()
+
+ggsave(file= paste0(folder_plot, "R0_", disease,"_level_ECDC.png"),  plot= gx , units="in", width=5.5, height=7, dpi=300)
+
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/05_AeAlbopictus_ImpactrecentClimateChange/Images/"
 
 ggsave(file= paste0(folder_plot, "R0_", disease,"_level_ECDC.png"),  plot= gx , units="in", width=5.5, height=7, dpi=300)
 
@@ -209,11 +215,11 @@ ggplot()+
   geom_sf(data = domain_sel, aes(fill = R0_l), colour = NA)+
   geom_sf(data = ECDC_Dengue, alpha = 0, color = "gray90", lwd = 0.1)+ 
   geom_sf(data = ECDC_Dengue %>% filter(Infection == "Yes"), fill = "red", alpha = 0.4, color = NA)+
-  coord_sf(xlim = c(-15, 18), ylim = c(36, 60))
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60))
 
 ggplot()+
   geom_sf(data = domain_sel, aes(fill = R0_l), colour = NA)+
   geom_sf(data = ECDC_Dengue, alpha = 0, color = "gray90", lwd = 0.1)+ 
   geom_sf(data = domain_sel %>% filter(R0_l > thr_v), fill = "orange", alpha = 0.4, color = NA)+
   geom_sf(data = ECDC_Dengue %>% filter(Infection == "Yes"), fill = "red", alpha = 0.4, color = NA)+
-  coord_sf(xlim = c(-15, 18), ylim = c(36, 60))
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60))
