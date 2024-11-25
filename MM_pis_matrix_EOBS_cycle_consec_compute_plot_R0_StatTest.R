@@ -181,7 +181,7 @@ text(y = sensitivity_th -0.03, x = specificity_th -0.03, paste0(thr, " day(s) ("
 
 
 # run togheter with MM_pis_matrix_EOBS_cycle_consec_compute_plot_R0
-x = c(105, 56, 21, 0, 0)
+x = c(105, 56, 21, 1, 0)
 x_lab = c("e 15 or more", "d 8 to 15", "c 3 to 8", "b 0 to 3", "a 0")
 col_x <- c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724")
 
@@ -206,9 +206,9 @@ gx <- ggplot()+
 
 ggsave(file= paste0(folder_plot, "R0_", disease,"_level_ECDC.png"),  plot= gx , units="in", width=5.5, height=7, dpi=300)
 
-folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/05_AeAlbopictus_ImpactrecentClimateChange/Images/"
-
-ggsave(file= paste0(folder_plot, "R0_", disease,"_level_ECDC.png"),  plot= gx , units="in", width=5.5, height=7, dpi=300)
+# folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/05_AeAlbopictus_ImpactrecentClimateChange/Images/"
+# 
+# ggsave(file= paste0(folder_plot, "R0_Dengue_level_ECDC.png"),  plot= gx , units="in", width=5.5, height=7, dpi=300)
 
 
 ggplot()+

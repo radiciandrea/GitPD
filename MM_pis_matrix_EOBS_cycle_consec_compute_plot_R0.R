@@ -173,8 +173,8 @@ R0_2 = colMeans(R0_m[which(years %in% years_sel_2),], na.rm = T)
 domain <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_01_W_EU.shp")) %>%
   arrange(region)
 
-x = c(61, 21, 7, 0, 0)
-x_lab = c("9 or more", "3 to 8", "1 to 2", "0 to 1", "0")
+x = c(105, 56, 21, 1, 0)
+x_lab = c("e 15 or more", "d 8 to 15", "c 3 to 8", "b 0 to 3", "a 0")
 col_x <- c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724")
 
 
@@ -202,9 +202,9 @@ R0_2_level <- case_when(R0_2 > x[1] ~ x_lab[1],
                         R0_2 == x[5] ~ x_lab[5])
 
 Risk_zone <-  case_when((R0_1 < 1) & (R0_2 < 1) ~ "No p. spread",
-                        (R0_1 > 1) & (R0_2 > 1) ~ "Hist. p. spread",
-                        (R0_1 < 1) & (R0_2 > 1) ~ "New p. spread",
-                        (R0_1 > 1) & (R0_2 < 1) ~ "Prev. p. spread")
+                        (R0_1 >= 1) & (R0_2 >= 1) ~ "Hist. p. spread",
+                        (R0_1 < 1) & (R0_2 >= 1) ~ "New p. spread",
+                        (R0_1 >= 1) & (R0_2 < 1) ~ "Prev. p. spread")
 
 ### plot for CC RIO conference /cclimat et impacte/paper
 
@@ -218,7 +218,7 @@ g1 <- ggplot()+
   geom_sf(data = domain, aes(fill = R0_1_level), colour = NA)+ #
   scale_fill_manual(values = col_x)+
   geom_sf(data = countries_sh, alpha = 0, colour = "white")+
-  coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60)) +
   ggtitle(paste0("Possible spread of ", disease, " (period 2006-2014)"))+
   theme_void()+
   guides(fill=guide_legend(title=bquote(R[0]~gt~1~(weeks))))
@@ -231,7 +231,7 @@ g2 <- ggplot()+
   geom_sf(data = domain, aes(fill = R0_2_level), colour = NA)+ #
   scale_fill_manual(values = col_x)+
   geom_sf(data = countries_sh, alpha = 0, colour = "white")+
-  coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60)) +
   ggtitle(paste0("Possible spread of ", disease, " (period 2015-2023)"))+
   theme_void() +
   guides(fill=guide_legend(title=bquote(R[0]~gt~1~(weeks))))
@@ -240,13 +240,11 @@ ggsave(file= paste0(folder_plot, "R0_", disease,"_2_level_01.png"),  plot= g2 , 
 
 # plot 3
 
-col_x_sint_FR<- c("#384AB4", "#8EB0FE", "#F29878", "#B00026") 
-
 gvar <- ggplot()+
   geom_sf(data = domain, aes(fill = Risk_zone), colour = NA)+
-  scale_fill_manual(values = rev(col_x_sint_FR))+
-  geom_sf(data = countries_sh, alpha = 0, colour = "grey90")+
-  coord_sf(xlim = c(-15, 18), ylim = c(36, 60)) +
+  scale_fill_manual(values = c("gray10", "gray30", "gray70", "gray90"), na.value = "white")+
+  geom_sf(data = countries_sh, alpha = 0, colour = "grey50")+
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60)) +
   ggtitle(paste0("Variation in the spread pattern of ", disease))+
   theme_void() +
   guides(fill=guide_legend(title=bquote(R[0]~variation)))
