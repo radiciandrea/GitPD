@@ -53,12 +53,19 @@ E0_m_c_sel_2 <- apply(E0_m[which(years %in% years_sel_2),], 2,
 E0_2015_2023 = apply(E0_m_c_sel_2, 2,
                  function(x){exp(mean(log(x)))})
 
+years_sel_3 = 2018:2023 # 2017:2023 
+E0_m_c_sel_3 <- apply(E0_m[which(years %in% years_sel_3),], 2,
+                      function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
+E0_2018_2023 = apply(E0_m_c_sel_3, 2,
+                     function(x){exp(mean(log(x)))})
+
 domain_sel <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel", type, "_", name,".shp")) 
 
 domain_years_sel <- domain_sel%>%
   arrange(region) %>%
   mutate(E0_2006_2014 = E0_2006_2014)%>%
-  mutate(E0_2015_2023 = E0_2015_2023)
+  mutate(E0_2015_2023 = E0_2015_2023)%>%
+  mutate(E0_2018_2023 = E0_2018_2023)
 
 #2006_2014
 obs_Kramer <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/Kramer_2015_Albo_W_EU.shp")
@@ -171,6 +178,7 @@ regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_do
 
 E0_sel_1 = E0_2006_2014
 E0_sel_2 = E0_2015_2023
+E0_sel_3 = E0_2018_2023
 
 br = c(0, 10^(-3:3), 10^10)
 
@@ -186,7 +194,11 @@ domain_years_sel <- domain_sel%>%
   mutate(E0_2 = E0_sel_2)%>%
   mutate(E0_2_level=cut(E0_2, breaks=br,
                         labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
-  mutate(E0_2_level=factor(as.character(E0_2_level), levels=rev(levels(E0_2_level))))
+  mutate(E0_2_level=factor(as.character(E0_2_level), levels=rev(levels(E0_2_level)))) %>%
+  mutate(E0_3 = E0_sel_3)%>%
+  mutate(E0_3_level=cut(E0_3, breaks=br,
+                        labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
+  mutate(E0_3_level=factor(as.character(E0_3_level), levels=rev(levels(E0_3_level))))
 
 
 folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/05_AeAlbopictus_ImpactrecentClimateChange/Images/"
@@ -214,16 +226,18 @@ ggplot()+
 
 ggsave(file= paste0(folder_plot, "E0_2_level.png"), units="in", width=5, height=7, dpi=300)
 
+# with pres-abs
+
 ggplot()+
-  geom_sf(data = domain_years_sel, aes(fill = E0_2_level), colour = NA)+ #
+  geom_sf(data = domain_years_sel, aes(fill = E0_3_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
-  geom_sf(data = ECDC_Albo %>% filter(Status == "Absent"), fill = "white", alpha = 0.3, color = NA)+
-  xlim(c(-14,19))+
-  ylim(c(37, 59))+
+  geom_sf(data = ECDC_Albo %>% filter(Status == "Absent"), fill = "white", alpha = 0.3, color = "black")+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
   geom_sf(data = obs_GBIF, alpha = 1, colour = "yellow", size=0.3)+
-  ggtitle(paste0("E0 diapausing eggs, period = ", min(years_sel_2), "-", max(years_sel_2)))+
+  ggtitle(paste0("E0 diapausing eggs, period = ", min(years_sel_3), "-", max(years_sel_3)))+
+  xlim(c(-14,19))+
+  ylim(c(37, 59))+
   theme_void()
 # + scale_fill_gradient(trans = "log")
 
-ggsave(file= paste0(folder_plot, "E0_2_level+gbif-ecdc.png"), units="in", width=5, height=7, dpi=300)
+ggsave(file= paste0(folder_plot, "E0_3_level+gbif-ecdc.png"), units="in", width=5, height=7, dpi=300)
