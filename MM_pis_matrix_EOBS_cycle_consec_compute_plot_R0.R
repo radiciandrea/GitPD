@@ -189,17 +189,17 @@ col_x <- c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724")
 #                         labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
 #   mutate(R0_2_level=factor(as.character(R0_2_level), levels=rev(levels(R0_2_level))))
 
-R0_1_level <- case_when(R0_1 > x[1] ~ x_lab[1],
-                        R0_1 > x[2] ~ x_lab[2],
-                        R0_1 > x[3] ~ x_lab[3],
-                        R0_1 > x[4] ~ x_lab[4],
-                        R0_1 == x[5] ~ x_lab[5])
+R0_1_level <- case_when(R0_1 >= x[1] ~ x_lab[1],
+                        R0_1 >= x[2] ~ x_lab[2],
+                        R0_1 >= x[3] ~ x_lab[3],
+                        R0_1 >= x[4] ~ x_lab[4],
+                        R0_1 < x[4] ~ x_lab[5])
 
 R0_2_level <- case_when(R0_2 > x[1] ~ x_lab[1],
                         R0_2 > x[2] ~ x_lab[2],
                         R0_2 > x[3] ~ x_lab[3],
                         R0_2 > x[4] ~ x_lab[4],
-                        R0_2 == x[5] ~ x_lab[5])
+                        R0_2 < x[4] ~ x_lab[5])
 
 Risk_zone <-  case_when((R0_1 < 1) & (R0_2 < 1) ~ "No p. spread",
                         (R0_1 >= 1) & (R0_2 >= 1) ~ "Hist. p. spread",
