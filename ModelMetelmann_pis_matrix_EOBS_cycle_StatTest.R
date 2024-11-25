@@ -207,8 +207,7 @@ ggplot()+
   geom_sf(data = domain_years_sel, aes(fill = E0_1_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
-  xlim(c(-15,20))+
-  ylim(c(36, 60))+
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60))
   ggtitle(paste0("E0 diapausing eggs, period = ", min(years_sel_1), "-", max(years_sel_1)))+
   theme_void()
 # + scale_fill_gradient(trans = "log")
@@ -219,8 +218,7 @@ ggplot()+
   geom_sf(data = domain_years_sel, aes(fill = E0_2_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
-  xlim(c(-15,20))+
-  ylim(c(36, 60))+
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60))
   ggtitle(paste0("E0 diapausing eggs, period = ", min(years_sel_2), "-", max(years_sel_2)))+
   theme_void()
 
@@ -235,8 +233,7 @@ ggplot()+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
   geom_sf(data = obs_GBIF, alpha = 1, colour = "yellow", size=0.3)+
   ggtitle(paste0("E0 diapausing eggs, period = ", min(years_sel_3), "-", max(years_sel_3)))+
-  xlim(c(-14,19))+
-  ylim(c(37, 59))+
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60))
   theme_void()
 # + scale_fill_gradient(trans = "log")
 
@@ -258,7 +255,8 @@ ggplot()+
   scale_fill_manual(values = c("gray10", "gray30", "gray70", "gray90"), na.value = "white")+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey50")+
   ggtitle("E0 % variation" )+
-  xlim(c(-14,19))+
-  ylim(c(37, 59))+
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60))
   theme_void()
 # + scale_fill_g
+
+ggsave(file= paste0(folder_plot, "E0_variation.png"), units="in", width=5, height=7, dpi=300)
