@@ -241,3 +241,24 @@ ggplot()+
 # + scale_fill_gradient(trans = "log")
 
 ggsave(file= paste0(folder_plot, "E0_3_level+gbif-ecdc.png"), units="in", width=5, height=7, dpi=300)
+
+
+# variation %
+
+domain_years_sel <- domain_years_sel %>%
+  mutate(Risk_zone = case_when(
+    (E0_1 > 1) & (E0_2 > 1) ~ "1 HS",
+    (E0_1 < 1) & (E0_2 > 1) ~ "2 RS",
+    (E0_1 > 1) & (E0_2 < 1) ~ "3 NU",
+    (E0_1 < 1) & (E0_2 < 1) ~ "4 HU",
+    .default = NA))
+
+ggplot()+
+  geom_sf(data = domain_years_sel, aes(fill = Risk_zone), colour = NA)+ #
+  scale_fill_manual(values = c("gray10", "gray30", "gray70", "gray90"), na.value = "white")+
+  geom_sf(data = regions_sh, alpha = 0, colour = "grey50")+
+  ggtitle("E0 % variation" )+
+  xlim(c(-14,19))+
+  ylim(c(37, 59))+
+  theme_void()
+# + scale_fill_g
