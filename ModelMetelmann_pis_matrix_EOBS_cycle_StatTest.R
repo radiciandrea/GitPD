@@ -15,6 +15,7 @@ library(tidyverse)
 type = "_01"
 
 folder_out = paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_sim", type)
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/05_AeAlbopictus_ImpactrecentClimateChange/Images/"
 
 # name = "W_EU"
 # year = 2005
@@ -200,9 +201,6 @@ domain_years_sel <- domain_sel%>%
                         labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
   mutate(E0_3_level=factor(as.character(E0_3_level), levels=rev(levels(E0_3_level))))
 
-
-folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/05_AeAlbopictus_ImpactrecentClimateChange/Images/"
-
 ggplot()+
   geom_sf(data = domain_years_sel, aes(fill = E0_1_level), colour = NA)+ #
   scale_fill_manual(values = rev(col_br))+
@@ -231,9 +229,9 @@ ggplot()+
   scale_fill_manual(values = rev(col_br))+
   geom_sf(data = ECDC_Albo %>% filter(Status == "Absent"), fill = "white", alpha = 0.3, color = "black")+
   geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
-  geom_sf(data = obs_GBIF, alpha = 1, colour = "yellow", size=0.3)+
+  geom_sf(data = obs_GBIF, alpha = 1, colour = "yellow", size=0.8)+
   ggtitle(paste0("E0 diapausing eggs, period = ", min(years_sel_3), "-", max(years_sel_3)))+
-  coord_sf(xlim = c(-15, 19), ylim = c(36, 60))
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60)) +
   theme_void()
 # + scale_fill_gradient(trans = "log")
 
