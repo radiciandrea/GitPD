@@ -34,6 +34,8 @@ cities = c("Coimbra", "Montpellier", "Madrid", "Lugano", "Frankfurt aum Main", "
 cities = c("Montpellier", "Bilbao", "Augsburg", "Paris-centre", "Paris-suburbs", "Paris-region")
 
 years_eval = c(2004, 2007, 2010, 2014, 2017, 2020, 2023) #2004:2023
+years_eval = c(2004, 2023)
+years_lab = c("2000-2004", "2019-2023")
 years = 2000:2023
 
 #MULTIPLICATIVE
@@ -51,7 +53,8 @@ for (city_x in cities){
   point_df <- data.frame("name" = city_x,
                          "year" = years_eval,
                          "T_av_summer" = NA,
-                         "P_summ_tot" = NA)
+                         "P_summ_tot" = NA,
+                         "lab" = years_lab)
   
   # recc Didier: between 1 may and 1 oct
   for(y in years_eval){
@@ -84,11 +87,11 @@ for (city_x in cities){
                  color = "black", breaks = c(1))+
     theme_test()+
     geom_path(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
-    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot, color = as.factor(year)), size = 2) +
+    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color = "white", size = 2) +
     guides(size = "legend", colour = "none")+
     scale_color_grey()+
-    geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023), aes(x = T_av_summer, y = P_summ_tot, label = year),
-                     label.padding = 0.15) #size = 4
+    geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023), aes(x = T_av_summer, y = P_summ_tot, label = lab),
+                     label.padding = 0.15, segment.color = NA) #size = 4
   
   
   #Ad
@@ -102,11 +105,11 @@ for (city_x in cities){
     ggtitle(paste0("Average log10 adults/ha (May to Oct), " , city_x))+
     theme_test()+
     geom_path(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
-    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot, color = as.factor(year)), size = 2) +
+    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color = "white", size = 2) +
     guides(size = "legend", colour = "none")+
     scale_color_grey()+
-    geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023), aes(x = T_av_summer, y = P_summ_tot, label = year),
-                     label.padding = 0.15) #size = 4
+    geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023), aes(x = T_av_summer, y = P_summ_tot, label = lab),
+                     label.padding = 0.15,segment.color = NA) #size = 4
   
   # #R0
   # breaks_R = c(0, 0.5, 1, 2, 4, 7, 10)
@@ -138,33 +141,57 @@ for (city_x in cities){
                  color = "red", breaks = c(1))+
     theme_test()+
     geom_path(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
-    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot, color = as.factor(year)), size = 2) +
+    geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color = "white", size = 2) +
     guides(size = "legend", colour = "none")+
     scale_color_grey()+
-    geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023), aes(x = T_av_summer, y = P_summ_tot, label = year),
-                     label.padding = 0.15) #size = 4
+    geom_label_repel(data = point_df %>% filter(year == 2004 | year ==  2023), aes(x = T_av_summer, y = P_summ_tot, label = lab),
+                     label.padding = 0.15, segment.color = NA) #size = 4
   
   
   # Save
-  g_tot <- ggarrange(g0_c, g1_c, g3_c, ncol = 1)
+  # g_tot <- ggarrange(g0_c, g1_c, g3_c, ncol = 1)
   
-  ggsave(paste0(folder_plot, "NEW_g", city_x ,"_E0_15.png"), g0_c + xlab("")+ ylab("")+ggtitle("")+guides(size = "legend", fill = "none"), units="in", height=8/(3*1.5), width= 5.5/1.5, dpi=300)
-  ggsave(paste0(folder_plot, "NEW_g", city_x ,"_Ad_15.png"), g1_c + xlab("")+ ylab("")+ggtitle("")+guides(size = "legend", fill = "none"), units="in", height=8/(3*1.5), width= 5.5/1.5, dpi=300)
-  ggsave(paste0(folder_plot, "NEW_g", city_x ,"_nR_15.png"), g3_c + xlab("")+ ylab("")+ggtitle("")+guides(size = "legend", fill = "none"), units="in", height=8/(3*1.5), width= 5.5/1.5, dpi=300)
+  ggsave(paste0(folder_plot, "NEW_g", city_x ,"_E0_15.png"),
+         g0_c +
+           guides(size = "legend", fill = "none")+ 
+           theme(axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 plot.title = element_blank(),
+                 plot.margin = unit(c(0.025, 0, 0, 0), "in"))+
+                   scale_x_continuous(expand = c(0, 0))+
+                   scale_y_continuous(expand = c(0, 0)),
+         units="in", height=1.2, width= 3.6, dpi=300)
   
-  ggsave(paste0(folder_plot, "NEW_g", city_x ,".png"), g_tot, units="in", height=8, width= 5.5, dpi=300)
+  ggsave(paste0(folder_plot, "NEW_g", city_x ,"_Ad_15.png"),
+         g1_c +
+           guides(size = "legend", fill = "none")+ 
+           theme(axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 plot.title = element_blank(),
+                 plot.margin = unit(c(0.025, 0, 0, 0), "in"))+
+           scale_x_continuous(expand = c(0, 0))+
+           scale_y_continuous(expand = c(0, 0)),
+         units="in", height=1.2, width= 3.6, dpi=300)
+  
+  ggsave(paste0(folder_plot, "NEW_g", city_x ,"_nR_15.png"),
+         g3_c +
+           guides(size = "legend", fill = "none")+ 
+           theme(axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 plot.title = element_blank(),
+                 plot.margin = unit(c(0.025, 0, 0, 0), "in"))+
+           scale_x_continuous(expand = c(0, 0))+
+           scale_y_continuous(expand = c(0, 0)),
+         units="in", height=1.2, width= 3.6, dpi=300)
+  
+  # ggsave(paste0(folder_plot, "NEW_g", city_x ,"_nR_15.png"), g3_c + guides(size = "legend", fill = "none") + theme(axis.title.x = element_blank(), axis.title.y = element_blank(), plot.title = element_blank()), units="in", height=1.5, width= 3.5, dpi=300)
+  
+  # ggsave(paste0(folder_plot, "NEW_g", city_x ,".png"), g_tot, units="in", height=8, width= 5.5, dpi=300)
 }
 
 
 
-
-
-
-
-
-
-
-# VARIANCE-BASED (TO BE UPTDATED)
+ # VARIANCE-BASED (TO BE UPTDATED)
 
 folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/Exposure_state_pow/"
 
