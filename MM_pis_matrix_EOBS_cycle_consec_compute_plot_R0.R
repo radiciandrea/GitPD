@@ -201,10 +201,10 @@ R0_2_level <- case_when(R0_2 > x[1] ~ x_lab[1],
                         R0_2 > x[4] ~ x_lab[4],
                         R0_2 < x[4] ~ x_lab[5])
 
-Risk_zone <-  case_when((R0_1 < 1) & (R0_2 < 1) ~ "No p. spread",
-                        (R0_1 >= 1) & (R0_2 >= 1) ~ "Hist. p. spread",
-                        (R0_1 < 1) & (R0_2 >= 1) ~ "New p. spread",
-                        (R0_1 >= 1) & (R0_2 < 1) ~ "Prev. p. spread")
+Risk_zone <-  case_when((R0_1 < 1) & (R0_2 < 1) ~ "d No p. spread",
+                        (R0_1 >= 1) & (R0_2 >= 1) ~ "a Hist. p. spread",
+                        (R0_1 < 1) & (R0_2 >= 1) ~ "b New  spread",
+                        (R0_1 >= 1) & (R0_2 < 1) ~ "c Prev. p. spread")
 
 ### plot for CC RIO conference /cclimat et impacte/paper
 
