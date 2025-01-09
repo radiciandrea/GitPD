@@ -181,7 +181,7 @@ text(y = sensitivity_th -0.03, x = specificity_th -0.03, paste0(thr, " day(s) ("
 
 
 # run togheter with MM_pis_matrix_EOBS_cycle_consec_compute_plot_R0
-x = c(105, 56, 21, 1, 0)
+x = c(105, 56, 21, 0, 0)
 x_lab = c("e 15 or more", "d 8 to 15", "c 3 to 8", "b 0 to 3", "a 0")
 col_x <- c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724")
 
@@ -197,14 +197,14 @@ gx <- ggplot()+
   geom_sf(data = domain_sel, aes(fill = R0_l_level), colour = NA)+ #
   scale_fill_manual(values = col_x)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray90")+
-  geom_sf(data = ECDC_Dengue %>% filter(Infection == "Yes"), fill = "white", alpha = 0.8, color = "red", lwd = 0.7)+
+  geom_sf(data = ECDC_Dengue %>% filter(Infection == "Yes"), fill = "white", alpha = 0.05, color = "red", lwd = 0.4)+
   coord_sf(xlim = c(-15, 19), ylim = c(36, 60))+
   ggtitle(paste0("Comparison ECDC vs #cases R0"))+
   theme_minimal() +
   guides(fill=guide_legend(title=bquote(R[0]~gt~1~(weeks))))+
   theme_void()
 
-ggsave(file= paste0(folder_plot, "R0_", disease,"_level_ECDC.png"),  plot= gx , units="in", width=5.5, height=7, dpi=300)
+ggsave(file= paste0(folder_plot, "R0_dengue_level_ECDC.png"),  plot= gx , units="in", width=5.5, height=7, dpi=300)
 
 # folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/05_AeAlbopictus_ImpactrecentClimateChange/Images/"
 # 
