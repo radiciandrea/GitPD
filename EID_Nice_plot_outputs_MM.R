@@ -216,7 +216,7 @@ g2 <- ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = Type))+
   xlab("date")+
   theme_test()
 
-ggsave(file= paste0(folder_plot, "/New_Nice_EID_withmedian.png"), plot= g2, width=4, height=3, dpi=300)
+ggsave(file= paste0(folder_plot, "/New_Nice_EID_withmedian.png"), plot= g2, width=3.5, height=2.5, dpi=300)
 
 #lo plotto nell'inkcscape
 
