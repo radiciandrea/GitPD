@@ -206,6 +206,8 @@ Risk_zone <-  case_when((R0_1 < 1) & (R0_2 < 1) ~ "d No p. spread",
                         (R0_1 < 1) & (R0_2 >= 1) ~ "b New  spread",
                         (R0_1 >= 1) & (R0_2 < 1) ~ "c Prev. p. spread")
 
+
+mean(R0_2 - R0_1, na.rm = T)
 ### plot for CC RIO conference /cclimat et impacte/paper
 
 folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/R0/"
