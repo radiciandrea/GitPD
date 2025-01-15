@@ -74,14 +74,54 @@ for (city_x in cities){
       pull(P_summ_tot)
   }
   
-  #E0
-  breaks_E0 = c(10^(-7), 10^7)
+  # #E0
+  # breaks_E0 = c(10^(-7), 10^7)
+  # 
+  # g0_c <- ggplot()+
+  #   geom_contour_fill(data = Ind_df,
+  #                     aes(x = T_av_summer, y = P_summ_tot, z = log10(E0)))+
+  #   scale_fill_viridis_c(limits = log10(c(min(breaks_E0), max(breaks_E0))),
+  #                        na.value = "#32003C", option = "plasma")+
+  #   ggtitle(paste0("Average E0, ", city_x))+
+  #   geom_contour(data = Ind_df, aes(x = T_av_summer, y = P_summ_tot, z = E0),
+  #                color = "black", breaks = c(1))+
+  #   theme_test()+
+  #   geom_path(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color= "white") +
+  #   geom_point(data = point_df, aes(x = T_av_summer, y = P_summ_tot), color = "white", size = 2) +
+  #   guides(size = "legend", colour = "none")+
+  #   scale_color_grey()+
+  #   geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023), aes(x = T_av_summer, y = P_summ_tot, label = lab),
+  #                    label.padding = 0.15, segment.color = NA) #size = 4
   
-  g0_c <- ggplot()+
-    geom_contour_fill(data = Ind_df,
-                      aes(x = T_av_summer, y = P_summ_tot, z = log10(E0)))+
-    scale_fill_viridis_c(limits = log10(c(min(breaks_E0), max(breaks_E0))),
-                         na.value = "#32003C", option = "plasma")+
+  
+  br = 10^(-7:7)
+  col_br = c("#020206","#141a40","#26327a", "#384AB4", "#5570DF", "#8EB0FE", "#C5D7F3",
+             "#F2CDBB", "#F29878", "#D04B45", "#B00026", "#640015", "#180005", "#000000")
+  
+  Ind_df <- Ind_df%>%
+    mutate(E0_app = E0)
+  
+  Ind_df$E0_app[which(Ind_df$E0> max(br))] = max(br)
+  Ind_df$E0_app[which(Ind_df$E0< min(br))] = min(br)
+  
+  min_E0_app = floor(log10(min(Ind_df$E0_app)))
+  max_E0_app = ceil(log10(max(Ind_df$E0_app)))
+  
+  br_post = 10^seq(min_E0_app, max_E0_app, by = 1)
+  col_br_post = col_br[which(br %in% br_post[2:length(br_post)])-1]
+  
+  
+  # Plot
+  g0_c <- ggplot() +
+    geom_contour_fill(
+      data = Ind_df,
+      aes(x = T_av_summer, y = P_summ_tot, z = log(E0_app))
+    ) +
+    scale_fill_gradientn(
+      colors = col_br_post, # Use the defined colors
+      values = scales::rescale(log10(br_post)), # Rescale breaks for the log10 scale
+      na.value = "#32003C" # Define the color for NA values
+    )+
     ggtitle(paste0("Average E0, ", city_x))+
     geom_contour(data = Ind_df, aes(x = T_av_summer, y = P_summ_tot, z = E0),
                  color = "black", breaks = c(1))+
@@ -92,7 +132,6 @@ for (city_x in cities){
     scale_color_grey()+
     geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023), aes(x = T_av_summer, y = P_summ_tot, label = lab),
                      label.padding = 0.15, segment.color = NA) #size = 4
-  
   
   #Ad
   breaks_Ad = seq(0.03, 30000, by = 500)
@@ -151,7 +190,7 @@ for (city_x in cities){
   # Save
   # g_tot <- ggarrange(g0_c, g1_c, g3_c, ncol = 1)
   
-  ggsave(paste0(folder_plot, "NEW_g", city_x ,"_E0_15.png"),
+  ggsave(paste0(folder_plot, "NEWNEW_g", city_x ,"_E0_15.png"),
          g0_c +
            guides(size = "legend", fill = "none")+ 
            theme(axis.title.x = element_blank(),
