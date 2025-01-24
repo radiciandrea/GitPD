@@ -38,6 +38,9 @@ df_cities = data.frame(city = c("Montpellier", "Paris", "Madrid", "London_N", "V
 df_cities = data.frame(city = c("Montpellier", "Bilbao", "Augsburg", "Paris-centre", "Paris-suburbs", "Paris-region"),
                        code = c("1524", "1387", "3026", "3163", "3082", "3081"))
 
+df_cities = data.frame(city = c("Montpellier", "Rennes", "Strasbourg"),
+                       code = c("1524", "2883", "3104"))
+
 for (city_x in df_cities$city){
 
 region_x = df_cities$code[df_cities$city == city_x] # region of Montpellier
@@ -64,3 +67,4 @@ save(W_tot_df, file = paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/
      city_x, "_", min(years), "_", max(years), ".RData")) #Nizza
 
 }
+

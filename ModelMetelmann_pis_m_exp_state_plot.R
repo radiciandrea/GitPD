@@ -33,6 +33,8 @@ cities = c("Coimbra", "Montpellier", "Madrid", "Lugano", "Frankfurt aum Main", "
 
 cities = c("Montpellier", "Bilbao", "Augsburg", "Paris-centre", "Paris-suburbs", "Paris-region")
 
+cities = c("Montpellier", "Rennes", "Strasbourg")
+
 years_eval = c(2004, 2007, 2010, 2014, 2017, 2020, 2023) #2004:2023
 years_eval = c(2004, 2023)
 years_lab = c("2000-2004", "2019-2023")
