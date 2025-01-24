@@ -390,7 +390,7 @@ for(region_x in regions_availab){
   
   #more details
   egg_plot <- ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = type))+
-    ggtitle(paste0(name_region," (Id VectAdunance: ", id_VA, "), ", label_cor))+
+    ggtitle(paste0(name_region," (Id VectAbundance: ", id_VA, "), ", label_cor))+
     geom_line(data = Egg_comp_df %>% filter(type == "laid, simulated"))+
     geom_point(data = Egg_comp_df %>% filter(type != "laid, simulated"))+
     guides(color = FALSE)+
