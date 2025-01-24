@@ -363,9 +363,11 @@ for(region_x in regions_availab){
     cor_annual_stars = ""
   }
   
-  label_cor = paste0("r: ", round(cor_brut, 2), cor_brut_stars,
-                     "; rmse = ", round(rmse_brut, 3), "; r (annual): ",
-                     round(cor_annual, 2), cor_annual_stars)
+  # label_cor = paste0("r: ", round(cor_brut, 2), cor_brut_stars,
+  #                    "; rmse = ", round(rmse_brut, 3), "; r (annual): ",
+  #                    round(cor_annual, 2), cor_annual_stars)
+  
+  label_cor = paste0("r: ", round(cor_brut, 2), cor_brut_stars)
   
   VectDomain$r_gross[VectDomain$region == region_x] = cor_brut
   VectDomain$pv_r_gross[VectDomain$region == region_x] = cor_brut_p
@@ -385,9 +387,18 @@ for(region_x in regions_availab){
     theme_test()#+
     # annotate(geom="text", x= min(Egg_comp_df$date)+(max(Egg_comp_df$date) - min(Egg_comp_df$date))*0.13, y=max(Egg_comp_df$norm_eggs),
     #          label= label_cor, color="black")
+  
+  #more details
+  egg_plot <- ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = type))+
+    ggtitle(paste0(name_region," (Id VectAdunance: ", id_VA, "), ", label_cor))+
+    geom_line(data = Egg_comp_df %>% filter(type == "laid, simulated"))+
+    geom_point(data = Egg_comp_df %>% filter(type != "laid, simulated"))+
+    guides(color = FALSE)+
+    ylab("normalized abundance (%)")+
+    theme_test()
 
-  ggsave(paste0(folder_plot, "/New_egg_plot_cell_id_", region_x, ".png"), plot = egg_plot,
-         units="in", width=3.5, height=2.5, dpi=300)
+  ggsave(paste0(folder_plot, "/Paper_egg_plot_cell_id_", region_x, ".png"), plot = egg_plot,
+         units="in", width=5.5, height=2.5, dpi=300)
 
 
 }
