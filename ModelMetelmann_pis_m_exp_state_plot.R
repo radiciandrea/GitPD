@@ -91,9 +91,9 @@ for (city_x in cities){
     point_df$E0[which(point_df$year == y)] <- E0_x
     point_df$Ad[which(point_df$year == y)] <- Ad_x
     point_df$nR0[which(point_df$year == y)] <- nR0_x
-    point_df$labE0[which(point_df$year == y)] <- paste0(y-4,"-",y, "\n(", round(E0_x,1), ")")
-    point_df$labAd[which(point_df$year == y)] <- paste0(y-4,"-",y, "\n(", round(Ad_x,1), ")")
-    point_df$labnR0[which(point_df$year == y)] <- paste0(y-4,"-",y, "\n(", round(nR0_x,1), ")")
+    point_df$labE0[which(point_df$year == y)] <- paste0(y-4,"-",y, " (", round(E0_x,1), ")")
+    point_df$labAd[which(point_df$year == y)] <- paste0(y-4,"-",y, " (", round(Ad_x,1), ")")
+    point_df$labnR0[which(point_df$year == y)] <- paste0(y-4,"-",y, " (", round(nR0_x,1), ")")
 }
   
   # prepare labels
@@ -158,7 +158,7 @@ for (city_x in cities){
     scale_color_grey()+
     geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023),
                      aes(x = T_av_summer, y = P_summ_tot, label = labE0),
-                     label.padding = 0.15, segment.color = NA) #size = 4
+                     label.padding = 0.15, segment.color = NA, size = 3) #size = 4
   
   #Ad
   breaks_Ad = seq(0.03, 30000, by = 500)
@@ -176,7 +176,7 @@ for (city_x in cities){
     scale_color_grey()+
     geom_label_repel(data = point_df %>% filter(year ==  2004 | year ==  2023),
                      aes(x = T_av_summer, y = P_summ_tot, label = labAd),
-                     label.padding = 0.15,segment.color = NA) #size = 4
+                     label.padding = 0.15,segment.color = NA, size = 3) #size = 4
   
   # #R0
   # breaks_R = c(0, 0.5, 1, 2, 4, 7, 10)
@@ -213,7 +213,7 @@ for (city_x in cities){
     scale_color_grey()+
     geom_label_repel(data = point_df %>% filter(year == 2004 | year ==  2023),
                      aes(x = T_av_summer, y = P_summ_tot, label = labnR0),
-                     label.padding = 0.15, segment.color = NA) #size = 4
+                     label.padding = 0.15, segment.color = NA, size = 3) #size = 4
   
   
   # Save
