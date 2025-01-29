@@ -194,7 +194,25 @@ g1 <- ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = Type))+
 
 ggsave(file= paste0(folder_plot, "Nice_traj_withmedian.svg"), plot= g1 , width=8, height=3)
 
-# Save with VectDomain (vectabundance)
+# plot per SI articolo 1
+
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/EOBS_sim_consec_plot"
+
+
+label_cor = paste0("r: ", round(cor_brut, 2), cor_brut_stars)
+
+egg_plot <- ggplot(Egg_comp_df, aes(x = date, y = norm_eggs, color = Type))+
+  ggtitle(paste0("Nice (EID) (Id VectAbundance 9987), ", label_cor))+
+  geom_line(data = Egg_comp_df %>% filter(Type == "laid, simulated"))+
+  geom_point(data = Egg_comp_df %>% filter(Type != "laid, simulated"))+
+  guides(color = FALSE)+
+  ylab("normalized abundance (%)")+
+  theme_test()
+
+ggsave(paste0(folder_plot, "/Paper_egg_plot_Nice (EID).png"), plot = egg_plot,
+       units="in", width=5.5, height=2.5, dpi=300)
+
+#Save with VectDomain (vectabundance)
 
 VectDomain_Nice = data.frame(Name_app = "Nice (EID)",
                              r_gross = cor_brut, 
