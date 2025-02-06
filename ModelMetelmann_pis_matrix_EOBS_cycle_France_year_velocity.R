@@ -6,20 +6,44 @@
 library(sf)
 library(dplyr)
 library(ggplot2)
+library(xlsx)
+library(pracma)
 
 #### PRESENCE DATA ----
 # load presence data
 
 folder_CANNET = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/DGS_Cannet"
-data_presence <- read.csv2(paste0(folder_CANNET, "/IRD communes années mod.csv"))
+
+# integrate presence data with 2024
+data_presence_mid2024 <- read.csv2(paste0(folder_CANNET, "/IRD communes années mod.csv")) # lacks of 2024
+data_presence_2024 <- read.xlsx(paste0(folder_CANNET, "/IRD communes années 2024.xlsx"), sheetName = "2024") # lacks of code insee
+
+# clean data_presence_mid2024 from 2024 data and add colmn "name_common_dep"
+data_presence_pre2024 <- data_presence_mid2024 %>%
+  select(-c("Nb.Présence.vecteur.Oui")) %>%
+  mutate(Année.colonisation.commune = case_when(Année.colonisation.commune == "2024" ~ NA,
+                                                .default = Année.colonisation.commune)) %>%
+  rename(Année.colonisation.commune_before2024 = Année.colonisation.commune) %>%
+  mutate(com_dep = paste0(Communes, "_", substring(Code.Insee, 1, 2))) 
+
+# same to 2024
+data_presence_2024<- data_presence_2024 %>%
+  mutate(com_dep = paste0(Communes, "_", Code.Département))%>%
+  rename(Année.colonisation.commune_2024 = Année.colonisation.commune) %>%
+  select(c("com_dep", "Année.colonisation.commune_2024"))
+
+# join to obtain global db
+data_presence <- left_join(data_presence_pre2024, data_presence_2024, by = "com_dep") %>%
+  mutate(Année.colonisation.commune = pmin(Année.colonisation.commune_before2024, Année.colonisation.commune_2024, na.rm = T)) %>%
+  select(c("Communes", "Code.Insee", "Année.colonisation.commune"))
 
 # simplidfied shp (may be too much) with QGIS
 folder_COMM = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/communes-20220101-shp"
 shp_communes <- st_read(paste0(folder_COMM, "/communes-20220101_metr_simp.shp"))
 
 data_presence_sf <- left_join(shp_communes, data_presence, by = c("insee" = "Code.Insee")) %>%
-  rename(presence = Nb.Présence.vecteur.Oui) %>%
   rename(year_col = Année.colonisation.commune) %>%
+  mutate(presence = !is.na(year_col)) %>%
   select(c("insee","presence", "year_col", "geometry"))
 
 ggplot()+
@@ -43,7 +67,10 @@ data_presence_sf_cp <- st_transform(data_presence_sf_c, crs = "EPSG:3035") #mete
 #https://www.image.ucar.edu/GSP/Software/Fields/Help/Tps.html
 library(fields)
 
+# very long: 285 secs
+tic()
 tps_model <- Tps(x = st_coordinates(data_presence_sf_cp), Y = data_presence_sf_cp$year_col)
+toc()
 
 # load grid and other datas
 grid_W_EU <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/grid_eobs_01_W_EU.shp")
@@ -138,7 +165,7 @@ domain_sel_v <- left_join(domain_sel, st_drop_geometry(grid_W_EU_cp))
 
 # ggplot(domain_sel_v, aes(fill = velocity), color = NULL) +
 #   geom_sf() +
-#   scale_fill_viridis_c(na.value = "transparent") + 
+#   scale_fill_viridis_c(na.value = "transparent") +
 #   labs(title = "Spread Velocity", fill = "km/y") +
 #   theme_minimal()
 # 
@@ -182,8 +209,8 @@ for (i in 1:length(files)){
   rm(Sim)
 }
 
-years_eval = 2006:2023
-delay = 6 #1:8
+years_eval = 2005:2024
+delay = 7 #1:8
 
 domain_sel_E0 <- domain_sel
 domain_sel_E0$year_col <- NA
@@ -192,7 +219,7 @@ domain_sel_E0$year_col <- NA
 E0_m_FR = E0_m[,domain_sel$region]
 
 for (year in years_eval){
-  years_sel = (year-delay):(year) 
+  years_sel = max(min(years), (year-delay+1)):min(max(years), (year))
   E0_m_FR_c_sel <- apply(E0_m_FR[which(years %in% years_sel),], 2,
                       function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
   
@@ -341,7 +368,7 @@ velocity_df <- domain_sel_v %>%
 
 velocity_E0_df <- domain_sel_v_E0 %>%
   filter(!is.na(year_col)) %>%
-  rename(velocity = velocity_E0) %>%
+  mutate(velocity = velocity_E0) %>%
   select(c("year_col", "velocity")) %>%
   mutate(source = "E0")
 
@@ -382,7 +409,7 @@ vel <- ggplot(velocity_all_df,
   geom_boxplot(outliers = F)+
   ylim(c(0, 40))+
   scale_x_discrete(labels=c("", "2005", "", "", "", "", "2010", "", "", "", "",
-         "2015","", "", "", "", "2020", "", "", ""))+
+         "2015","", "", "", "", "2020", "", "", "", ""))+
   geom_jitter(shape=16, position=position_jitter(0.2), alpha = 0.1)+
   scale_color_manual(values=c("#B0986CFF", "#009474FF"))+
   labs(title = "Spread velocity by year - obs vs E0") +
