@@ -16,6 +16,7 @@ library(dplyr)
 library(pracma)
 library(sf)
 library(tidyverse)
+library(xlsx)
 
 type = "_01"
 
@@ -55,15 +56,38 @@ domain_df <- domain_sel %>%
 # load presence data
 
 folder_CANNET = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/DGS_Cannet"
-data_presence <- read.csv2(paste0(folder_CANNET, "/IRD communes années mod.csv"))
+data_presence_mid2024 <- read.csv2(paste0(folder_CANNET, "/IRD communes années mod.csv")) # lacks of 2024
+data_presence_2024 <- read.xlsx(paste0(folder_CANNET, "/IRD communes années 2024.xlsx"), sheetName = "2024") # lacks of code insee
+
+# clean data_presence_mid2024 from 2024 data and add colmn "name_common_dep"
+data_presence_pre2024 <- data_presence_mid2024 %>%
+  select(-c("Nb.Présence.vecteur.Oui")) %>%
+  mutate(Année.colonisation.commune = case_when(Année.colonisation.commune == "2024" ~ NA,
+                                                .default = Année.colonisation.commune)) %>%
+  rename(Année.colonisation.commune_before2024 = Année.colonisation.commune) %>%
+  mutate(com_dep = paste0(Communes, "_", substring(Code.Insee, 1, 2))) 
+
+# same to 2024
+
+data_presence_2024<- data_presence_2024 %>%
+  mutate(com_dep = paste0(Communes, "_", Code.Département))%>%
+  rename(Année.colonisation.commune_2024 = Année.colonisation.commune) %>%
+  select(c("com_dep", "Année.colonisation.commune_2024"))
+
+# join
+
+data_presence <- left_join(data_presence_pre2024, data_presence_2024, by = "com_dep") %>%
+  mutate(Année.colonisation.commune = pmin(Année.colonisation.commune_before2024, Année.colonisation.commune_2024, na.rm = T)) %>%
+  select(c("Communes", "Code.Insee", "Année.colonisation.commune"))
 
 # simplidfied shp (may be too much) with QGIS
 folder_COMM = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/communes-20220101-shp"
 shp_communes <- st_read(paste0(folder_COMM, "/communes-20220101_metr_simp.shp"))
 
+# BEWARE! Under indication of Guillaume Lacour, we may consider a lag of 1 year in colonization (delay)
 data_presence_sf <- left_join(shp_communes, data_presence, by = c("insee" = "Code.Insee")) %>%
-  rename(presence = Nb.Présence.vecteur.Oui) %>%
-  rename(year_col = Année.colonisation.commune) %>%
+  mutate(year_col = Année.colonisation.commune) %>%
+  mutate(presence = !is.na(year_col)) %>%
   select(c("insee","presence", "year_col", "geometry"))
 
 ggplot()+
@@ -84,9 +108,9 @@ toc()
 #install.packages("psych")
 library(psych)
 
-years_eval = 2006:2023
+years_eval = 2005:2024
 
-delays = 6 #1:8
+delays = 7 #1:8
 
 # remove sf just to accelerate the following
 domain_presence_intersect_df <- domain_presence_intersect %>%
@@ -99,6 +123,8 @@ CK = data.frame(year = rep(years_eval, each =length(delays)),
                 K = NA)
 
 domain_df_year <- domain_df %>%
+  mutate(s_2005 = NA) %>%
+  mutate(s_2006 = NA) %>%
   mutate(s_2006 = NA) %>%
   mutate(s_2007 = NA) %>%
   mutate(s_2008 = NA) %>%
@@ -116,12 +142,13 @@ domain_df_year <- domain_df %>%
   mutate(s_2020 = NA) %>%
   mutate(s_2021 = NA) %>%
   mutate(s_2022 = NA) %>%
-  mutate(s_2023 = NA) 
+  mutate(s_2023 = NA) %>%
+  mutate(s_2024 = NA)
 
 # for(delay in delays){
 delay = delays
 for (year in years_eval){
-  years_sel = (year-delay):(year) 
+  years_sel = max(min(years), (year-delay+1)):min(max(years), (year)) 
   E0_m_c_sel <- apply(E0_m[which(years %in% years_sel),], 2,
                       function(x){x[which(is.nan(x))] = exp(mean(log(x[which(is.nan(x)==F)]))); return(x)})
   
@@ -163,7 +190,7 @@ for (year in years_eval){
 
  # Linear regression: K vs year
 
-folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/02_ClimaImpact_nov_2024/Images/"
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/Spread France"
 
 ggplot(CK, aes(x = year, y = K)) +
   geom_point() +
