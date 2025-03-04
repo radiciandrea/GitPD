@@ -41,6 +41,9 @@ df_cities = data.frame(city = c("Montpellier", "Bilbao", "Augsburg", "Paris-cent
 df_cities = data.frame(city = c("Montpellier", "Rennes", "Strasbourg"),
                        code = c("1524", "2883", "3104"))
 
+df_cities = data.frame(city = c("Montpellier", "Toulouse", "Rodez"),
+                       code = c("1524", "1514", "1701"))
+
 for (city_x in df_cities$city){
 
 region_x = df_cities$code[df_cities$city == city_x] # region of Montpellier
