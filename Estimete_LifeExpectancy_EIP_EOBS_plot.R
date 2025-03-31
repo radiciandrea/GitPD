@@ -9,6 +9,7 @@ library(dplyr)
 library(pracma)
 library(sf)
 library(ggplot2)
+library(lubridate)
 
 #folders
 folder_eobs = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/EOBS_elab"
@@ -31,6 +32,10 @@ EIP_JAS_m = matrix(NA, nrow = length(years), ncol = n_r)
 C_m = matrix(NA, nrow = length(years), ncol = n_r)
 CP_JAS_m = matrix(NA, nrow = length(years), ncol = n_r)
 
+#temperatire and rainy days
+T_JAS_m = matrix(NA, nrow = length(years), ncol = n_r)
+RD_JAS_m = matrix(NA, nrow = length(years), ncol = n_r)
+
 for (year in years){
   
   #getting weather from EOBS 
@@ -41,6 +46,7 @@ for (year in years){
   n_d = max(DOY)
   
   temp = matrix(W_tot_df$T_av, nrow = n_d)
+  rain = matrix(W_tot_df$P, nrow = n_d)
   
   #estimate average life expentacy ofr adult mosquitoes LT:= 1/ma
   
@@ -69,6 +75,9 @@ for (year in years){
   LE_A_JAS = colMeans(LE_A[d_i:d_f,])
   EIP_JAS = colMeans(EIP[d_i:d_f,])
   
+  T_JAS = colMeans(temp[d_i:d_f,])
+  RD_JAS = colMeans(rain[d_i:d_f,]>0)
+  
   #Average (daily) fraction of mosquitoes that can survive EIP
   #this is independent of mosquito presence
   CP_JAS = colMeans(CP[d_i:d_f,])
@@ -77,6 +86,9 @@ for (year in years){
   EIP_JAS_m[which(years == year),] = EIP_JAS 
   C_m[which(years == year),] = C 
   CP_JAS_m[which(years == year),] = CP_JAS 
+  
+  T_JAS_m[which(years == year),] = T_JAS
+  RD_JAS_m[which(years == year),] = RD_JAS
   
 }
 
@@ -87,6 +99,8 @@ LE_A_JAS_1 = colMeans(LE_A_JAS_m[years %in% years_1,])
 EIP_JAS_1 = colMeans(EIP_JAS_m[years %in% years_1,])
 C_1 = colMeans(C_m[years %in% years_1,])
 CP_JAS_1 = colMeans(CP_JAS_m[years %in% years_1,])
+T_JAS_1 = colMeans(T_JAS_m[years %in% years_1,])
+RD_JAS_1 = colMeans(RD_JAS_m[years %in% years_1,])
 
 g_LE_A_JAS_1 <- ggplot()+
   geom_sf(data = domain, aes(fill = LE_A_JAS_1), colour = NA)+ #
@@ -127,6 +141,8 @@ LE_A_JAS_2 = colMeans(LE_A_JAS_m[years %in% years_2,])
 EIP_JAS_2 = colMeans(EIP_JAS_m[years %in% years_2,])
 C_2 = colMeans(C_m[years %in% years_2,])
 CP_JAS_2 = colMeans(CP_JAS_m[years %in% years_2,])
+T_JAS_2 = colMeans(T_JAS_m[years %in% years_2,])
+RD_JAS_2 = colMeans(RD_JAS_m[years %in% years_2,])
 
 g_LE_A_JAS_2 <- ggplot()+
   geom_sf(data = domain, aes(fill = LE_A_JAS_2), colour = NA)+ #
@@ -165,6 +181,8 @@ LE_A_JAS_delta = LE_A_JAS_2 - LE_A_JAS_1
 EIP_JAS_delta = EIP_JAS_2 - EIP_JAS_1
 C_delta = C_2 - C_1
 CP_JAS_delta = CP_JAS_2 - CP_JAS_1
+T_JAS_delta = T_JAS_2 - T_JAS_1
+RD_JAS_delta = RD_JAS_2 - RD_JAS_1
 
 g_LE_A_JAS_delta <- ggplot()+
   geom_sf(data = domain, aes(fill = LE_A_JAS_delta), colour = NA)+ #
@@ -190,6 +208,13 @@ g_C_delta <- ggplot()+
 
 g_CP_JAS_delta <- ggplot()+
   geom_sf(data = domain, aes(fill = CP_JAS_delta), colour = NA)+ #
+  geom_sf(data = countries_sh, alpha = 0, colour = "white")+
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60)) +
+  ggtitle("")+
+  theme_void()
+
+g_T_JAS_delta <- ggplot()+
+  geom_sf(data = domain, aes(fill = T_JAS_delta), colour = NA)+ #
   geom_sf(data = countries_sh, alpha = 0, colour = "white")+
   coord_sf(xlim = c(-15, 19), ylim = c(36, 60)) +
   ggtitle("")+
