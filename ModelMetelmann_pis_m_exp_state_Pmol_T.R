@@ -52,6 +52,10 @@ cities = c("Montpellier", "Rennes", "Strasbourg")
 
 cities = c("Montpellier", "Toulouse", "Rodez")
 
+cities = c("Antwerp")
+
+cities =c("Marseille", "Avignon", "Gap")
+
 rk = "on" #on if integration crashes! (it is way slower)
 folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/Exposure_state_mol/"
 

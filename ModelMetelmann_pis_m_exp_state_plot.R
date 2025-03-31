@@ -37,6 +37,9 @@ cities = c("Montpellier", "Rennes", "Strasbourg")
 
 cities = c("Montpellier", "Toulouse", "Rodez")
 
+cities = c("Antwerp")
+
+cities = c("Marseille", "Avignon", "Gap")
 
 years_eval = c(2004, 2007, 2010, 2014, 2017, 2020, 2023) #2004:2023
 years_eval = c(2004, 2023)
