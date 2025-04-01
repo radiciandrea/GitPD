@@ -68,6 +68,11 @@ for (city_x in cities){
     mutate(DOS = yday(date)) %>%
     mutate(pop = pop_x)
   
+  #corrections for missing data
+  na_T_av = which(is.na(W_tot_df$T_av))
+  W_tot_df$T_av[na_T_av] = 0.5*(W_tot_df$T_m[na_T_av]+W_tot_df$T_M[na_T_av])
+  W_tot_df$P[which(is.na(W_tot_df$P))] = 0
+  
   save(W_tot_df, file = paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_MeteoFrance_",
                                city_x, "_", min(years), "_", max(years), ".RData")) #Nizza
   
