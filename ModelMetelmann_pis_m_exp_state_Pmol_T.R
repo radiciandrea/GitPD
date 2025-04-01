@@ -36,6 +36,8 @@ library(ggpubr)
 # LAT = 43.5
 # LON = 7.3
 
+source = "MeteoFrance" # EOBS
+
 cities = c("Montpellier", "Paris", "Paris_S", "Madrid", "Rome_E", 
            "London_N", "Berlin", "Lisbon", "Lyon", "Barcelona", 
            "Milan", "Zurich", "Munich", "Bruxelles", "Amsterdam", 
@@ -79,7 +81,7 @@ eps_fac = 0.01
 
 for(city_x in cities){
   
-  load(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_EOBS_",
+  load(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_", source, "_",
               city_x, "_", min(years), "_", max(years), ".RData"))
   
   LAT = W_tot_df$lat[1]
@@ -163,7 +165,7 @@ for(city_x in cities){
   
   #Create a matrix over which integrate; each colums is a city_x, each row is a date
   regions = unique(W_tot_df$region)
-  DOS = unique(W_tot_df$DOS)
+  DOS = unique(W_tot_df$DOY)
   
   # set simualtion horizon
   t_s = DOS[1] # simulate multiple year

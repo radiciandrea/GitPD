@@ -51,9 +51,11 @@ folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperi
 # #or
 # folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Esperimenti/Outputs/Exposure_state_pow/"
 
+source = "MeteoFrance" # EOBS
+
 for (city_x in cities){
   
-  load(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_EOBS_",
+  load(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_", source, "_",
               city_x, "_", min(years), "_", max(years), ".RData"))
   
   load(paste0(folder_plot, "Ind_", city_x,".RData"))

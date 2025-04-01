@@ -62,12 +62,13 @@ for (city_x in cities){
     filter(NOM_USUEL %in% c(weather_station_x)) %>%
     mutate(date = parse_date_time(AAAAMMJJ,"ymd"), year = year(date), month = month(date), week = week(date)) %>%
     filter(year >= min(years)) %>%
-    select(c("LAT", "LON", "RR", "TM", "TN", "TX", "NOM_USUEL", "date")) %>%
+    select(c("LAT", "LON", "RR", "TM", "TN", "TX", "NOM_USUEL", "date", "year")) %>%
     rename(lat = LAT, lon = LON, P = RR, T_av = TM, T_m = TN, T_M = TX, region = NOM_USUEL) %>%
     mutate(DOY = yday(date)) %>%
+    mutate(DOS = yday(date)) %>%
     mutate(pop = pop_x)
   
-  save(W_tot_df, file = paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_EOBS_",
+  save(W_tot_df, file = paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Eggs_Weather/Weather_MeteoFrance_",
                                city_x, "_", min(years), "_", max(years), ".RData")) #Nizza
   
 }
