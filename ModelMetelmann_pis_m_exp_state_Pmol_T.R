@@ -165,7 +165,7 @@ for(city_x in cities){
   
   #Create a matrix over which integrate; each colums is a city_x, each row is a date
   regions = unique(W_tot_df$region)
-  DOS = unique(W_tot_df$DOY)
+  DOS = unique(W_tot_df$DOS)
   
   # set simualtion horizon
   t_s = DOS[1] # simulate multiple year
