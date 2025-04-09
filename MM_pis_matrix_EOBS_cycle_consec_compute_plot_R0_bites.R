@@ -49,6 +49,14 @@ R0_ZK_m = matrix(NA, ncol = n_r, nrow = length(files))
 R0_DG_tot = matrix(NA, ncol = n_r, nrow = n_d) 
 R0_DG_m = matrix(NA, ncol = n_r, nrow = length(files))
 
+#Bites
+Bites_tot = matrix(NA, ncol = n_r, nrow = n_d) 
+Bites_m = matrix(NA, ncol = n_r, nrow = length(files))
+
+#Mosquito reduction (alpha)
+Bites_reduction_DG_tot = matrix(NA, ncol = n_r, nrow = n_d) 
+Bites_reduction_DG_m = matrix(NA, ncol = n_r, nrow = length(files))
+
 k = 0
 for (i in 1:length(files)){
   file = files[i]
@@ -110,12 +118,28 @@ for (i in 1:length(files)){
   R0_ZK = (a*phi_a)^2*m/(mu_A+mu_A^2*EIP_ZK)*b_v2H*b_H2v_ZK*IIP_ZK # as Zanardini et al.
   R0_DG = (a*phi_a)^2*m/(mu_A+mu_A^2*EIP_DG)*b_v2H*b_H2v_DG*IIP_DG # as Zanardini et al.
   
+  #biting per person
+  Bit = (a*phi_a)*m
+  
+  # alpha_reduction (R0' = 1 = (1-alpha)*R0)
+  alpha_ZK = pmax(1 - 1/R0_ZK, 0)
+  alpha_DG = pmax(1 - 1/R0_DG, 0)
+  
+  #biting per person after reduction
+  Bites_threshold_DG = (a*phi_a*sqrt(1-alpha_DG))*m
+  Bites_reduction_DG = (Bit - Bites_threshold_DG)/Bit
+  
   n_d_i = nrow(R0_ZK)
   R0_ZK_tot[k + 1:n_d_i,]=R0_ZK
   R0_DG_tot[k + 1:n_d_i,]=R0_DG
+  Bites_tot[k + 1:n_d_i,]=Bit
+  Bites_reduction_DG_tot[k + 1:n_d_i,]=Bites_reduction_DG
+  
   k = k + n_d_i
   R0_ZK_m[i,] = colSums(R0_ZK>1)
   R0_DG_m[i,] = colSums(R0_DG>1)
+  Bites_m[i,] = colMeans(Bit)
+  Bites_reduction_DG_m[i,] = colMeans(Bites_reduction_DG)
 }
 
 #Choose here what to plot
