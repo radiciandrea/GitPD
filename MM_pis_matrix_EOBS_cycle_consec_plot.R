@@ -1,8 +1,8 @@
 # plot del cycle
 # MM_pis_matrix_EOBS_cycle_consec.R
 
-#per plottare anni consecutivi
-# compare with VectAbundance
+# per plottare anni consecutivi
+# compare with VectAbundance, Altopictus, EID
 # and make some stats
 
 
@@ -430,6 +430,9 @@ VectDomain_Nice <- domain%>%
   select(c("region", "IDVectAb", "Name_app", "geometry", "r_gross", "pv_r_gross",
            "rmse_gross", "r_year", "pv_r_year", "l_y"))
 
+
+VectDomain <- rbind(VectDomain, VectDomain_Nice)
+
 # VectDomain$r_gross[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$r_gross
 # VectDomain$pv_r_gross[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$pv_r_gross
 # VectDomain$rmse_gross[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$rmse_gross
@@ -438,22 +441,30 @@ VectDomain_Nice <- domain%>%
 # VectDomain$Name_app[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$Name_app
 # VectDomain$l_y[VectDomain$Name_app == "Nice (EID)"] = VectDomain_Nice$l_y
 
-#load Montpellier
-load(paste0(folder_plot, "/VectDomainStat_Perols.RData"))
+#load Altopictus
 
-VectDomain_Montpellier <- domain%>%
-  filter(region == 1524) %>%
-  mutate(Name_app = "Montpellier (Altopictus)") %>%
-  mutate(r_gross = VectDomain_Perols$r_gross) %>%
-  mutate(pv_r_gross = VectDomain_Perols$pv_r_gross) %>%
-  mutate(rmse_gross = VectDomain_Perols$rmse_gross) %>%
-  mutate(r_year  = VectDomain_Perols$r_year) %>%
-  mutate(pv_r_year = VectDomain_Perols$pv_r_year) %>%
-  mutate(l_y = VectDomain_Perols$l_y) %>%
-  select(c("region", "IDVectAb", "Name_app", "geometry", "r_gross", "pv_r_gross",
-         "rmse_gross", "r_year", "pv_r_year", "l_y"))
-                              
-VectDomain <- rbind(VectDomain, VectDomain_Nice, VectDomain_Montpellier)
+Albopictus_cities = c("PEROLS", "MURVIEL-LES-MONTPELLIER",  "SAINT-MEDARD-EN-JALLES", "BAYONNE", "RENNES", "TOULOUSE", "CAGNES-SUR-MER")
+
+for(city_x in Albopictus_cities){
+  
+  load(paste0(folder_plot, "/VectDomainStat_", city_x, ".RData"))
+  
+  VectDomain_temp <- domain%>%
+    filter(region == cell_x) %>%
+    mutate(Name_app = city_x) %>%
+    mutate(r_gross = VectDomain_Altopictus$r_gross) %>%
+    mutate(pv_r_gross = VectDomain_Altopictus$pv_r_gross) %>%
+    mutate(rmse_gross = NA) %>%
+    mutate(r_year  = NA) %>%
+    mutate(pv_r_year = NA) %>%
+    mutate(l_y = VectDomain_Altopictus$l_y) %>%
+    select(c("region", "IDVectAb", "Name_app", "geometry", "r_gross", "pv_r_gross",
+             "rmse_gross", "r_year", "pv_r_year", "l_y"))
+  
+  VectDomain <- rbind(VectDomain,  VectDomain_temp)
+}
+
+
 
 ###
 
@@ -468,7 +479,7 @@ ggplot()+
   geom_sf(data = st_centroid(VectDomain), aes(color = r_gross, size = l_y))+
   # geom_sf(data = st_centroid(VectDomain) %>% filter(pv_r_gross< 0.05), shape = 3, color = "black")+
   geom_sf(data = st_centroid(VectDomain) %>% filter(pv_r_gross< 0.01), shape = 1, color = "black")+
-  coord_sf(xlim = c(4.25, 18), ylim = c(37, 46.5))+
+  coord_sf(xlim = c(-1.25, 18), ylim = c(37, 49.25))+
   # scale_color_gradient2(
   #   name = waiver(),
   #   low = "#384AB4",
@@ -477,10 +488,10 @@ ggplot()+
   #   midpoint = 0)+
   scale_color_viridis_c(limits = c(0,1),
                         na.value = "grey50")+
-  ggtitle('Linear correlation')+
+  #ggtitle('Linear correlation')+
   theme_void()
 
-ggsave(file= paste0(folder_plot2, "VectAbundance_corr_withmontpel.png"), units="in", width=6, height=7, dpi=300)
+ggsave(file= paste0(folder_plot2, "VectAbundance_corr_withAltopictus.png"), units="in", width=6, height=5.3, dpi=300)
 
 ggplot()+
   geom_sf(data = countries_sh, alpha = 1, colour = "white")+
