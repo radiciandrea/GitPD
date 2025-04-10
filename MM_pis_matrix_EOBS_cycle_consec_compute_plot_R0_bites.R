@@ -43,19 +43,19 @@ H_v <- W_tot_df %>%
   pull("pop")
 
 # R0s Zika & Dengue
-R0_ZK_tot = matrix(NA, ncol = n_r, nrow = n_d) 
+# R0_ZK_tot = matrix(NA, ncol = n_r, nrow = n_d) 
 R0_ZK_m = matrix(NA, ncol = n_r, nrow = length(files))
 
-R0_DG_tot = matrix(NA, ncol = n_r, nrow = n_d) 
+# R0_DG_tot = matrix(NA, ncol = n_r, nrow = n_d) 
 R0_DG_m = matrix(NA, ncol = n_r, nrow = length(files))
 
 #Bites
-Bites_tot = matrix(NA, ncol = n_r, nrow = n_d) 
-Bites_m = matrix(NA, ncol = n_r, nrow = length(files))
+# Bites_tot = matrix(NA, ncol = n_r, nrow = n_d) 
+Bites_MO_m = matrix(NA, ncol = n_r, nrow = length(files))
 
 #Mosquito reduction (alpha)
-Bites_reduction_DG_tot = matrix(NA, ncol = n_r, nrow = n_d) 
-Bites_reduction_DG_m = matrix(NA, ncol = n_r, nrow = length(files))
+# Bites_rdct_DG_tot = matrix(NA, ncol = n_r, nrow = n_d) 
+Bites_rdct_DG_MO_m = matrix(NA, ncol = n_r, nrow = length(files))
 
 k = 0
 for (i in 1:length(files)){
@@ -127,19 +127,22 @@ for (i in 1:length(files)){
   
   #biting per person after reduction
   Bites_threshold_DG = (a*phi_a*sqrt(1-alpha_DG))*m
-  Bites_reduction_DG = (Bit - Bites_threshold_DG)/Bit
+  Bites_rdct_DG = (Bit - Bites_threshold_DG)/Bit
+  Bites_rdct_DG[which(Bit==0)] = 0
   
-  n_d_i = nrow(R0_ZK)
-  R0_ZK_tot[k + 1:n_d_i,]=R0_ZK
-  R0_DG_tot[k + 1:n_d_i,]=R0_DG
-  Bites_tot[k + 1:n_d_i,]=Bit
-  Bites_reduction_DG_tot[k + 1:n_d_i,]=Bites_reduction_DG
+  # n_d_i = nrow(R0_ZK)
+  # R0_ZK_tot[k + 1:n_d_i,]=R0_ZK
+  # R0_DG_tot[k + 1:n_d_i,]=R0_DG
+  # Bites_tot[k + 1:n_d_i,]=Bit
+  # Bites_rdct_DG_tot[k + 1:n_d_i,]=Bites_rdct_DG
   
   k = k + n_d_i
   R0_ZK_m[i,] = colSums(R0_ZK>1)
   R0_DG_m[i,] = colSums(R0_DG>1)
-  Bites_m[i,] = colMeans(Bit)
-  Bites_reduction_DG_m[i,] = colMeans(Bites_reduction_DG)
+  
+  #Average between may and august
+  Bites_MO_m[i,] = colMeans(Bit[yday(paste0(year, "-05-01")):yday(paste0(year, "-10-31")),])
+  Bites_rdct_DG_MO_m[i,] = colMeans(Bites_rdct_DG[yday(paste0(year, "-05-01")):yday(paste0(year, "-10-31")),])
 }
 
 #Choose here what to plot
@@ -147,10 +150,10 @@ for (i in 1:length(files)){
 disease = "dengue" 
 
 if (disease == "Zika"){
-  R0_tot = R0_ZK_tot
+  #R0_tot = R0_ZK_tot
   R0_m = R0_ZK_m
 } else if (disease == "dengue") {
-  R0_tot = R0_DG_tot
+  #R0_tot = R0_DG_tot
   R0_m = R0_DG_m
 }
 
@@ -188,10 +191,13 @@ if (disease == "Zika"){
 
 years_sel_1 = 2006:2014 # # 2006:2016
 R0_1 = colMeans(R0_m[which(years %in% years_sel_1),], na.rm = T)
+Bites_1 = colMeans(Bites_MO_m[which(years %in% years_sel_1),], na.rm = T)
+Bites_rdct_1 = colMeans(Bites_rdct_DG_MO_m[which(years %in% years_sel_1),], na.rm = T)
 
 years_sel_2 = 2015:2023 # 2017:2023 
 R0_2 = colMeans(R0_m[which(years %in% years_sel_2),], na.rm = T)
-
+Bites_2 = colMeans(Bites_MO_m[which(years %in% years_sel_2),], na.rm = T)
+Bites_rdct_2 = colMeans(Bites_rdct_DG_MO_m[which(years %in% years_sel_2),], na.rm = T)
 
 # to plot
 domain <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_01_W_EU.shp")) %>%
@@ -240,6 +246,28 @@ countries_sh <-  st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post
 
 #plot 1
 
+x = c(105, 56, 21, 1, 0)
+x_lab = c("e 15 or more", "d 8 to 15", "c 3 to 8", "b 0 to 3", "a 0")
+col_x <- c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724")
+
+
+# domain <- domain%>%
+#   arrange(region) %>%
+#   mutate(R0_1 = R0_sel_1)%>%
+#   mutate(R0_1_level=cut(R0_1, breaks=br,
+#                         labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
+#   mutate(R0_1_level=factor(as.character(R0_1_level), levels=rev(levels(R0_1_level)))) %>%
+#   mutate(R0_2 = R0_sel_2)%>%
+#   mutate(R0_2_level=cut(R0_2, breaks=br,
+#                         labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
+#   mutate(R0_2_level=factor(as.character(R0_2_level), levels=rev(levels(R0_2_level))))
+
+R0_1_level <- case_when(R0_1 >= x[1] ~ x_lab[1],
+                        R0_1 >= x[2] ~ x_lab[2],
+                        R0_1 >= x[3] ~ x_lab[3],
+                        R0_1 >= x[4] ~ x_lab[4],
+                        R0_1 < x[4] ~ x_lab[5])
+
 g1 <- ggplot()+
   geom_sf(data = domain, aes(fill = R0_1_level), colour = NA)+ #
   scale_fill_manual(values = col_x)+
@@ -249,7 +277,7 @@ g1 <- ggplot()+
   theme_void()+
   guides(fill=guide_legend(title=bquote(R[0]~gt~1~(weeks))))
 
-ggsave(file= paste0(folder_plot, "R0_", disease,"_1_level_01.png"), plot= g1 , units="in", width=5.5, height=7, dpi=300)
+# ggsave(file= paste0(folder_plot, "R0_", disease,"_1_level_01.png"), plot= g1 , units="in", width=5.5, height=7, dpi=300)
 
 #plot 2
 
@@ -262,7 +290,7 @@ g2 <- ggplot()+
   theme_void() +
   guides(fill=guide_legend(title=bquote(R[0]~gt~1~(weeks))))
 
-ggsave(file= paste0(folder_plot, "R0_", disease,"_2_level_01.png"),  plot= g2 , units="in", width=5.5, height=7, dpi=300)
+# ggsave(file= paste0(folder_plot, "R0_", disease,"_2_level_01.png"),  plot= g2 , units="in", width=5.5, height=7, dpi=300)
 
 # plot 3
 
@@ -275,146 +303,219 @@ gvar <- ggplot()+
   theme_void() +
   guides(fill=guide_legend(title=bquote(R[0]~variation)))
 
-ggsave(file= paste0(folder_plot, "R0_", disease,"_var_level_01.png"), plot= gvar , units="in", width=5.5, height=7, dpi=300)
+# ggsave(file= paste0(folder_plot, "R0_", disease,"_var_level_01.png"), plot= gvar , units="in", width=5.5, height=7, dpi=300)
 
-# Plot Francia (poster ESOVE)
+# BITES 
 
-library(ggspatial)
-library(prettymapr)
-library(ggrepel)
-library(RJSONIO)
+x = c(100, 10, 1, 0.1, 0)
+x_lab = c("e 100 or more", "d 10 to 100", "c 1 to 10", "b 0.1 to 1", "a 0 to 0.1")
+col_x <- c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724")
 
-folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/01_Esove/images/"
 
-regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
+Bites_1_level <- case_when(Bites_1 >= x[1] ~ x_lab[1],
+                           Bites_1 >= x[2] ~ x_lab[2],
+                           Bites_1 >= x[3] ~ x_lab[3],
+                           Bites_1 >= x[4] ~ x_lab[4],
+                           Bites_1 >= x[5] ~ x_lab[5])
 
-domain_FR <- domain %>%
-  filter(!is.na(Country))
+Bites_2_level <- case_when(Bites_2 >= x[1] ~ x_lab[1],
+                           Bites_2 >= x[2] ~ x_lab[2],
+                           Bites_2 >= x[3] ~ x_lab[3],
+                           Bites_2 >= x[4] ~ x_lab[4],
+                           Bites_2 >= x[5] ~ x_lab[5])
 
-reg_FR = domain_FR$region
+gb_1 <- ggplot()+
+  geom_sf(data = domain, aes(fill = Bites_1_level), colour = NA)+ #
+  scale_fill_manual(values = col_x)+
+  geom_sf(data = countries_sh, alpha = 0, colour = "white")+
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60)) +
+  ggtitle(paste0("Bites per person per day in M-O (period 2006-2014)"))+
+  theme_void()
 
-# plot cities (from)
+gb_2 <- ggplot()+
+  geom_sf(data = domain, aes(fill = Bites_2_level), colour = NA)+ #
+  scale_fill_manual(values = col_x)+
+  geom_sf(data = countries_sh, alpha = 0, colour = "white")+
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60)) +
+  ggtitle(paste0("Bites per person per day in M-O (period 2006-2014)"))+
+  theme_void()
 
-locateCountry = function(nameCity, codeCountry) {
-  cleanCityName = gsub(' ', '%20', nameCity)
-  url = paste(
-    "http://nominatim.openstreetmap.org/search?city="
-    , cleanCityName
-    , "&countrycodes="
-    , codeCountry
-    , "&limit=9&format=json"
-    , sep="")
-  resOSM = fromJSON(url)
-  if(length(resOSM) > 0) {
-    return(c(resOSM[[1]]$lon, resOSM[[1]]$lat))
-  } else return(rep(NA,2)) 
-}
 
-cities_df <- data.frame(name = c("Paris", "Marseille", "Lyon", "Toulouse", "Bordeaux", "Nice", "Dijon",
-                                 "Lille", "Montpellier", "Strasbourg", "Rennes", "Nantes", "Ajaccio", "Dijon"))
-cities_df$code = "FR"
 
-coord = t(apply(cities_df, 1, function(aRow) as.numeric(locateCountry(aRow[1], aRow[2]))))
+# BITES REDUCTION
 
-cities_df$lon = coord[,1]
-cities_df$lat = coord[,2]
+x = 0.01*c(50, 20, 10, 1, 0)
+x_lab = c("e 50% or more", "d 20 to 50%", "c 10 to 20%", "b 1 to 10%", "a < 1%")
+col_x <- c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724")
 
-points <- lapply(1:nrow(coord), function(i){st_point(coord[i,])})
-points_sf <- st_sfc(points, crs = 4326)
-cities_sf <- st_sf('city' = cities_df$name, 'geometry' = points_sf)  
 
-#plot: degnue 2020 
+Bites_rdct_1_level <- case_when(Bites_rdct_1 >= x[1] ~ x_lab[1],
+                           Bites_rdct_1 >= x[2] ~ x_lab[2],
+                           Bites_rdct_1 >= x[3] ~ x_lab[3],
+                           Bites_rdct_1 >= x[4] ~ x_lab[4],
+                           Bites_rdct_1 >= x[5] ~ x_lab[5])
 
-R0_2010_FR_v <- R0_1[reg_FR]
+Bites_rdct_2_level <- case_when(Bites_rdct_2 >= x[1] ~ x_lab[1],
+                           Bites_rdct_2 >= x[2] ~ x_lab[2],
+                           Bites_rdct_2 >= x[3] ~ x_lab[3],
+                           Bites_rdct_2 >= x[4] ~ x_lab[4],
+                           Bites_rdct_2 >= x[5] ~ x_lab[5])
 
-x = c(61, 21, 7, 0, 0)
-x_lab = c("a) >9", "b) 3-8", "c) 1-2", "d) < 1", "e) 0")
+gbr_1 <- ggplot()+
+  geom_sf(data = domain, aes(fill = Bites_rdct_1_level), colour = NA)+ #
+  scale_fill_manual(values = col_x)+
+  geom_sf(data = countries_sh, alpha = 0, colour = "white")+
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60)) +
+  ggtitle(paste0("Bites reduction in M-O % (period 2006-2014)"))+
+  theme_void()
 
-R0_2010_FR_f <- case_when(R0_2010_FR_v > x[1] ~ x_lab[1],
-                          R0_2010_FR_v > x[2] ~ x_lab[2],
-                          R0_2010_FR_v > x[3] ~ x_lab[3],
-                          R0_2010_FR_v > x[4] ~ x_lab[4],
-                          R0_2010_FR_v == x[5] ~ x_lab[5])
+gbr_2 <- ggplot()+
+  geom_sf(data = domain, aes(fill = Bites_rdct_2_level), colour = NA)+ #
+  scale_fill_manual(values = col_x)+
+  geom_sf(data = countries_sh, alpha = 0, colour = "white")+
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60)) +
+  ggtitle(paste0("Bites reduction in M-O % (period 2015-2023)"))+
+  theme_void()
 
-g_D_2010 <- ggplot()+
-  geom_sf(data = domain_FR, aes(fill = R0_2010_FR_f), color = NA)+
-  scale_fill_viridis_d()+
-  geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
-  geom_sf(data = points_sf)+
-  ggtitle(paste0("Lenght period with R0 gt 1 (dengue)"))+
-  guides(fill=guide_legend(title="weeks"))+
-  theme(panel.grid = element_blank(), 
-        line = element_blank(), 
-        rect = element_blank(), 
-        text = element_blank(), 
-        plot.background = element_rect(fill = "transparent", color = "transparent"))+
-  geom_sf(data = cities_sf) +
-  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
-                   label.padding = 0.1, size = 4)
 
-ggsave(paste0(folder_plot, "g_D_2010.png"), g_D_2010, units="in", height=8, width= 6, dpi=300)
-
-#plot: dengue 2020 
-
-R0_2020_FR_v <- R0_2[reg_FR]
-
-x = c(61, 21, 7, 0, 0)
-x_lab = c("a) >9", "b) 3-8", "c) 1-2", "d) < 1", "e) 0")
-
-R0_2020_FR_f <- case_when(R0_2020_FR_v > x[1] ~ x_lab[1],
-                          R0_2020_FR_v > x[2] ~ x_lab[2],
-                          R0_2020_FR_v > x[3] ~ x_lab[3],
-                          R0_2020_FR_v > x[4] ~ x_lab[4],
-                          R0_2020_FR_v == x[5] ~ x_lab[5])
-
-g_D_2020 <- ggplot()+
-  geom_sf(data = domain_FR, aes(fill = R0_2020_FR_f), color = NA)+
-  scale_fill_viridis_d()+
-  geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
-  geom_sf(data = points_sf)+
-  ggtitle(paste0("Lenght period with R0 gt 1 (dengue)"))+
-  guides(fill=guide_legend(title="weeks"))+
-  theme(panel.grid = element_blank(), 
-        line = element_blank(), 
-        rect = element_blank(), 
-        text = element_blank(), 
-        plot.background = element_rect(fill = "transparent", color = "transparent"))+
-  geom_sf(data = cities_sf) +
-  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
-                   label.padding = 0.1, size = 4)
-
-ggsave(paste0(folder_plot, "g_D_2020.png"), g_D_2020, units="in", height=8, width= 6, dpi=300)
-
-### change
-
-palette_pos2 = c( "gray90", "#F2CDBB", "#F29878", "#D04B45", "#B00026")
-
-R0_2010_FR_v <- R0_1[reg_FR]
-R0_diff_FR_v <- R0_2020_FR_v - R0_2010_FR_v
-
-R0_diff_FR_v[which(R0_2020_FR_v<1)] = NA
-
-R0_diff_FR_f <- case_when(R0_diff_FR_v > 63 ~"a) > 9 w",
-                          R0_diff_FR_v > 21 ~"b) 3 to 9 w)",
-                          R0_diff_FR_v > 7 ~"c) 1 to 3 w",
-                          R0_diff_FR_v > 2 ~"d) 2 d to 1 w ",
-                          R0_diff_FR_v > -3 ~"e) -2 to +2 d",
-                          .default = NA)
-
-g_D_change <- ggplot()+
-  geom_sf(data = domain_FR, aes(fill = R0_diff_FR_f), color = NA)+
-  scale_fill_manual(values = rev(palette_pos2), na.value = "transparent")+
-  geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
-  geom_sf(data = points_sf)+
-  ggtitle(paste0("Difference in positive transmission period"))+
-  guides(fill=guide_legend(title="Increase"))+
-  theme(panel.grid = element_blank(), 
-        line = element_blank(), 
-        rect = element_blank(), 
-        text = element_blank(), 
-        plot.background = element_rect(fill = "transparent", color = "transparent"))+
-  geom_sf(data = cities_sf) +
-  geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
-                   label.padding = 0.1, size = 4)
-
-ggsave(paste0(folder_plot, "g_D_change.png"), g_D_change, units="in", height=8, width= 6, dpi=300)
+# # Plot Francia (poster ESOVE)
+# 
+# library(ggspatial)
+# library(prettymapr)
+# library(ggrepel)
+# library(RJSONIO)
+# 
+# folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/01_Esove/images/"
+# 
+# regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
+# 
+# domain_FR <- domain %>%
+#   filter(!is.na(Country))
+# 
+# reg_FR = domain_FR$region
+# 
+# # plot cities (from)
+# 
+# locateCountry = function(nameCity, codeCountry) {
+#   cleanCityName = gsub(' ', '%20', nameCity)
+#   url = paste(
+#     "http://nominatim.openstreetmap.org/search?city="
+#     , cleanCityName
+#     , "&countrycodes="
+#     , codeCountry
+#     , "&limit=9&format=json"
+#     , sep="")
+#   resOSM = fromJSON(url)
+#   if(length(resOSM) > 0) {
+#     return(c(resOSM[[1]]$lon, resOSM[[1]]$lat))
+#   } else return(rep(NA,2)) 
+# }
+# 
+# cities_df <- data.frame(name = c("Paris", "Marseille", "Lyon", "Toulouse", "Bordeaux", "Nice", "Dijon",
+#                                  "Lille", "Montpellier", "Strasbourg", "Rennes", "Nantes", "Ajaccio", "Dijon"))
+# cities_df$code = "FR"
+# 
+# coord = t(apply(cities_df, 1, function(aRow) as.numeric(locateCountry(aRow[1], aRow[2]))))
+# 
+# cities_df$lon = coord[,1]
+# cities_df$lat = coord[,2]
+# 
+# points <- lapply(1:nrow(coord), function(i){st_point(coord[i,])})
+# points_sf <- st_sfc(points, crs = 4326)
+# cities_sf <- st_sf('city' = cities_df$name, 'geometry' = points_sf)  
+# 
+# #plot: degnue 2020 
+# 
+# R0_2010_FR_v <- R0_1[reg_FR]
+# 
+# x = c(61, 21, 7, 0, 0)
+# x_lab = c("a) >9", "b) 3-8", "c) 1-2", "d) < 1", "e) 0")
+# 
+# R0_2010_FR_f <- case_when(R0_2010_FR_v > x[1] ~ x_lab[1],
+#                           R0_2010_FR_v > x[2] ~ x_lab[2],
+#                           R0_2010_FR_v > x[3] ~ x_lab[3],
+#                           R0_2010_FR_v > x[4] ~ x_lab[4],
+#                           R0_2010_FR_v == x[5] ~ x_lab[5])
+# 
+# g_D_2010 <- ggplot()+
+#   geom_sf(data = domain_FR, aes(fill = R0_2010_FR_f), color = NA)+
+#   scale_fill_viridis_d()+
+#   geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
+#   geom_sf(data = points_sf)+
+#   ggtitle(paste0("Lenght period with R0 gt 1 (dengue)"))+
+#   guides(fill=guide_legend(title="weeks"))+
+#   theme(panel.grid = element_blank(), 
+#         line = element_blank(), 
+#         rect = element_blank(), 
+#         text = element_blank(), 
+#         plot.background = element_rect(fill = "transparent", color = "transparent"))+
+#   geom_sf(data = cities_sf) +
+#   geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
+#                    label.padding = 0.1, size = 4)
+# 
+# ggsave(paste0(folder_plot, "g_D_2010.png"), g_D_2010, units="in", height=8, width= 6, dpi=300)
+# 
+# #plot: dengue 2020 
+# 
+# R0_2020_FR_v <- R0_2[reg_FR]
+# 
+# x = c(61, 21, 7, 0, 0)
+# x_lab = c("a) >9", "b) 3-8", "c) 1-2", "d) < 1", "e) 0")
+# 
+# R0_2020_FR_f <- case_when(R0_2020_FR_v > x[1] ~ x_lab[1],
+#                           R0_2020_FR_v > x[2] ~ x_lab[2],
+#                           R0_2020_FR_v > x[3] ~ x_lab[3],
+#                           R0_2020_FR_v > x[4] ~ x_lab[4],
+#                           R0_2020_FR_v == x[5] ~ x_lab[5])
+# 
+# g_D_2020 <- ggplot()+
+#   geom_sf(data = domain_FR, aes(fill = R0_2020_FR_f), color = NA)+
+#   scale_fill_viridis_d()+
+#   geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
+#   geom_sf(data = points_sf)+
+#   ggtitle(paste0("Lenght period with R0 gt 1 (dengue)"))+
+#   guides(fill=guide_legend(title="weeks"))+
+#   theme(panel.grid = element_blank(), 
+#         line = element_blank(), 
+#         rect = element_blank(), 
+#         text = element_blank(), 
+#         plot.background = element_rect(fill = "transparent", color = "transparent"))+
+#   geom_sf(data = cities_sf) +
+#   geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
+#                    label.padding = 0.1, size = 4)
+# 
+# ggsave(paste0(folder_plot, "g_D_2020.png"), g_D_2020, units="in", height=8, width= 6, dpi=300)
+# 
+# ### change
+# 
+# palette_pos2 = c( "gray90", "#F2CDBB", "#F29878", "#D04B45", "#B00026")
+# 
+# R0_2010_FR_v <- R0_1[reg_FR]
+# R0_diff_FR_v <- R0_2020_FR_v - R0_2010_FR_v
+# 
+# R0_diff_FR_v[which(R0_2020_FR_v<1)] = NA
+# 
+# R0_diff_FR_f <- case_when(R0_diff_FR_v > 63 ~"a) > 9 w",
+#                           R0_diff_FR_v > 21 ~"b) 3 to 9 w)",
+#                           R0_diff_FR_v > 7 ~"c) 1 to 3 w",
+#                           R0_diff_FR_v > 2 ~"d) 2 d to 1 w ",
+#                           R0_diff_FR_v > -3 ~"e) -2 to +2 d",
+#                           .default = NA)
+# 
+# g_D_change <- ggplot()+
+#   geom_sf(data = domain_FR, aes(fill = R0_diff_FR_f), color = NA)+
+#   scale_fill_manual(values = rev(palette_pos2), na.value = "transparent")+
+#   geom_sf(data = regions_sh, alpha = 0, colour = "gray70")+
+#   geom_sf(data = points_sf)+
+#   ggtitle(paste0("Difference in positive transmission period"))+
+#   guides(fill=guide_legend(title="Increase"))+
+#   theme(panel.grid = element_blank(), 
+#         line = element_blank(), 
+#         rect = element_blank(), 
+#         text = element_blank(), 
+#         plot.background = element_rect(fill = "transparent", color = "transparent"))+
+#   geom_sf(data = cities_sf) +
+#   geom_label_repel(data = cities_df, aes(x = lon, y = lat, label = name),
+#                    label.padding = 0.1, size = 4)
+# 
+# ggsave(paste0(folder_plot, "g_D_change.png"), g_D_change, units="in", height=8, width= 6, dpi=300)
