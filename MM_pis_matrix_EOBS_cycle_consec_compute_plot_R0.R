@@ -79,14 +79,14 @@ for (i in 1:length(files)){
   EIP_ZK = EIP_ZK_Cmn
   EIP_DG = EIP_DN_Mtl
   
-  #Vectorial competence
+  #Vector competence
   B = pmax(0,-0.0043*temp^2 + 0.2593*temp - 3.2705) #Benkimoun 2021
   b_v2H = 0.5 # b Blagrove 2020
   
   #to check this:
   b_H2v_ZK_Blg = 0.0665 # beta Blagrove 2020 - cites study in Europe: preferred
   b_H2v_ZK_Cmn = 0.033 # beta Caminade 2016
-  b_H2v_DG_Mtl = 0.31 # beta Mtl 2021
+  b_H2v_DG_Mtl = 0.31 # beta Metelmann 2021
   
   #chose
   b_H2v_ZK = b_H2v_ZK_Blg
