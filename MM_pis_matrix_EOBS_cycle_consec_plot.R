@@ -493,6 +493,44 @@ ggplot()+
 
 ggsave(file= paste0(folder_plot2, "VectAbundance_corr_withAltopictus.png"), units="in", width=6, height=5.3, dpi=300)
 
+# for the plot to answer to reviewer critics
+
+VectDomain <- VectDomain %>% 
+  mutate(r_gross_cat = case_when(r_gross < 0 ~ "a",
+                        r_gross < 0.2 ~ "b",
+                        r_gross < 0.4 ~ "c",
+                        r_gross < 0.6 ~ "d",
+                        r_gross < 0.8 ~ "e",
+                        r_gross < 1 ~ "f"))
+
+#plot map 
+ggplot()+
+  geom_sf(data = countries_sh, alpha = 1, colour = "white")+
+  geom_sf(data = st_centroid(VectDomain) %>% filter(r_gross < 0), aes(size = l_y), color = "grey50")+
+  geom_sf(data = st_centroid(VectDomain) %>% filter(r_gross >= 0), aes(color = r_gross_cat, size = l_y))+
+  # geom_sf(data = st_centroid(VectDomain) %>% filter(pv_r_gross< 0.05), shape = 3, color = "black")+
+  geom_sf(data = st_centroid(VectDomain) %>% filter(pv_r_gross< 0.01), shape = 1, color = "black")+
+  # scale_color_gradient2(
+  #   name = waiver(),
+  #   low = "#384AB4",
+  #   mid = "white",
+  #   high = "#B00026",
+  #   midpoint = 0)+
+  scale_color_viridis_d(na.value = "grey50")+
+  coord_sf(xlim = c(-4, 18), ylim = c(37, 49.25))+
+  theme(legend.position = "none",
+        panel.grid = element_blank(), 
+        line = element_blank(), 
+        rect = element_blank(), 
+        text = element_blank(), 
+        plot.background = element_rect(fill = "transparent", color = "transparent"))
+
+ggsave(file= paste0(folder_plot2, "VectAbundance_corr_withAltopictus_4paper.png"), units="in", width=6*1.5, height=5.3*1.5, dpi=300)
+
+
+
+####
+
 ggplot()+
   geom_sf(data = countries_sh, alpha = 1, colour = "white")+
   geom_sf(data = VectDomain, fill = "black")+
