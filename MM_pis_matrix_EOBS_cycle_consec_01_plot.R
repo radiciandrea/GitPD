@@ -83,7 +83,7 @@ load(paste0(folder_out, "/LE_Adults.RData"))
 
 # Recompute n_c, n_r...
 
-years = 2005:2022
+years = 2005:2023
 
 first_day = as.Date(paste0(min(years), "-01-01"))
 last_day = as.Date(paste0(max(years), "-12-31"))
@@ -277,11 +277,14 @@ Adults_av_s_diff_f <- case_when(Adults_av_s_diff_v > 500 ~"a) strong increase (>
                             Adults_av_s_diff_v < -500 ~"e) strong decrease (<-500)",
                             .default = NA)
 
+scale_var5 = c("#8c5002", "#e0c27f", "#f5f5f5", "#81cfc3", "#00675e")
+scale_var4 = c("#8c5002", "#e0c27f",  "#81cfc3", "#00675e")
+
 Adults_av_s_diff_gg <- ggplot()+
   geom_sf(data = domain, aes(fill = Adults_av_s_diff_f), color = NA)+
   geom_sf(data = countries_sh, alpha = 0, colour = "gray90")+
   coord_sf(xlim = c(-9, 17), ylim = c(34, 59)) +
-  scale_fill_manual(values = c("gray10", "gray30", "gray50", "gray70", "gray90"), na.value = "white")+
+  scale_fill_manual(values = scale_var5, na.value = "gray50")+
   ggtitle(paste0("Difference in Adults density in summer"))+
   guides(fill=guide_legend(title="Adults/ha"))+
   theme_void()
