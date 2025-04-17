@@ -242,10 +242,13 @@ ggsave(file= paste0(folder_plot, "R0_", disease,"_2_level_01.png"),  plot= g2 , 
 
 # plot 3
 
+scale_var5 = c("#8c5002", "#e0c27f", "#f5f5f5", "#81cfc3", "#00675e")
+scale_var4 = c("#8c5002", "#e0c27f",  "#81cfc3", "#00675e")
+
 gvar <- ggplot()+
   geom_sf(data = domain, aes(fill = Risk_zone), colour = NA)+
-  scale_fill_manual(values = c("gray10", "gray30", "gray70", "gray90"), na.value = "white")+
-  geom_sf(data = countries_sh, alpha = 0, colour = "grey50")+
+  scale_fill_manual(values = scale_var4 , na.value = "grey50")+
+  geom_sf(data = countries_sh, alpha = 0, colour = "grey90")+
   coord_sf(xlim = c(-15, 19), ylim = c(36, 60)) +
   ggtitle(paste0("Variation in the spread pattern of ", disease))+
   theme_void() +
