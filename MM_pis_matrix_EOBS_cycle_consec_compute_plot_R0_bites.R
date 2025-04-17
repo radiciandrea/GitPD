@@ -519,3 +519,65 @@ gbr_2 <- ggplot()+
 #                    label.padding = 0.1, size = 4)
 # 
 # ggsave(paste0(folder_plot, "g_D_change.png"), g_D_change, units="in", height=8, width= 6, dpi=300)
+
+
+#plot Francia Clementine Calba
+
+folder_plot = "C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/ArtiConForm/17_EID_9_avril/R0 france SPF"
+
+regions_sh <- st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/regions_2015_metropole_region.shp")
+countries_sh <-  st_read("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_adm/european-countries.shp")
+
+domain <- st_read(paste0("C:/Users/2024ar003/Desktop/Alcuni file permanenti/Post_doc/Dati/Shp_elab/domain_sel_01_W_EU.shp")) %>%
+  arrange(region)
+
+#identify france
+
+domain_FR <- domain %>%
+  filter(!is.na(Country))
+
+reg_FR = domain_FR$region
+
+R0_FR_m<- R0_m[,reg_FR]
+
+x = c(105, 56, 21, 1, 0)
+x_lab = c("e) 15 or more", "d) 8 to 15", "c) 3 to 8", "b) 0 to 3", "a) 0")
+col_x <- c("#450054", "#3A528A", "#21908C", "#5CC963", "#FCE724")
+
+
+# domain <- domain%>%
+#   arrange(region) %>%
+#   mutate(R0_1 = R0_sel_1)%>%
+#   mutate(R0_1_level=cut(R0_1, breaks=br,
+#                         labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
+#   mutate(R0_1_level=factor(as.character(R0_1_level), levels=rev(levels(R0_1_level)))) %>%
+#   mutate(R0_2 = R0_sel_2)%>%
+#   mutate(R0_2_level=cut(R0_2, breaks=br,
+#                         labels=sapply(br[-length(br)], function(x){paste0(">", as.character(x))}))) %>%
+#   mutate(R0_2_level=factor(as.character(R0_2_level), levels=rev(levels(R0_2_level))))
+
+for(year in years){
+  
+  R0_FR_year = R0_FR_m[which(years==year),]
+  
+  
+  R0_FR_year_level <- case_when(R0_FR_year >= x[1] ~ x_lab[1],
+                                R0_FR_year >= x[2] ~ x_lab[2],
+                                R0_FR_year >= x[3] ~ x_lab[3],
+                                R0_FR_year >= x[4] ~ x_lab[4],
+                                R0_FR_year < x[4] ~ x_lab[5])
+  
+  g1 <- ggplot()+
+    geom_sf(data = countries_sh, alpha = 1, fill = "gray70", colour = "gray90")+
+    geom_sf(data = domain_FR, aes(fill = R0_FR_year_level), colour = NA)+ #
+    scale_fill_manual(values = col_x)+
+    geom_sf(data = regions_sh, alpha = 0, colour = "gray90")+
+    coord_sf(xlim = c(-4.5, 9.5), ylim = c(41.5, 51)) +
+    ggtitle(paste0("Length of the transmission season of ", disease, " (", year, ")"))+
+    guides(fill=guide_legend(title=bquote(LTS~(weeks~R[0]>1))))
+  
+  ggsave(file= paste0(folder_plot, "/LTS_", disease, "_",  year ,".png"), plot= g1 , units="in", width=6, height=6, dpi=300)
+  
+}
+
+
