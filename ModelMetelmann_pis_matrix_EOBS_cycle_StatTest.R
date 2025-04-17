@@ -248,12 +248,17 @@ domain_years_sel <- domain_years_sel %>%
     (E0_1 < 1) & (E0_2 < 1) ~ "4 HU",
     .default = NA))
 
+# scale from= https://www.ncl.ucar.edu/Document/Graphics/ColorTables/CBR_drywet.shtml
+
+scale_var5 = c("#8c5002", "#e0c27f", "#f5f5f5", "#81cfc3", "#00675e")
+scale_var4 = c("#8c5002", "#e0c27f",  "#81cfc3", "#00675e")
+
 ggplot()+
   geom_sf(data = domain_years_sel, aes(fill = Risk_zone), colour = NA)+ #
-  scale_fill_manual(values = c("gray10", "gray30", "gray70", "gray90"), na.value = "white")+
-  geom_sf(data = regions_sh, alpha = 0, colour = "grey50")+
+  scale_fill_manual(values = scale_var4, na.value = "grey50")+
+  geom_sf(data = regions_sh, alpha = 0, colour = "grey90")+
   ggtitle("E0 % variation" )+
-  coord_sf(xlim = c(-15, 19), ylim = c(36, 60))
+  coord_sf(xlim = c(-15, 19), ylim = c(36, 60))+
   theme_void()
 # + scale_fill_g
 
